@@ -7,7 +7,7 @@ echo "Updating system..."
 sudo apt update && sudo apt upgrade -y
 
 echo "Installing prerequisites..."
-sudo apt install -y nginx nodejs npm python3-venv python3-pip screen git certbot python3-certbot-nginx curl
+sudo apt install -y nginx nodejs python3-venv python3-pip screen git certbot python3-certbot-nginx curl
 
 # Try to install n for managing Node versions, just in case they need a newer version for Next.js 16
 sudo npm install -g n || true
