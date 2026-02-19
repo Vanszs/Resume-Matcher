@@ -1,0 +1,28 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 38.242.205.93
+          # You should set these secrets in your GitHub repository securely
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
+          port: ${{ secrets.SERVER_SSH_PORT || 22 }}
+          script: |
+            # Navigate to the repository directory. Defaults to inside user's home folder.
+            # E.g. /home/ubuntu/Resume-Matcher. Adjust 'Resume-Matcher' if different.
+            cd Resume-Matcher || (echo "Repository folder not found"; exit 1)
+            
+            # Execute the deployment script
+            bash scripts/deploy.sh
