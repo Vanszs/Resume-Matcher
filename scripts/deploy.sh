@@ -57,7 +57,7 @@ sleep 2
 # Check if port is free before starting
 check_port $FRONTEND_PORT "Frontend"
 
-screen -dmS resume-frontend PORT=$FRONTEND_PORT npm start
+screen -dmS resume-frontend env PORT=$FRONTEND_PORT node .next/standalone/server.js
 cd ../..
 
 # Restart or Start Backend Screen
