@@ -20,9 +20,8 @@ jobs:
           passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
           port: ${{ secrets.SERVER_SSH_PORT || 22 }}
           script: |
-            # Navigate to the repository directory. Defaults to inside user's home folder.
-            # E.g. /home/ubuntu/Resume-Matcher. Adjust 'Resume-Matcher' if different.
-            cd Resume-Matcher || (echo "Repository folder not found"; exit 1)
+            # Navigate to the repository directory.
+            cd code/Resume-Matcher || (echo "Repository folder not found"; exit 1)
             
             # Execute the deployment script
             bash scripts/deploy.sh
