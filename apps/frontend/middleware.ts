@@ -9,9 +9,17 @@ const ADMIN_PATHS = ['/admin'];
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
+    const noIndexValue = 'noindex, nofollow, noarchive';
+
     // Allow public paths
-    if (PUBLIC_PATHS.some((p) => p === '/' ? pathname === '/' : pathname.startsWith(p))) {
+    if (pathname === '/') {
         return NextResponse.next();
+    }
+
+    if (pathname.startsWith('/login')) {
+        const response = NextResponse.next();
+        response.headers.set('X-Robots-Tag', noIndexValue);
+        return response;
     }
 
     // Allow Next.js internals and static files
@@ -29,7 +37,9 @@ export function middleware(request: NextRequest) {
     if (!token) {
         const loginUrl = new URL('/login', request.url);
         loginUrl.searchParams.set('from', pathname);
-        return NextResponse.redirect(loginUrl);
+        const response = NextResponse.redirect(loginUrl);
+        response.headers.set('X-Robots-Tag', noIndexValue);
+        return response;
     }
 
     // Guard admin-only routes: check user_role cookie
@@ -37,11 +47,15 @@ export function middleware(request: NextRequest) {
         const role = request.cookies.get('user_role')?.value;
         if (role !== 'admin') {
             // Non-admin users get redirected to dashboard
-            return NextResponse.redirect(new URL('/dashboard', request.url));
+            const response = NextResponse.redirect(new URL('/dashboard', request.url));
+            response.headers.set('X-Robots-Tag', noIndexValue);
+            return response;
         }
     }
 
-    return NextResponse.next();
+    const response = NextResponse.next();
+    response.headers.set('X-Robots-Tag', noIndexValue);
+    return response;
 }
 
 export const config = {
