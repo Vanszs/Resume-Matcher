@@ -41,6 +41,10 @@ export default function LoginPage() {
             document.cookie = `auth_token=${data.access_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
             document.cookie = `user_role=${data.role}; path=/; max-age=${maxAge}; SameSite=Lax`;
 
+            // Flush the Next.js router cache so the middleware re-evaluates
+            // the new auth cookies before navigating to the protected route.
+            router.refresh();
+
             // Redirect to originally requested page, or dashboard
             const params = new URLSearchParams(window.location.search);
             router.push(params.get('from') || '/dashboard');

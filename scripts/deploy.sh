@@ -33,8 +33,15 @@ npm install
 echo "Building Next.js app..."
 npm run build
 
-# Standalone mode requires manual copy of static assets
+# Standalone mode requires manual copy of static assets.
+# Next.js may produce a flat layout (standalone/server.js) or a monorepo-
+# mirrored layout (standalone/apps/frontend/server.js) depending on whether
+# it detects a workspace root.  Copy assets into both so either layout works.
 echo "Copying static assets to standalone directory..."
+mkdir -p .next/standalone/.next
+cp -r public .next/standalone/ 2>/dev/null || true
+cp -r .next/static .next/standalone/.next/
+
 mkdir -p .next/standalone/apps/frontend/.next
 cp -r public .next/standalone/apps/frontend/ 2>/dev/null || true
 cp -r .next/static .next/standalone/apps/frontend/.next/
@@ -52,6 +59,18 @@ source venv/bin/activate
 pip install -r requirements.txt
 cd ../..
 
+# Resolve the full path to node so screen daemon sessions (which run with
+# a minimal PATH that may not include nvm-managed binaries) can still
+# find it.
+NODE_BIN="$(which node 2>/dev/null || echo "")"
+if [ -z "$NODE_BIN" ]; then
+    # Try common nvm location as a fallback
+    export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    NODE_BIN="$(which node)"
+fi
+echo "Using node: $NODE_BIN"
+
 echo "=== Screen Session Management ==="
 
 # Restart or Start Frontend Screen
@@ -64,9 +83,19 @@ sleep 2
 # Check if port is free before starting
 check_port $FRONTEND_PORT "Frontend"
 
-cd .next/standalone/apps/frontend
-screen -dmS resume-frontend env PORT=$FRONTEND_PORT node server.js
-cd ../../../..
+FRONTEND_STANDALONE="$(pwd)/.next/standalone"
+# Next.js standalone in a monorepo may nest server.js under the full app path.
+# Detect which layout was produced by this build.
+if [ -f "$FRONTEND_STANDALONE/apps/frontend/server.js" ]; then
+    STANDALONE_SERVER_DIR="$FRONTEND_STANDALONE/apps/frontend"
+elif [ -f "$FRONTEND_STANDALONE/server.js" ]; then
+    STANDALONE_SERVER_DIR="$FRONTEND_STANDALONE"
+else
+    echo "ERROR: Could not locate standalone server.js under $FRONTEND_STANDALONE"
+    exit 1
+fi
+echo "Starting frontend from: $STANDALONE_SERVER_DIR"
+screen -dmS resume-frontend bash -c "cd '$STANDALONE_SERVER_DIR' && PORT=$FRONTEND_PORT '$NODE_BIN' server.js"
 cd ../..
 
 # Restart or Start Backend Screen
