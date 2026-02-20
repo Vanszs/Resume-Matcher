@@ -1,7 +1,10 @@
-# Database files (local data)
+# Database files (local data) - NEVER COMMIT - contains API keys and user data
 data/*.json
 data/config.json
+data/user_configs/*.json
+data/database.json
 !data/.gitkeep
+!data/user_configs/.gitkeep
 
 # Config file with API keys - NEVER COMMIT
 config.json

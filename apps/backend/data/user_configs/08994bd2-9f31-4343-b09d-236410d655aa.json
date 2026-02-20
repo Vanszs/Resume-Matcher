@@ -1,8 +1,0 @@
-{
-  "provider": "gemini",
-  "model": "gemini-3-flash-preview",
-  "api_key": "AIzaSyAC4KwxDheDsa4MlmAM_7RRJEBik7WNq-U",
-  "register_enabled": true,
-  "default_prompt_id": "keywords",
-  "api_base": "https://agentrouter.org/v1"
-}
