@@ -37,7 +37,10 @@ async def parse_document(content: bytes, filename: str) -> str:
         tmp_path.unlink(missing_ok=True)
 
 
-async def parse_resume_to_json(markdown_text: str) -> dict[str, Any]:
+async def parse_resume_to_json(
+    markdown_text: str,
+    user_id: str | None = None,
+) -> dict[str, Any]:
     """Parse resume markdown to structured JSON using LLM.
 
     Args:
@@ -54,6 +57,7 @@ async def parse_resume_to_json(markdown_text: str) -> dict[str, Any]:
     result = await complete_json(
         prompt=prompt,
         system_prompt="You are a JSON extraction engine. Output only valid JSON, no explanations.",
+        user_id=user_id,
     )
 
     # Validate against schema

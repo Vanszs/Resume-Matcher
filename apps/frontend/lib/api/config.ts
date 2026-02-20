@@ -124,57 +124,18 @@ export async function fetchSystemStatus(includeLlmHealth = false): Promise<Syste
 // Provider display names and default models
 export const PROVIDER_INFO: Record<
   LLMProvider,
-  {
-    name: string;
-    defaultModel: string;
-    requiresKey: boolean;
-    supportsCustomBase: boolean;
-    // Human-readable hint shown under the Base URL field when filled
-    customBaseHint?: string;
-    // Placeholder for the model field when a custom base URL is active
-    customBaseModelPlaceholder?: string;
-  }
+  { name: string; defaultModel: string; requiresKey: boolean }
 > = {
-  openai: {
-    name: 'OpenAI',
-    defaultModel: 'gpt-5-nano-2025-08-07',
-    requiresKey: true,
-    supportsCustomBase: false,
-  },
-  anthropic: {
-    name: 'Anthropic',
-    defaultModel: 'claude-haiku-4-5-20251001',
-    requiresKey: true,
-    supportsCustomBase: false,
-  },
+  openai: { name: 'OpenAI', defaultModel: 'gpt-5-nano-2025-08-07', requiresKey: true },
+  anthropic: { name: 'Anthropic', defaultModel: 'claude-haiku-4-5-20251001', requiresKey: true },
   openrouter: {
     name: 'OpenRouter',
     defaultModel: 'deepseek/deepseek-chat',
     requiresKey: true,
-    supportsCustomBase: true,
-    customBaseHint:
-      'Custom endpoint mode — model name is sent as-is to your endpoint (e.g. deepseek/deepseek-v3.2, openai/gpt-oss-120b)',
-    customBaseModelPlaceholder: 'e.g. deepseek/deepseek-v3.2',
   },
-  gemini: {
-    name: 'Google Gemini',
-    defaultModel: 'gemini-3-flash-preview',
-    requiresKey: true,
-    supportsCustomBase: false,
-  },
-  deepseek: {
-    name: 'DeepSeek',
-    defaultModel: 'deepseek-chat',
-    requiresKey: true,
-    supportsCustomBase: false,
-  },
-  ollama: {
-    name: 'Ollama (Local)',
-    defaultModel: 'gemma3:4b',
-    requiresKey: false,
-    supportsCustomBase: true,
-    customBaseHint: 'Ollama server URL (default: http://localhost:11434)',
-  },
+  gemini: { name: 'Google Gemini', defaultModel: 'gemini-3-flash-preview', requiresKey: true },
+  deepseek: { name: 'DeepSeek', defaultModel: 'deepseek-chat', requiresKey: true },
+  ollama: { name: 'Ollama (Local)', defaultModel: 'gemma3:4b', requiresKey: false },
 };
 
 // Feature configuration types
@@ -403,80 +364,5 @@ export async function resetDatabase(scope: 'self' | 'all' = 'self'): Promise<voi
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.detail || `Failed to reset database (status ${res.status}).`);
-  }
-}
-
-// =============================================
-// Multi-Provider LLM Configuration (User-Level)
-// =============================================
-
-export interface UserLLMConfig {
-  id: string;
-  provider: LLMProvider;
-  api_key_masked: string | null;
-  model: string | null;
-  base_url: string | null;
-  is_default: boolean;
-}
-
-export interface UserLLMConfigInput {
-  provider: LLMProvider;
-  api_key?: string | null;
-  model?: string | null;
-  base_url?: string | null;
-  is_default?: boolean;
-}
-
-// Fetch all LLM configurations for current user
-export async function fetchUserLLMConfigs(): Promise<UserLLMConfig[]> {
-  const res = await apiFetch('/user/llm-config', { credentials: 'include' });
-
-  if (!res.ok) {
-    throw new Error(`Failed to load LLM configs (status ${res.status}).`);
-  }
-
-  return res.json();
-}
-
-// Create or update LLM config for a provider
-export async function upsertUserLLMConfig(config: UserLLMConfigInput): Promise<UserLLMConfig> {
-  const res = await apiFetch('/user/llm-config', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify(config),
-  });
-
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.detail || `Failed to save LLM config (status ${res.status}).`);
-  }
-
-  return res.json();
-}
-
-// Set a provider as default
-export async function setDefaultProvider(provider: LLMProvider): Promise<void> {
-  const res = await apiFetch(`/user/llm-config/${provider}/set-default`, {
-    method: 'PUT',
-    credentials: 'include',
-  });
-
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.detail || `Failed to set default provider (status ${res.status}).`);
-  }
-}
-
-// Delete LLM config for a provider
-export async function deleteUserLLMConfig(provider: LLMProvider): Promise<void> {
-  const res = await apiFetch(`/user/llm-config/${provider}`, {
-    method: 'DELETE',
-    credentials: 'include',
-  });
-
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.detail || `Failed to delete LLM config (status ${res.status}).`);
   }
 }

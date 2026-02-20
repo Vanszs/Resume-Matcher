@@ -1,7 +1,6 @@
 {
   "common": {
     "save": "Simpan",
-    "saved": "Tersimpan",
     "saving": "Menyimpan...",
     "cancel": "Batal",
     "delete": "Hapus",
@@ -17,7 +16,6 @@
     "confirm": "Konfirmasi",
     "back": "Kembali",
     "retry": "Coba Lagi",
-    "refresh": "Segarkan",
     "next": "Selanjutnya",
     "continue": "Lanjutkan",
     "finish": "Selesai",
@@ -641,7 +639,6 @@
       "defaultModel": "DEFAULT: {model}",
       "apiKeyLabel": "Kunci API",
       "apiKeyOptionalForOllama": "(Opsional untuk Ollama)",
-      "optional": "opsional",
       "apiKeyPlaceholder": "sk-...",
       "apiKeyNotRequiredPlaceholder": "Tidak diperlukan untuk model lokal",
       "leaveBlankToKeepExistingKey": "KOSONGKAN UNTUK MEMPERTAHANKAN KUNCI YANG SUDAH ADA",
@@ -700,32 +697,7 @@
       "unknownProvider": "Penyedia tidak dikenal dikembalikan dari backend: {provider}",
       "unableToSaveConfiguration": "Tidak dapat menyimpan konfigurasi",
       "failedToClearApiKeys": "Gagal menghapus kunci API. Silakan coba lagi.",
-      "failedToResetDatabase": "Gagal mereset database. Silakan coba lagi.",
-      "failedToSave": "Gagal menyimpan konfigurasi.",
-      "failedToSetDefault": "Gagal mengatur penyedia default.",
-      "failedToLoadConfigs": "Gagal memuat konfigurasi."
-    },
-    "scopeDialog": {
-      "clearKeysDescription": "Pilih kunci API mana yang akan dihapus. Tindakan ini tidak dapat dibatalkan.",
-      "resetDatabaseDescription": "Pilih data mana yang akan direset. Tindakan ini tidak dapat dibatalkan.",
-      "myDataOnly": "Data Saya Saja",
-      "myKeysOnlyDesc": "Hapus hanya kunci API pribadi Anda",
-      "myDataOnlyDesc": "Reset hanya resume, pekerjaan, dan pengaturan Anda",
-      "allUsers": "Semua Data Pengguna",
-      "allUsersKeysDesc": "Hapus kunci API untuk SEMUA pengguna (Hanya Admin)",
-      "allUsersDataDesc": "Reset SEMUA data pengguna (Hanya Admin)"
-    },
-    "multiProvider": {
-      "title": "Konfigurasi Penyedia LLM",
-      "description": "Konfigurasi beberapa penyedia AI. Atur satu sebagai aktif untuk digunakan dalam penyesuaian resume.",
-      "configuredProviders": "Terkonfigurasi",
-      "activeProvider": "Aktif",
-      "noneSet": "Tidak ada",
-      "configured": "Terkonfigurasi",
-      "notConfigured": "Belum dikonfigurasi",
-      "useAsActive": "Gunakan Penyedia Ini",
-      "currentlyActive": "Penyedia yang sedang aktif",
-      "keyStored": "Kunci API tersimpan (kosongkan untuk menyimpan)"
+      "failedToResetDatabase": "Gagal mereset database. Silakan coba lagi."
     }
   },
   "resumeViewer": {

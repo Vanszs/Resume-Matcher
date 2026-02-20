@@ -5,8 +5,7 @@
  * Automatically attaches JWT Authorization header when a token exists.
  */
 
-export const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '' : 'http://127.0.0.1:8000');
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '' : 'http://127.0.0.1:8000');
 export const API_BASE = `${API_URL}/api/v1`;
 
 /**
@@ -29,13 +28,9 @@ function buildHeaders(extra?: HeadersInit): HeadersInit {
   // Merge extra headers
   if (extra) {
     if (extra instanceof Headers) {
-      extra.forEach((value, key) => {
-        headers[key] = value;
-      });
+      extra.forEach((value, key) => { headers[key] = value; });
     } else if (Array.isArray(extra)) {
-      extra.forEach(([key, value]) => {
-        headers[key] = value;
-      });
+      extra.forEach(([key, value]) => { headers[key] = value; });
     } else {
       Object.assign(headers, extra);
     }
@@ -56,11 +51,7 @@ export async function apiFetch(endpoint: string, options?: RequestInit): Promise
 
   // Auto-redirect to login on 401 (token expired or invalid)
   // But don't redirect if already on the login page (prevents loop)
-  if (
-    response.status === 401 &&
-    typeof window !== 'undefined' &&
-    !window.location.pathname.startsWith('/login')
-  ) {
+  if (response.status === 401 && typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_email');

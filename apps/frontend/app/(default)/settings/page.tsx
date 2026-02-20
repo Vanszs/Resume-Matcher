@@ -13,15 +13,11 @@ import {
   updatePromptConfig,
   clearAllApiKeys,
   resetDatabase,
-  fetchUserLLMConfigs,
-  setDefaultProvider,
-  upsertUserLLMConfig,
   PROVIDER_INFO,
   type LLMConfig,
   type LLMProvider,
   type LLMHealthCheck,
   type PromptOption,
-  type UserLLMConfig,
 } from '@/lib/api/config';
 import { API_URL, logout } from '@/lib/api/client';
 import { getVersionString } from '@/lib/config/version';
@@ -120,8 +116,6 @@ export default function SettingsPage() {
   // Remember what was last saved to restore hasStoredApiKey when user switches back
   const [savedProvider, setSavedProvider] = useState<LLMProvider>('openai');
   const [savedHasStoredApiKey, setSavedHasStoredApiKey] = useState(false);
-  const [userProviderConfigs, setUserProviderConfigs] = useState<UserLLMConfig[]>([]);
-  const [providerSummaryLoading, setProviderSummaryLoading] = useState(false);
 
   // Use cached system status (loaded on app start, refreshes every 30 min)
   const {
@@ -145,8 +139,8 @@ export default function SettingsPage() {
   // Danger Zone state
   const [showClearApiKeysDialog, setShowClearApiKeysDialog] = useState(false);
   const [showResetDatabaseDialog, setShowResetDatabaseDialog] = useState(false);
-  const [showClearApiKeysScopeDialog, setShowClearApiKeysScopeDialog] = useState(false);
-  const [showResetDatabaseScopeDialog, setShowResetDatabaseScopeDialog] = useState(false);
+    const [showClearApiKeysScopeDialog, setShowClearApiKeysScopeDialog] = useState(false);
+    const [showResetDatabaseScopeDialog, setShowResetDatabaseScopeDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessage, setSuccessDialogMessage] = useState({ title: '', description: '' });
   const [isResetting, setIsResetting] = useState(false);
@@ -249,18 +243,6 @@ export default function SettingsPage() {
       healthCheck.warning
     );
   }, [healthCheck, t]);
-  const activeUserProvider = useMemo(
-    () => userProviderConfigs.find((config) => config.is_default)?.provider as LLMProvider | undefined,
-    [userProviderConfigs]
-  );
-  const configuredProviderCount = useMemo(
-    () =>
-      PROVIDERS.filter((providerId) => {
-        const config = userProviderConfigs.find((item) => item.provider === providerId);
-        return Boolean(config?.api_key_masked) || PROVIDER_INFO[providerId].requiresKey === false;
-      }).length,
-    [userProviderConfigs]
-  );
 
   // Load LLM config and feature config on mount
   useEffect(() => {
@@ -268,11 +250,10 @@ export default function SettingsPage() {
 
     async function loadConfig() {
       try {
-        const [llmConfig, featureConfig, promptConfig, userConfigs] = await Promise.all([
+        const [llmConfig, featureConfig, promptConfig] = await Promise.all([
           fetchLlmConfig().catch(() => null),
           fetchFeatureConfig().catch(() => null),
           fetchPromptConfig().catch(() => null),
-          fetchUserLLMConfigs().catch(() => null),
         ]);
 
         if (cancelled) return;
@@ -309,10 +290,6 @@ export default function SettingsPage() {
           setDefaultPromptId(promptConfig.default_prompt_id || 'keywords');
         }
 
-        if (userConfigs) {
-          setUserProviderConfigs(userConfigs);
-        }
-
         setStatus('idle');
       } catch (err) {
         console.error('Failed to load settings', err);
@@ -334,9 +311,7 @@ export default function SettingsPage() {
     setProvider(newProvider);
     setModel(PROVIDER_INFO[newProvider].defaultModel);
 
-    if (PROVIDER_INFO[newProvider].supportsCustomBase === false) {
-      setApiBase('');
-    } else if (newProvider === 'ollama' && !apiBase.trim()) {
+    if (newProvider === 'ollama' && !apiBase.trim()) {
       setApiBase('http://localhost:11434');
     }
 
@@ -351,68 +326,6 @@ export default function SettingsPage() {
     // Always clear the text input when switching so the old masked value isn't
     // accidentally sent to the new (or restored) provider.
     setApiKey('');
-  };
-
-  const refreshUserProviderConfigs = async () => {
-    setProviderSummaryLoading(true);
-    try {
-      const configs = await fetchUserLLMConfigs();
-      setUserProviderConfigs(configs);
-    } catch (err) {
-      console.error('Failed to load provider summary', err);
-    } finally {
-      setProviderSummaryLoading(false);
-    }
-  };
-
-  const handleSetActiveProvider = async (targetProvider: LLMProvider) => {
-    setProviderSummaryLoading(true);
-    setError(null);
-
-    try {
-      const existingConfig = userProviderConfigs.find((item) => item.provider === targetProvider);
-
-      if (!existingConfig) {
-        await upsertUserLLMConfig({
-          provider: targetProvider,
-          model: PROVIDER_INFO[targetProvider].defaultModel,
-          base_url: targetProvider === 'ollama' ? 'http://localhost:11434' : undefined,
-          is_default: true,
-        });
-      } else {
-        await setDefaultProvider(targetProvider);
-      }
-
-      // CRITICAL: Fetch fresh configs from backend BEFORE reading state.
-      // The old code read from stale `userProviderConfigs` which caused API keys
-      // to appear lost when switching providers.
-      const freshConfigs = await fetchUserLLMConfigs();
-      setUserProviderConfigs(freshConfigs);
-
-      const selectedConfig = freshConfigs.find((item) => item.provider === targetProvider);
-      handleProviderChange(targetProvider);
-      const providerHasStoredKey = Boolean(selectedConfig?.api_key_masked) || targetProvider === 'ollama';
-      setHasStoredApiKey(providerHasStoredKey);
-      setSavedProvider(targetProvider);
-      setSavedHasStoredApiKey(providerHasStoredKey);
-      if (selectedConfig?.model) {
-        setModel(selectedConfig.model);
-      } else {
-        setModel(PROVIDER_INFO[targetProvider].defaultModel);
-      }
-      if (selectedConfig?.base_url !== undefined && selectedConfig?.base_url !== null) {
-        setApiBase(selectedConfig.base_url);
-      } else if (!PROVIDER_INFO[targetProvider].supportsCustomBase) {
-        setApiBase('');
-      }
-
-      await refreshStatus(true);
-    } catch (err) {
-      console.error('Failed to set active provider', err);
-      setError((err as Error).message || t('settings.errors.failedToSetDefault'));
-    } finally {
-      setProviderSummaryLoading(false);
-    }
   };
 
   // Save configuration
@@ -432,7 +345,7 @@ export default function SettingsPage() {
       const config: Partial<LLMConfig> = {
         provider,
         model: model.trim(),
-        api_base: providerInfo.supportsCustomBase ? apiBase.trim() || null : null,
+        api_base: apiBase.trim() || null,
       };
       if (requiresApiKey) {
         if (trimmedKey) {
@@ -445,16 +358,6 @@ export default function SettingsPage() {
       }
 
       await updateLlmConfig(config);
-
-      await upsertUserLLMConfig({
-        provider,
-        model: model.trim() || undefined,
-        base_url: apiBase.trim() || undefined,
-        api_key: trimmedKey || undefined,
-        is_default: true,
-      }).catch((err) => {
-        console.warn('Failed to sync user provider config', err);
-      });
 
       // Re-fetch the full config from backend so the form always reflects what
       // was actually persisted (e.g. api_base might have been coerced or cleared).
@@ -487,7 +390,6 @@ export default function SettingsPage() {
 
       // Refresh cached system status after save (fast path is fine here)
       await refreshStatus();
-      await refreshUserProviderConfigs();
 
       setStatus('saved');
       setTimeout(() => setStatus('idle'), 2000);
@@ -509,7 +411,7 @@ export default function SettingsPage() {
       const testConfig: Partial<LLMConfig> = {
         provider,
         model: model.trim() || providerInfo.defaultModel,
-        api_base: providerInfo.supportsCustomBase ? apiBase.trim() || null : null,
+        api_base: apiBase.trim() || null,
       };
 
       // Only include API key if provided or if we have a stored key
@@ -606,8 +508,7 @@ export default function SettingsPage() {
       setError(null);
       setSuccessDialogMessage({
         title: t('common.success'),
-        description:
-          scope === 'all' ? 'All users API keys have been cleared.' : t('common.keysCleared'),
+        description: scope === 'all' ? 'All users API keys have been cleared.' : t('common.keysCleared'),
       });
       setShowSuccessDialog(true);
     } catch (err) {
@@ -636,7 +537,8 @@ export default function SettingsPage() {
       setError(null);
       setSuccessDialogMessage({
         title: t('common.success'),
-        description: scope === 'all' ? 'All users data has been reset.' : t('common.databaseReset'),
+        description:
+          scope === 'all' ? 'All users data has been reset.' : t('common.databaseReset'),
       });
       setShowSuccessDialog(true);
     } catch (err) {
@@ -898,66 +800,11 @@ export default function SettingsPage() {
                     </button>
                   ))}
                 </div>
-                <div className="border border-black bg-white p-3 space-y-3">
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono text-gray-700">
-                    <span>
-                      CONFIGURED: {configuredProviderCount} / {PROVIDERS.length}
-                    </span>
-                    <span>
-                      ACTIVE: {activeUserProvider ? PROVIDER_INFO[activeUserProvider].name : '-'}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {PROVIDERS.map((providerId) => {
-                      const config = userProviderConfigs.find((item) => item.provider === providerId);
-                      const isConfigured =
-                        Boolean(config?.api_key_masked) || PROVIDER_INFO[providerId].requiresKey === false;
-                      const isActive = activeUserProvider === providerId;
-
-                      return (
-                        <button
-                          key={`active-${providerId}`}
-                          type="button"
-                          onClick={() => handleSetActiveProvider(providerId)}
-                          disabled={providerSummaryLoading || (!isConfigured && providerId !== 'ollama')}
-                          className={`px-2 py-1 text-[10px] uppercase ${SEGMENTED_BUTTON_BASE} ${
-                            isActive
-                              ? SEGMENTED_BUTTON_ACTIVE
-                              : isConfigured
-                                ? SEGMENTED_BUTTON_INACTIVE
-                                : 'bg-gray-100 text-gray-400 border-gray-300 shadow-none'
-                          }`}
-                        >
-                          {PROVIDER_INFO[providerId].name.split(' ')[0]}
-                          {isActive ? ' • ACTIVE' : isConfigured ? ' • SET' : ' • EMPTY'}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-xs text-gray-500 font-mono">
-                    {t('settings.llmConfiguration.selectedProvider', {
-                      provider: providerInfo.name,
-                    })}
-                  </p>
-                  {/* Dynamic badge: shows when OpenRouter is in custom-endpoint mode */}
-                  {provider === 'openrouter' &&
-                    apiBase.trim() &&
-                    !apiBase.includes('openrouter.ai') && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-blue-700 bg-blue-50 font-mono text-[10px] uppercase tracking-wider text-blue-700">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-700 inline-block" />
-                        Custom Endpoint
-                      </span>
-                    )}
-                  {provider === 'openrouter' &&
-                    (!apiBase.trim() || apiBase.includes('openrouter.ai')) && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-gray-400 bg-white font-mono text-[10px] uppercase tracking-wider text-gray-500">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block" />
-                        OpenRouter Gateway
-                      </span>
-                    )}
-                </div>
+                <p className="text-xs text-gray-500 font-mono">
+                  {t('settings.llmConfiguration.selectedProvider', {
+                    provider: providerInfo.name,
+                  })}
+                </p>
               </div>
 
               {/* Model Input */}
@@ -967,13 +814,7 @@ export default function SettingsPage() {
                   id="model"
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
-                  placeholder={
-                    provider === 'openrouter' &&
-                    apiBase.trim() &&
-                    !apiBase.includes('openrouter.ai')
-                      ? (providerInfo.customBaseModelPlaceholder ?? providerInfo.defaultModel)
-                      : providerInfo.defaultModel
-                  }
+                  placeholder={providerInfo.defaultModel}
                   className="font-mono"
                 />
                 <p className="text-xs text-gray-500 font-mono">
@@ -1016,36 +857,20 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              {/* API Base URL (optional, only for providers that support it) */}
-              {providerInfo.supportsCustomBase && (
-                <div className="space-y-2">
-                  <Label htmlFor="apiBase">{t('settings.llmConfiguration.baseUrlLabel')}</Label>
-                  <Input
-                    id="apiBase"
-                    value={apiBase}
-                    onChange={(e) => setApiBase(e.target.value)}
-                    placeholder={
-                      provider === 'ollama'
-                        ? 'http://localhost:11434'
-                        : 'https://openrouter.ai/api/v1'
-                    }
-                    className="font-mono"
-                  />
-                  {/* Dynamic description based on mode */}
-                  {provider === 'openrouter' &&
-                  apiBase.trim() &&
-                  !apiBase.includes('openrouter.ai') &&
-                  providerInfo.customBaseHint ? (
-                    <p className="text-xs text-blue-700 font-mono border-l-2 border-blue-700 pl-2">
-                      {providerInfo.customBaseHint}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-gray-500 font-mono">
-                      {t('settings.llmConfiguration.baseUrlDescription')}
-                    </p>
-                  )}
-                </div>
-              )}
+              {/* API Base URL (optional, for proxies/aggregators/custom endpoints) */}
+              <div className="space-y-2">
+                <Label htmlFor="apiBase">{t('settings.llmConfiguration.baseUrlLabel')}</Label>
+                <Input
+                  id="apiBase"
+                  value={apiBase}
+                  onChange={(e) => setApiBase(e.target.value)}
+                  placeholder={t('settings.llmConfiguration.baseUrlPlaceholder')}
+                  className="font-mono"
+                />
+                <p className="text-xs text-gray-500 font-mono">
+                  {t('settings.llmConfiguration.baseUrlDescription')}
+                </p>
+              </div>
 
               {/* Action Buttons */}
               <div className="flex gap-4">
@@ -1300,9 +1125,7 @@ export default function SettingsPage() {
                   variant="destructive"
                   className="w-full"
                   onClick={() =>
-                    isAdmin
-                      ? setShowResetDatabaseScopeDialog(true)
-                      : setShowResetDatabaseDialog(true)
+                    isAdmin ? setShowResetDatabaseScopeDialog(true) : setShowResetDatabaseDialog(true)
                   }
                   disabled={isResetting}
                 >
@@ -1389,97 +1212,61 @@ export default function SettingsPage() {
         onConfirm={() => setShowSuccessDialog(false)}
       />
 
-      {/* Scope Dialog: Clear API Keys */}
       <Dialog open={showClearApiKeysScopeDialog} onOpenChange={setShowClearApiKeysScopeDialog}>
-        <DialogContent className="sm:max-w-[480px] p-0 gap-0">
-          <DialogHeader className="p-6 pb-4">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 border-2 border-orange-500 bg-orange-50 flex items-center justify-center shrink-0">
-                <Key className="w-6 h-6 text-orange-500" />
-              </div>
-              <div className="flex-1">
-                <DialogTitle className="font-serif text-xl font-bold uppercase tracking-tight">
-                  {t('settings.clearApiKeys')}
-                </DialogTitle>
-                <DialogDescription className="font-mono text-xs text-gray-600 mt-2">
-                  {t('settings.scopeDialog.clearKeysDescription')}
-                </DialogDescription>
-              </div>
-            </div>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('settings.clearApiKeys')}</DialogTitle>
+            <DialogDescription>
+              Choose scope: clear only your API keys, or clear API keys for all users.
+            </DialogDescription>
           </DialogHeader>
-          <div className="px-6 pb-4 space-y-3">
-            <button
+          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black gap-2">
+            <Button variant="outline" onClick={() => setShowClearApiKeysScopeDialog(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="warning"
               onClick={() => handleClearApiKeysWithScope('self')}
               disabled={isResetting}
-              className="w-full text-left border-2 border-black p-4 bg-white hover:bg-orange-50 hover:border-orange-500 transition-colors disabled:opacity-50"
             >
-              <div className="font-sans text-sm font-bold">{t('settings.scopeDialog.myDataOnly')}</div>
-              <div className="font-mono text-xs text-gray-600 mt-1">{t('settings.scopeDialog.myKeysOnlyDesc')}</div>
-            </button>
-            <button
+              Clear Only My Keys
+            </Button>
+            <Button
+              variant="destructive"
               onClick={() => handleClearApiKeysWithScope('all')}
               disabled={isResetting}
-              className="w-full text-left border-2 border-red-600 p-4 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
             >
-              <div className="font-sans text-sm font-bold text-red-700">{t('settings.scopeDialog.allUsers')}</div>
-              <div className="font-mono text-xs text-red-600 mt-1">{t('settings.scopeDialog.allUsersKeysDesc')}</div>
-            </button>
-          </div>
-          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black flex-row justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setShowClearApiKeysScopeDialog(false)}
-              className="rounded-none border-black"
-            >
-              {t('common.cancel')}
+              Clear All Users Keys
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Scope Dialog: Reset Database */}
       <Dialog open={showResetDatabaseScopeDialog} onOpenChange={setShowResetDatabaseScopeDialog}>
-        <DialogContent className="sm:max-w-[480px] p-0 gap-0">
-          <DialogHeader className="p-6 pb-4">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 border-2 border-red-600 bg-red-50 flex items-center justify-center shrink-0">
-                <span className="text-red-600 text-2xl font-bold">!</span>
-              </div>
-              <div className="flex-1">
-                <DialogTitle className="font-serif text-xl font-bold uppercase tracking-tight">
-                  {t('settings.resetDatabase')}
-                </DialogTitle>
-                <DialogDescription className="font-mono text-xs text-gray-600 mt-2">
-                  {t('settings.scopeDialog.resetDatabaseDescription')}
-                </DialogDescription>
-              </div>
-            </div>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('settings.resetDatabase')}</DialogTitle>
+            <DialogDescription>
+              Choose scope: reset only your data, or reset all users data.
+            </DialogDescription>
           </DialogHeader>
-          <div className="px-6 pb-4 space-y-3">
-            <button
+          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black gap-2">
+            <Button variant="outline" onClick={() => setShowResetDatabaseScopeDialog(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="warning"
               onClick={() => handleResetDatabaseWithScope('self')}
               disabled={isResetting}
-              className="w-full text-left border-2 border-black p-4 bg-white hover:bg-orange-50 hover:border-orange-500 transition-colors disabled:opacity-50"
             >
-              <div className="font-sans text-sm font-bold">{t('settings.scopeDialog.myDataOnly')}</div>
-              <div className="font-mono text-xs text-gray-600 mt-1">{t('settings.scopeDialog.myDataOnlyDesc')}</div>
-            </button>
-            <button
+              Reset Only My Data
+            </Button>
+            <Button
+              variant="destructive"
               onClick={() => handleResetDatabaseWithScope('all')}
               disabled={isResetting}
-              className="w-full text-left border-2 border-red-600 p-4 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
             >
-              <div className="font-sans text-sm font-bold text-red-700">{t('settings.scopeDialog.allUsers')}</div>
-              <div className="font-mono text-xs text-red-600 mt-1">{t('settings.scopeDialog.allUsersDataDesc')}</div>
-            </button>
-          </div>
-          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black flex-row justify-end gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setShowResetDatabaseScopeDialog(false)}
-              className="rounded-none border-black"
-            >
-              {t('common.cancel')}
+              Reset All Users Data
             </Button>
           </DialogFooter>
         </DialogContent>

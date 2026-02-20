@@ -61,9 +61,7 @@ export const SwissGrid = ({ children }: { children: React.ReactNode }) => {
             />
             <span className="uppercase font-bold">Resume Matcher</span>
             {userEmail && (
-              <span className="hidden sm:inline text-gray-500 font-normal normal-case">
-                — {userEmail}
-              </span>
+              <span className="hidden sm:inline text-gray-500 font-normal normal-case">— {userEmail}</span>
             )}
           </div>
           <div className="flex items-center gap-4">

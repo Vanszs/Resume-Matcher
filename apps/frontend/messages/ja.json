@@ -1,7 +1,6 @@
 {
   "common": {
     "save": "保存",
-    "saved": "保存済み",
     "saving": "保存中...",
     "cancel": "キャンセル",
     "delete": "削除",
@@ -17,7 +16,6 @@
     "confirm": "確認",
     "back": "戻る",
     "retry": "再試行",
-    "refresh": "更新",
     "next": "次へ",
     "continue": "続行",
     "finish": "完了",
@@ -640,7 +638,8 @@
       "modelLabel": "モデル",
       "defaultModel": "既定: {model}",
       "apiKeyLabel": "API キー",
-      "apiKeyOptionalForOllama": "（Ollama は任意）",      "optional": "任意",      "apiKeyPlaceholder": "sk-...",
+      "apiKeyOptionalForOllama": "（Ollama は任意）",
+      "apiKeyPlaceholder": "sk-...",
       "apiKeyNotRequiredPlaceholder": "ローカルモデルでは不要",
       "leaveBlankToKeepExistingKey": "空欄のままにすると既存キーを保持します",
       "baseUrlLabel": "ベースURL（任意）",
@@ -698,32 +697,7 @@
       "unknownProvider": "バックエンドから未知のプロバイダーが返されました: {provider}",
       "unableToSaveConfiguration": "設定を保存できません",
       "failedToClearApiKeys": "API キーの消去に失敗しました。もう一度お試しください。",
-      "failedToResetDatabase": "データベースのリセットに失敗しました。もう一度お試しください。",
-      "failedToSave": "設定の保存に失敗しました。",
-      "failedToSetDefault": "デフォルトプロバイダーの設定に失敗しました。",
-      "failedToLoadConfigs": "設定の読み込みに失敗しました。"
-    },
-    "scopeDialog": {
-      "clearKeysDescription": "消去する API キーを選択してください。この操作は元に戻せません。",
-      "resetDatabaseDescription": "リセットするデータを選択してください。この操作は元に戻せません。",
-      "myDataOnly": "自分のデータのみ",
-      "myKeysOnlyDesc": "自分の API キーのみを消去",
-      "myDataOnlyDesc": "自分の履歴書、求人、設定のみをリセット",
-      "allUsers": "全ユーザーのデータ",
-      "allUsersKeysDesc": "全ユーザーの API キーを消去（管理者のみ）",
-      "allUsersDataDesc": "全ユーザーのデータをリセット（管理者のみ）"
-    },
-    "multiProvider": {
-      "title": "LLM プロバイダー設定",
-      "description": "複数の AI プロバイダーを設定します。履歴書カスタマイズに使用するプロバイダーをアクティブに設定してください。",
-      "configuredProviders": "設定済み",
-      "activeProvider": "アクティブ",
-      "noneSet": "なし",
-      "configured": "設定済み",
-      "notConfigured": "未設定",
-      "useAsActive": "このプロバイダーを使用",
-      "currentlyActive": "現在アクティブなプロバイダー",
-      "keyStored": "API キー保存済み（保持する場合は空欄）"
+      "failedToResetDatabase": "データベースのリセットに失敗しました。もう一度お試しください。"
     }
   },
   "resumeViewer": {

@@ -16,6 +16,7 @@ async def generate_cover_letter(
     resume_data: dict[str, Any],
     job_description: str,
     language: str = "en",
+    user_id: str | None = None,
 ) -> str:
     """Generate a cover letter based on resume and job description.
 
@@ -38,6 +39,7 @@ async def generate_cover_letter(
     result = await complete(
         prompt=prompt,
         system_prompt="You are a professional career coach and resume writer. Write compelling, personalized cover letters.",
+        user_id=user_id,
         max_tokens=2048,
     )
 
@@ -48,6 +50,7 @@ async def generate_outreach_message(
     resume_data: dict[str, Any],
     job_description: str,
     language: str = "en",
+    user_id: str | None = None,
 ) -> str:
     """Generate a cold outreach message for networking.
 
@@ -70,6 +73,7 @@ async def generate_outreach_message(
     result = await complete(
         prompt=prompt,
         system_prompt="You are a professional networking coach. Write genuine, engaging cold outreach messages.",
+        user_id=user_id,
         max_tokens=1024,
     )
 
@@ -79,6 +83,7 @@ async def generate_outreach_message(
 async def generate_resume_title(
     job_description: str,
     language: str = "en",
+    user_id: str | None = None,
 ) -> str:
     """Generate a short descriptive title from a job description.
 
@@ -99,6 +104,7 @@ async def generate_resume_title(
     result = await complete(
         prompt=prompt,
         system_prompt="You extract job titles and company names from job descriptions.",
+        user_id=user_id,
         max_tokens=60,
         temperature=0.3,
     )

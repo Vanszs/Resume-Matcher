@@ -4,7 +4,7 @@ import json
 import logging
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
 
 from app.config import settings
 from app.llm import check_llm_health, LLMConfig
@@ -25,12 +25,6 @@ from app.schemas import (
     ResetDatabaseRequest,
 )
 from app.prompts import DEFAULT_IMPROVE_PROMPT_ID, IMPROVE_PROMPT_OPTIONS
-from app.config import (
-    get_api_keys_from_config,
-    save_api_keys_to_config,
-    delete_api_key_from_config,
-    clear_all_api_keys,
-)
 from app.database import db
 from app.dependencies import get_current_user, get_current_admin
 
@@ -133,14 +127,19 @@ async def update_llm_config(
     """
     stored = _load_config(user.id)
 
-    # Update only provided fields
-    if request.provider is not None:
+    # Update only provided fields.
+    # Use `model_fields_set` to distinguish "field not sent" from "field explicitly set
+    # to null". This is critical for api_base: sending null means "clear it", while
+    # not sending the field means "don't change it".
+    if "provider" in request.model_fields_set and request.provider is not None:
         stored["provider"] = request.provider
-    if request.model is not None:
+    if "model" in request.model_fields_set and request.model is not None:
         stored["model"] = request.model
-    if request.api_key is not None:
+    if "api_key" in request.model_fields_set and request.api_key is not None:
+        # Never clear the key via null – user must send an empty string explicitly.
         stored["api_key"] = request.api_key
-    if request.api_base is not None:
+    if "api_base" in request.model_fields_set:
+        # null is valid here and means "clear the api_base field".
         stored["api_base"] = request.api_base
 
     # Build normalized config for response
@@ -151,7 +150,7 @@ async def update_llm_config(
         api_base=stored.get("api_base", settings.llm_api_base),
     )
 
-    # Save config regardless of health check outcome (see docstring).
+    # Save to per-user config file.
     _save_config(stored, user.id)
 
     # Best-effort health check for server-side logs/diagnostics (do not block response).
@@ -193,7 +192,9 @@ async def test_llm_connection(request: LLMConfigRequest | None = None, user=Depe
         ),
         api_base=(
             request.api_base
-            if request and request.api_base is not None
+            # Use model_fields_set so that an explicit null clears api_base instead
+            # of falling back to the stored value.
+            if request and "api_base" in request.model_fields_set
             else stored.get("api_base", settings.llm_api_base)
         ),
     )
@@ -353,14 +354,57 @@ def _mask_key_short(key: str | None) -> str | None:
     return "..." + key[-4:]
 
 
+def _get_stored_api_keys(user_id: str) -> dict[str, str]:
+    """Get per-user provider API keys from user config storage."""
+    stored = _load_config(user_id)
+    api_keys = stored.get("api_keys", {})
+    return api_keys if isinstance(api_keys, dict) else {}
+
+
+def _save_stored_api_keys(user_id: str, api_keys: dict[str, str]) -> None:
+    """Save per-user provider API keys in user config storage."""
+    stored = _load_config(user_id)
+    stored["api_keys"] = api_keys
+    _save_config(stored, user_id)
+
+
+def _clear_api_keys_for_user(user_id: str) -> None:
+    """Clear all API keys for a specific user from their config file."""
+    stored = _load_config(user_id)
+    stored["api_keys"] = {}
+    stored["api_key"] = ""
+    _save_config(stored, user_id)
+
+
+def _clear_api_keys_for_all_users() -> None:
+    """Clear API keys from global and all per-user config files."""
+    global_config = _load_config()
+    global_config["api_keys"] = {}
+    global_config["api_key"] = ""
+    _save_config(global_config)
+
+    user_config_dir = settings.config_path.parent / "user_configs"
+    if not user_config_dir.exists():
+        return
+
+    for config_file in user_config_dir.glob("*.json"):
+        try:
+            stored = json.loads(config_file.read_text())
+            stored["api_keys"] = {}
+            stored["api_key"] = ""
+            config_file.write_text(json.dumps(stored, indent=2))
+        except Exception:
+            logging.exception("Failed to clear API keys in %s", config_file)
+
+
 @router.get("/api-keys", response_model=ApiKeyStatusResponse, dependencies=[Depends(get_current_user)])
-async def get_api_keys_status() -> ApiKeyStatusResponse:
+async def get_api_keys_status(user=Depends(get_current_user)) -> ApiKeyStatusResponse:
     """Get status of all configured API keys (masked).
 
     Returns the configuration status for each supported provider.
     API keys are masked to show only the last 4 characters.
     """
-    stored_keys = get_api_keys_from_config()
+    stored_keys = _get_stored_api_keys(user.id)
 
     providers = []
     for provider in SUPPORTED_PROVIDERS:
@@ -377,13 +421,13 @@ async def get_api_keys_status() -> ApiKeyStatusResponse:
 
 
 @router.post("/api-keys", response_model=ApiKeysUpdateResponse, dependencies=[Depends(get_current_user)])
-async def update_api_keys(request: ApiKeysUpdateRequest) -> ApiKeysUpdateResponse:
+async def update_api_keys(request: ApiKeysUpdateRequest, user=Depends(get_current_user)) -> ApiKeysUpdateResponse:
     """Update API keys for one or more providers.
 
     Only updates the providers that are explicitly set in the request.
     Empty strings will clear the key for that provider.
     """
-    stored_keys = get_api_keys_from_config()
+    stored_keys = _get_stored_api_keys(user.id)
     updated = []
 
     # Update each provider if provided in request
@@ -422,7 +466,7 @@ async def update_api_keys(request: ApiKeysUpdateRequest) -> ApiKeysUpdateRespons
             del stored_keys["deepseek"]
         updated.append("deepseek")
 
-    save_api_keys_to_config(stored_keys)
+    _save_stored_api_keys(user.id, stored_keys)
 
     return ApiKeysUpdateResponse(
         message=f"Updated {len(updated)} API key(s)",
@@ -431,7 +475,11 @@ async def update_api_keys(request: ApiKeysUpdateRequest) -> ApiKeysUpdateRespons
 
 
 @router.delete("/api-keys")
-async def delete_all_api_keys(confirm: str | None = None, _admin=Depends(get_current_admin)) -> dict:
+async def delete_all_api_keys(
+    confirm: str | None = None,
+    scope: str = Query("self", pattern="^(self|all)$"),
+    user=Depends(get_current_user),
+) -> dict:
     """Clear all configured API keys.
 
     This is a destructive operation. Requires confirmation token.
@@ -451,12 +499,19 @@ async def delete_all_api_keys(confirm: str | None = None, _admin=Depends(get_cur
             status_code=400,
             detail="Confirmation required. Pass confirm=CLEAR_ALL_KEYS query parameter.",
         )
-    clear_all_api_keys()
-    return {"message": "All API keys have been cleared"}
+
+    if scope == "all":
+        if not user.role or user.role.name != "admin":
+            raise HTTPException(status_code=403, detail="Admin privileges required")
+        _clear_api_keys_for_all_users()
+        return {"message": "All API keys for all users have been cleared"}
+
+    _clear_api_keys_for_user(user.id)
+    return {"message": "Your API keys have been cleared"}
 
 
 @router.delete("/api-keys/{provider}", dependencies=[Depends(get_current_user)])
-async def delete_api_key(provider: str) -> dict:
+async def delete_api_key(provider: str, user=Depends(get_current_user)) -> dict:
     """Delete API key for a specific provider.
 
     Args:
@@ -471,13 +526,16 @@ async def delete_api_key(provider: str) -> dict:
             detail=f"Unsupported provider: {provider}. Supported: {SUPPORTED_PROVIDERS}",
         )
 
-    delete_api_key_from_config(provider)
+    stored_keys = _get_stored_api_keys(user.id)
+    if provider in stored_keys:
+        del stored_keys[provider]
+    _save_stored_api_keys(user.id, stored_keys)
 
     return {"message": f"API key for {provider} has been removed"}
 
 
 @router.post("/reset")
-async def reset_database_endpoint(request: ResetDatabaseRequest, _admin=Depends(get_current_admin)) -> dict:
+async def reset_database_endpoint(request: ResetDatabaseRequest, user=Depends(get_current_user)) -> dict:
     """Reset the database and clear all data.
 
     WARNING: This action is irreversible. It will:
@@ -501,5 +559,13 @@ async def reset_database_endpoint(request: ResetDatabaseRequest, _admin=Depends(
             status_code=400,
             detail="Confirmation required. Pass confirm=RESET_ALL_DATA in request body.",
         )
-    db.reset_database()
-    return {"message": "Database and all data have been reset successfully"}
+
+    scope = request.scope or "self"
+    if scope == "all":
+        if not user.role or user.role.name != "admin":
+            raise HTTPException(status_code=403, detail="Admin privileges required")
+        db.reset_database()
+        return {"message": "Database and all users data have been reset successfully"}
+
+    db.reset_user_data(user.id)
+    return {"message": "Your data has been reset successfully"}
