@@ -35,8 +35,9 @@ npm run build
 
 # Standalone mode requires manual copy of static assets
 echo "Copying static assets to standalone directory..."
-cp -r public .next/standalone/ 2>/dev/null || true
-cp -r .next/static .next/standalone/.next/
+mkdir -p .next/standalone/apps/frontend/.next
+cp -r public .next/standalone/apps/frontend/ 2>/dev/null || true
+cp -r .next/static .next/standalone/apps/frontend/.next/
 
 cd ../..
 
@@ -63,7 +64,9 @@ sleep 2
 # Check if port is free before starting
 check_port $FRONTEND_PORT "Frontend"
 
-screen -dmS resume-frontend env PORT=$FRONTEND_PORT node .next/standalone/server.js
+cd .next/standalone/apps/frontend
+screen -dmS resume-frontend env PORT=$FRONTEND_PORT node server.js
+cd ../../../..
 cd ../..
 
 # Restart or Start Backend Screen
