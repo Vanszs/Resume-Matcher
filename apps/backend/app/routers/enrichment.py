@@ -65,7 +65,7 @@ async def analyze_resume(
     vague, or incomplete descriptions and generates clarifying questions.
     """
     # Fetch resume
-    resume = db.get_resume(resume_id)
+    resume = db.get_resume(resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -138,7 +138,7 @@ async def generate_enhancements(
     improved description bullets for each item.
     """
     # Fetch resume
-    resume = db.get_resume(request.resume_id)
+    resume = db.get_resume(request.resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -266,7 +266,9 @@ async def generate_enhancements(
 
 @router.post("/apply/{resume_id}")
 async def apply_enhancements(
-    resume_id: str, request: ApplyEnhancementsRequest
+    resume_id: str,
+    request: ApplyEnhancementsRequest,
+    user=Depends(get_current_user),
 ) -> dict:
     """Apply enhancements to the master resume.
 
@@ -274,7 +276,7 @@ async def apply_enhancements(
     the enhanced descriptions.
     """
     # Fetch resume
-    resume = db.get_resume(resume_id)
+    resume = db.get_resume(resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -333,6 +335,7 @@ async def apply_enhancements(
                 "content": updated_content,
                 "processed_data": updated_data,
             },
+            user_id=user.id,
         )
     except Exception as e:
         logger.error(f"Failed to save enhancements to database: {e}")
@@ -426,7 +429,7 @@ async def regenerate_items(
     then uses AI to rewrite the content addressing the user's concerns.
     """
     # Validate resume exists
-    resume = db.get_resume(request.resume_id)
+    resume = db.get_resume(request.resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -494,7 +497,9 @@ async def regenerate_items(
 
 @router.post("/apply-regenerated/{resume_id}")
 async def apply_regenerated_items(
-    resume_id: str, regenerated_items: list[RegeneratedItem]
+    resume_id: str,
+    regenerated_items: list[RegeneratedItem],
+    user=Depends(get_current_user),
 ) -> dict:
     """Apply regenerated items to the master resume.
 
@@ -502,7 +507,7 @@ async def apply_regenerated_items(
     the regenerated descriptions.
     """
     # Fetch resume
-    resume = db.get_resume(resume_id)
+    resume = db.get_resume(resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -743,6 +748,7 @@ async def apply_regenerated_items(
                 "content": updated_content,
                 "processed_data": updated_data,
             },
+            user_id=user.id,
         )
     except Exception as e:
         logger.error(f"Failed to save regenerated content to database: {e}")

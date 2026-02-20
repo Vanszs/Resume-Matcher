@@ -659,6 +659,7 @@ class ResetDatabaseRequest(BaseModel):
     """Request to reset database with confirmation."""
 
     confirm: str | None = None
+    scope: Literal["self", "all"] | None = "self"
 
 
 class GenerateContentResponse(BaseModel):

@@ -79,6 +79,7 @@ async def get_status(
     from app.config import settings as app_settings
 
     config = get_llm_config()  # global default
+    user_id: str | None = None
 
     if credentials:
         try:
@@ -94,8 +95,9 @@ async def get_status(
             pass  # Invalid/expired token → fall back to global config
 
     is_configured = bool(config.api_key) or config.provider == "ollama"
-    db_stats = db.get_stats()
-    resumes = db.list_resumes()
+    scoped_user_id = user_id if credentials else None
+    db_stats = db.get_stats(user_id=scoped_user_id)
+    resumes = db.list_resumes(user_id=scoped_user_id)
     db_stats["total_resumes"] = sum(
         1 for resume in resumes if not resume.get("is_master", False)
     )

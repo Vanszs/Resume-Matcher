@@ -29,6 +29,14 @@ import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Dropdown } from '@/components/ui/dropdown';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Save,
   Key,
   Database,
@@ -131,9 +139,12 @@ export default function SettingsPage() {
   // Danger Zone state
   const [showClearApiKeysDialog, setShowClearApiKeysDialog] = useState(false);
   const [showResetDatabaseDialog, setShowResetDatabaseDialog] = useState(false);
+    const [showClearApiKeysScopeDialog, setShowClearApiKeysScopeDialog] = useState(false);
+    const [showResetDatabaseScopeDialog, setShowResetDatabaseScopeDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessage, setSuccessDialogMessage] = useState({ title: '', description: '' });
   const [isResetting, setIsResetting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Language settings
   const {
@@ -463,77 +474,6 @@ export default function SettingsPage() {
     }
   };
 
-  // Handle Clear API Keys
-  const handleClearApiKeys = async () => {
-    setIsResetting(true);
-    try {
-      await clearAllApiKeys();
-
-      // Refetch full LLM config to ensure local state is synced with backend
-      const llmConfig = await fetchLlmConfig().catch(() => null);
-      if (llmConfig) {
-        setProvider(llmConfig.provider || 'openai');
-        setModel(llmConfig.model || PROVIDER_INFO['openai'].defaultModel);
-        const isMaskedKey = Boolean(llmConfig.api_key) && llmConfig.api_key.includes('*');
-        setHasStoredApiKey(Boolean(llmConfig.api_key));
-        setApiKey(isMaskedKey ? '' : llmConfig.api_key || '');
-        setApiBase(llmConfig.api_base || '');
-      } else {
-        // Fallback if refetch fails
-        setApiKey('');
-        setHasStoredApiKey(false);
-      }
-
-      setHealthCheck(null);
-      // Refresh status
-      await refreshStatus();
-      setError(null);
-      setSuccessDialogMessage({
-        title: t('common.success'),
-        description: t('common.keysCleared'),
-      });
-      setShowSuccessDialog(true);
-    } catch (err) {
-      console.error('Failed to clear API keys', err);
-      setError(t('settings.errors.failedToClearApiKeys'));
-    } finally {
-      setIsResetting(false);
-      setShowClearApiKeysDialog(false);
-    }
-  };
-
-  // Handle Reset Database
-  const handleResetDatabase = async () => {
-    setIsResetting(true);
-    try {
-      await resetDatabase();
-
-      // Clear all related localStorage keys
-      localStorage.removeItem('master_resume_id');
-      localStorage.removeItem('resume_builder_draft');
-      localStorage.removeItem('resume_builder_settings');
-      localStorage.removeItem('resume_matcher_content_language');
-      localStorage.removeItem('resume_matcher_ui_language');
-
-      // Refresh status to show empty counts
-      await refreshStatus();
-      // Clear health check as context is lost
-      setHealthCheck(null);
-      setError(null);
-      setSuccessDialogMessage({
-        title: t('common.success'),
-        description: t('common.databaseReset'),
-      });
-      setShowSuccessDialog(true);
-    } catch (err) {
-      console.error('Failed to reset database', err);
-      setError(t('settings.errors.failedToResetDatabase'));
-    } finally {
-      setIsResetting(false);
-      setShowResetDatabaseDialog(false);
-    }
-  };
-
   // Format last fetched time for display
   const formatLastFetched = () => {
     if (!lastFetched) return t('settings.systemStatus.lastFetched.never');
@@ -545,7 +485,77 @@ export default function SettingsPage() {
     return t('settings.systemStatus.lastFetched.hoursAgo', { hours: Math.floor(diff / 3600) });
   };
 
+  const handleClearApiKeysWithScope = async (scope: 'self' | 'all') => {
+    setIsResetting(true);
+    try {
+      await clearAllApiKeys(scope);
+
+      const llmConfig = await fetchLlmConfig().catch(() => null);
+      if (llmConfig) {
+        setProvider(llmConfig.provider || 'openai');
+        setModel(llmConfig.model || PROVIDER_INFO['openai'].defaultModel);
+        const isMaskedKey = Boolean(llmConfig.api_key) && llmConfig.api_key.includes('*');
+        setHasStoredApiKey(Boolean(llmConfig.api_key));
+        setApiKey(isMaskedKey ? '' : llmConfig.api_key || '');
+        setApiBase(llmConfig.api_base || '');
+      } else {
+        setApiKey('');
+        setHasStoredApiKey(false);
+      }
+
+      setHealthCheck(null);
+      await refreshStatus(true);
+      setError(null);
+      setSuccessDialogMessage({
+        title: t('common.success'),
+        description: scope === 'all' ? 'All users API keys have been cleared.' : t('common.keysCleared'),
+      });
+      setShowSuccessDialog(true);
+    } catch (err) {
+      console.error('Failed to clear API keys', err);
+      setError(t('settings.errors.failedToClearApiKeys'));
+    } finally {
+      setIsResetting(false);
+      setShowClearApiKeysScopeDialog(false);
+      setShowClearApiKeysDialog(false);
+    }
+  };
+
+  const handleResetDatabaseWithScope = async (scope: 'self' | 'all') => {
+    setIsResetting(true);
+    try {
+      await resetDatabase(scope);
+
+      localStorage.removeItem('master_resume_id');
+      localStorage.removeItem('resume_builder_draft');
+      localStorage.removeItem('resume_builder_settings');
+      localStorage.removeItem('resume_matcher_content_language');
+      localStorage.removeItem('resume_matcher_ui_language');
+
+      await refreshStatus(true);
+      setHealthCheck(null);
+      setError(null);
+      setSuccessDialogMessage({
+        title: t('common.success'),
+        description:
+          scope === 'all' ? 'All users data has been reset.' : t('common.databaseReset'),
+      });
+      setShowSuccessDialog(true);
+    } catch (err) {
+      console.error('Failed to reset database', err);
+      setError(t('settings.errors.failedToResetDatabase'));
+    } finally {
+      setIsResetting(false);
+      setShowResetDatabaseScopeDialog(false);
+      setShowResetDatabaseDialog(false);
+    }
+  };
+
   const requiresApiKey = providerInfo.requiresKey ?? true;
+
+  useEffect(() => {
+    setIsAdmin(localStorage.getItem('user_role') === 'admin');
+  }, []);
 
   return (
     <div
@@ -1093,7 +1103,9 @@ export default function SettingsPage() {
                 <Button
                   variant="outline"
                   className="w-full border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800 hover:border-red-300"
-                  onClick={() => setShowClearApiKeysDialog(true)}
+                  onClick={() =>
+                    isAdmin ? setShowClearApiKeysScopeDialog(true) : setShowClearApiKeysDialog(true)
+                  }
                   disabled={isResetting}
                 >
                   <Key className="w-4 h-4 mr-2" />
@@ -1112,7 +1124,9 @@ export default function SettingsPage() {
                 <Button
                   variant="destructive"
                   className="w-full"
-                  onClick={() => setShowResetDatabaseDialog(true)}
+                  onClick={() =>
+                    isAdmin ? setShowResetDatabaseScopeDialog(true) : setShowResetDatabaseDialog(true)
+                  }
                   disabled={isResetting}
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -1174,7 +1188,7 @@ export default function SettingsPage() {
         description={t('confirmations.clearApiKeysDescription')}
         confirmLabel={t('common.delete')}
         variant="warning"
-        onConfirm={handleClearApiKeys}
+        onConfirm={() => handleClearApiKeysWithScope('self')}
       />
 
       <ConfirmDialog
@@ -1184,7 +1198,7 @@ export default function SettingsPage() {
         description={t('confirmations.resetDatabaseDescription')}
         confirmLabel={t('common.reset')}
         variant="danger"
-        onConfirm={handleResetDatabase}
+        onConfirm={() => handleResetDatabaseWithScope('self')}
       />
 
       <ConfirmDialog
@@ -1197,6 +1211,66 @@ export default function SettingsPage() {
         variant="success"
         onConfirm={() => setShowSuccessDialog(false)}
       />
+
+      <Dialog open={showClearApiKeysScopeDialog} onOpenChange={setShowClearApiKeysScopeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('settings.clearApiKeys')}</DialogTitle>
+            <DialogDescription>
+              Choose scope: clear only your API keys, or clear API keys for all users.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black gap-2">
+            <Button variant="outline" onClick={() => setShowClearApiKeysScopeDialog(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="warning"
+              onClick={() => handleClearApiKeysWithScope('self')}
+              disabled={isResetting}
+            >
+              Clear Only My Keys
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => handleClearApiKeysWithScope('all')}
+              disabled={isResetting}
+            >
+              Clear All Users Keys
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showResetDatabaseScopeDialog} onOpenChange={setShowResetDatabaseScopeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('settings.resetDatabase')}</DialogTitle>
+            <DialogDescription>
+              Choose scope: reset only your data, or reset all users data.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black gap-2">
+            <Button variant="outline" onClick={() => setShowResetDatabaseScopeDialog(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="warning"
+              onClick={() => handleResetDatabaseWithScope('self')}
+              disabled={isResetting}
+            >
+              Reset Only My Data
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => handleResetDatabaseWithScope('all')}
+              disabled={isResetting}
+            >
+              Reset All Users Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

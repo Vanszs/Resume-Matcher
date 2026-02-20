@@ -66,6 +66,7 @@ class Database:
         cover_letter: str | None = None,
         outreach_message: str | None = None,
         title: str | None = None,
+        user_id: str | None = None,
     ) -> dict[str, Any]:
         """Create a new resume entry.
 
@@ -86,6 +87,7 @@ class Database:
             "cover_letter": cover_letter,
             "outreach_message": outreach_message,
             "title": title,
+            "user_id": user_id,
             "created_at": now,
             "updated_at": now,
         }
@@ -101,6 +103,7 @@ class Database:
         processing_status: str = "pending",
         cover_letter: str | None = None,
         outreach_message: str | None = None,
+        user_id: str | None = None,
     ) -> dict[str, Any]:
         """Create a new resume with atomic master assignment.
 
@@ -109,7 +112,7 @@ class Database:
         the FastAPI event loop unlike threading.Lock.
         """
         async with self._master_resume_lock:
-            current_master = self.get_master_resume()
+            current_master = self.get_master_resume(user_id=user_id)
             is_master = current_master is None
 
             # Recovery behavior: if the current master is stuck in failed parsing
@@ -131,21 +134,30 @@ class Database:
                 processing_status=processing_status,
                 cover_letter=cover_letter,
                 outreach_message=outreach_message,
+                user_id=user_id,
             )
 
-    def get_resume(self, resume_id: str) -> dict[str, Any] | None:
+    def get_resume(self, resume_id: str, user_id: str | None = None) -> dict[str, Any] | None:
         """Get resume by ID."""
         Resume = Query()
-        result = self.resumes.search(Resume.resume_id == resume_id)
+        query = Resume.resume_id == resume_id
+        if user_id is not None:
+            query = query & (Resume.user_id == user_id)
+        result = self.resumes.search(query)
         return result[0] if result else None
 
-    def get_master_resume(self) -> dict[str, Any] | None:
+    def get_master_resume(self, user_id: str | None = None) -> dict[str, Any] | None:
         """Get the master resume if exists."""
         Resume = Query()
-        result = self.resumes.search(Resume.is_master == True)
+        query = Resume.is_master == True
+        if user_id is not None:
+            query = query & (Resume.user_id == user_id)
+        result = self.resumes.search(query)
         return result[0] if result else None
 
-    def update_resume(self, resume_id: str, updates: dict[str, Any]) -> dict[str, Any]:
+    def update_resume(
+        self, resume_id: str, updates: dict[str, Any], user_id: str | None = None
+    ) -> dict[str, Any]:
         """Update resume by ID.
 
         Raises:
@@ -153,28 +165,37 @@ class Database:
         """
         Resume = Query()
         updates["updated_at"] = datetime.now(timezone.utc).isoformat()
-        updated_count = self.resumes.update(updates, Resume.resume_id == resume_id)
+        query = Resume.resume_id == resume_id
+        if user_id is not None:
+            query = query & (Resume.user_id == user_id)
+        updated_count = self.resumes.update(updates, query)
 
         if not updated_count:
             raise ValueError(f"Resume not found: {resume_id}")
 
-        result = self.get_resume(resume_id)
+        result = self.get_resume(resume_id, user_id=user_id)
         if not result:
             raise ValueError(f"Resume disappeared after update: {resume_id}")
 
         return result
 
-    def delete_resume(self, resume_id: str) -> bool:
+    def delete_resume(self, resume_id: str, user_id: str | None = None) -> bool:
         """Delete resume by ID."""
         Resume = Query()
-        removed = self.resumes.remove(Resume.resume_id == resume_id)
+        query = Resume.resume_id == resume_id
+        if user_id is not None:
+            query = query & (Resume.user_id == user_id)
+        removed = self.resumes.remove(query)
         return len(removed) > 0
 
-    def list_resumes(self) -> list[dict[str, Any]]:
+    def list_resumes(self, user_id: str | None = None) -> list[dict[str, Any]]:
         """List all resumes."""
-        return list(self.resumes.all())
+        if user_id is None:
+            return list(self.resumes.all())
+        Resume = Query()
+        return list(self.resumes.search(Resume.user_id == user_id))
 
-    def set_master_resume(self, resume_id: str) -> bool:
+    def set_master_resume(self, resume_id: str, user_id: str | None = None) -> bool:
         """Set a resume as the master, unsetting any existing master.
 
         Returns False if the resume doesn't exist.
@@ -182,21 +203,30 @@ class Database:
         Resume = Query()
 
         # First verify the target resume exists
-        target = self.resumes.search(Resume.resume_id == resume_id)
+        target_query = Resume.resume_id == resume_id
+        if user_id is not None:
+            target_query = target_query & (Resume.user_id == user_id)
+        target = self.resumes.search(target_query)
         if not target:
             logger.warning("Cannot set master: resume %s not found", resume_id)
             return False
 
         # Unset current master
-        self.resumes.update({"is_master": False}, Resume.is_master == True)
+        unset_query = Resume.is_master == True
+        if user_id is not None:
+            unset_query = unset_query & (Resume.user_id == user_id)
+        self.resumes.update({"is_master": False}, unset_query)
         # Set new master
-        updated = self.resumes.update(
-            {"is_master": True}, Resume.resume_id == resume_id
-        )
+        set_query = Resume.resume_id == resume_id
+        if user_id is not None:
+            set_query = set_query & (Resume.user_id == user_id)
+        updated = self.resumes.update({"is_master": True}, set_query)
         return len(updated) > 0
 
     # Job operations
-    def create_job(self, content: str, resume_id: str | None = None) -> dict[str, Any]:
+    def create_job(
+        self, content: str, resume_id: str | None = None, user_id: str | None = None
+    ) -> dict[str, Any]:
         """Create a new job description entry."""
         job_id = str(uuid4())
         now = datetime.now(timezone.utc).isoformat()
@@ -205,24 +235,33 @@ class Database:
             "job_id": job_id,
             "content": content,
             "resume_id": resume_id,
+            "user_id": user_id,
             "created_at": now,
         }
         self.jobs.insert(doc)
         return doc
 
-    def get_job(self, job_id: str) -> dict[str, Any] | None:
+    def get_job(self, job_id: str, user_id: str | None = None) -> dict[str, Any] | None:
         """Get job by ID."""
         Job = Query()
-        result = self.jobs.search(Job.job_id == job_id)
+        query = Job.job_id == job_id
+        if user_id is not None:
+            query = query & (Job.user_id == user_id)
+        result = self.jobs.search(query)
         return result[0] if result else None
 
-    def update_job(self, job_id: str, updates: dict[str, Any]) -> dict[str, Any] | None:
+    def update_job(
+        self, job_id: str, updates: dict[str, Any], user_id: str | None = None
+    ) -> dict[str, Any] | None:
         """Update a job by ID."""
         Job = Query()
-        updated = self.jobs.update(updates, Job.job_id == job_id)
+        query = Job.job_id == job_id
+        if user_id is not None:
+            query = query & (Job.user_id == user_id)
+        updated = self.jobs.update(updates, query)
         if not updated:
             return None
-        return self.get_job(job_id)
+        return self.get_job(job_id, user_id=user_id)
 
     # Improvement operations
     def create_improvement(
@@ -231,6 +270,7 @@ class Database:
         tailored_resume_id: str,
         job_id: str,
         improvements: list[dict[str, Any]],
+        user_id: str | None = None,
     ) -> dict[str, Any]:
         """Create an improvement result entry."""
         request_id = str(uuid4())
@@ -242,13 +282,14 @@ class Database:
             "tailored_resume_id": tailored_resume_id,
             "job_id": job_id,
             "improvements": improvements,
+            "user_id": user_id,
             "created_at": now,
         }
         self.improvements.insert(doc)
         return doc
 
     def get_improvement_by_tailored_resume(
-        self, tailored_resume_id: str
+        self, tailored_resume_id: str, user_id: str | None = None
     ) -> dict[str, Any] | None:
         """Get improvement record by tailored resume ID.
 
@@ -256,20 +297,46 @@ class Database:
         cover letter and outreach message generation.
         """
         Improvement = Query()
-        result = self.improvements.search(
-            Improvement.tailored_resume_id == tailored_resume_id
-        )
+        query = Improvement.tailored_resume_id == tailored_resume_id
+        if user_id is not None:
+            query = query & (Improvement.user_id == user_id)
+        result = self.improvements.search(query)
         return result[0] if result else None
 
     # Stats
-    def get_stats(self) -> dict[str, Any]:
+    def get_stats(self, user_id: str | None = None) -> dict[str, Any]:
         """Get database statistics."""
+        if user_id is None:
+            total_resumes = len(self.resumes)
+            total_jobs = len(self.jobs)
+            total_improvements = len(self.improvements)
+            has_master_resume = self.get_master_resume() is not None
+        else:
+            Resume = Query()
+            Job = Query()
+            Improvement = Query()
+            total_resumes = len(self.resumes.search(Resume.user_id == user_id))
+            total_jobs = len(self.jobs.search(Job.user_id == user_id))
+            total_improvements = len(
+                self.improvements.search(Improvement.user_id == user_id)
+            )
+            has_master_resume = self.get_master_resume(user_id=user_id) is not None
+
         return {
-            "total_resumes": len(self.resumes),
-            "total_jobs": len(self.jobs),
-            "total_improvements": len(self.improvements),
-            "has_master_resume": self.get_master_resume() is not None,
+            "total_resumes": total_resumes,
+            "total_jobs": total_jobs,
+            "total_improvements": total_improvements,
+            "has_master_resume": has_master_resume,
         }
+
+    def reset_user_data(self, user_id: str) -> None:
+        """Reset data for a specific user only."""
+        Resume = Query()
+        Job = Query()
+        Improvement = Query()
+        self.resumes.remove(Resume.user_id == user_id)
+        self.jobs.remove(Job.user_id == user_id)
+        self.improvements.remove(Improvement.user_id == user_id)
 
     def reset_database(self) -> None:
         """Reset the database by truncating all tables and clearing uploads."""
