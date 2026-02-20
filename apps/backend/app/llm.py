@@ -154,13 +154,25 @@ def _join_text_parts(parts: list[str]) -> str | None:
 
 
 def _extract_message_text(message: Any) -> str | None:
-    """Extract plain text from a LiteLLM message object across providers."""
+    """Extract plain text from a LiteLLM message object across providers.
+    
+    Handles reasoning models (e.g., DeepSeek-R1, GLM) that return content in
+    'reasoning_content' field instead of 'content'.
+    """
     content: Any = None
 
+    # Try regular content first
     if hasattr(message, "content"):
         content = message.content
     elif isinstance(message, dict):
         content = message.get("content")
+
+    # If content is empty, check reasoning_content (for reasoning models)
+    if not content:
+        if hasattr(message, "reasoning_content"):
+            content = message.reasoning_content
+        elif isinstance(message, dict):
+            content = message.get("reasoning_content")
 
     return _join_text_parts(_extract_text_parts(content))
 
