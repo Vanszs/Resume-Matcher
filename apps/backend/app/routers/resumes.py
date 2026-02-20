@@ -41,6 +41,7 @@ from app.schemas import (
     UpdateTitleRequest,
     normalize_resume_data,
 )
+import litellm
 from app.services.parser import parse_document, parse_resume_to_json
 from app.services.improver import (
     extract_job_keywords,
@@ -142,6 +143,52 @@ def _raise_improve_error(
     detail: str,
 ) -> NoReturn:
     logger.error("Resume %s failed during %s: %s", action, stage, error)
+
+    # Detect LiteLLM-specific error types for better UX
+    try:
+        if isinstance(error, litellm.exceptions.RateLimitError):
+            raise HTTPException(
+                status_code=429,
+                detail="AI API rate limit reached. Please wait a moment and try again.",
+            )
+        if isinstance(error, litellm.exceptions.AuthenticationError):
+            raise HTTPException(
+                status_code=401,
+                detail="AI API authentication failed. Please check your API key in Settings.",
+            )
+        if isinstance(error, (litellm.exceptions.ServiceUnavailableError, litellm.exceptions.Timeout)):
+            raise HTTPException(
+                status_code=503,
+                detail="AI service is temporarily unavailable. Please try again.",
+            )
+        if isinstance(error, litellm.exceptions.BadRequestError):
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid request to AI provider. Please check your model configuration in Settings.",
+            )
+    except HTTPException:
+        raise
+    except Exception:
+        pass  # AttributeError if litellm.exceptions not fully available; fall through
+
+    # Fallback: inspect error message string for common patterns
+    error_str = str(error).lower()
+    if "rate limit" in error_str or "429" in str(error):
+        raise HTTPException(
+            status_code=429,
+            detail="AI API rate limit reached. Please wait a moment and try again.",
+        )
+    if "auth" in error_str or "api key" in error_str or "401" in str(error) or "unauthorized" in error_str:
+        raise HTTPException(
+            status_code=401,
+            detail="AI API authentication failed. Please check your API key in Settings.",
+        )
+    if "timeout" in error_str or "timed out" in error_str or "503" in str(error):
+        raise HTTPException(
+            status_code=503,
+            detail="AI service is temporarily unavailable. Please try again.",
+        )
+
     raise HTTPException(status_code=500, detail=detail)
 
 
@@ -245,6 +292,7 @@ async def _generate_auxiliary_messages(
     language: str,
     enable_cover_letter: bool,
     enable_outreach: bool,
+    user_id: str,
 ) -> tuple[str | None, str | None, str | None, list[str]]:
     """Generate cover letter, outreach message, and resume title.
 
@@ -258,17 +306,27 @@ async def _generate_auxiliary_messages(
     task_labels: list[str] = []
 
     # Title generation is always on (no feature flag)
-    generation_tasks.append(generate_resume_title(job_content, language))
+    generation_tasks.append(generate_resume_title(job_content, language, user_id=user_id))
     task_labels.append("title")
 
     if enable_cover_letter:
         generation_tasks.append(
-            generate_cover_letter(improved_data, job_content, language)
+            generate_cover_letter(
+                improved_data,
+                job_content,
+                language,
+                user_id=user_id,
+            )
         )
         task_labels.append("cover_letter")
     if enable_outreach:
         generation_tasks.append(
-            generate_outreach_message(improved_data, job_content, language)
+            generate_outreach_message(
+                improved_data,
+                job_content,
+                language,
+                user_id=user_id,
+            )
         )
         task_labels.append("outreach")
 
@@ -305,7 +363,10 @@ MAX_FILE_SIZE = 4 * 1024 * 1024  # 4MB
 
 
 @router.post("/upload", response_model=ResumeUploadResponse)
-async def upload_resume(file: UploadFile = File(...)) -> ResumeUploadResponse:
+async def upload_resume(
+    file: UploadFile = File(...),
+    user=Depends(get_current_user),
+) -> ResumeUploadResponse:
     """Upload and process a resume file (PDF/DOCX).
 
     Converts the file to Markdown and stores it in the database.
@@ -350,7 +411,7 @@ async def upload_resume(file: UploadFile = File(...)) -> ResumeUploadResponse:
 
     # Try to parse to structured JSON (optional, may fail if LLM not configured)
     try:
-        processed_data = await parse_resume_to_json(markdown_content)
+        processed_data = await parse_resume_to_json(markdown_content, user_id=user.id)
         db.update_resume(
             resume["resume_id"],
             {
@@ -459,6 +520,7 @@ async def list_resumes(include_master: bool = Query(False)) -> ResumeListRespons
 @router.post("/improve/preview", response_model=ImproveResumeResponse)
 async def improve_resume_preview_endpoint(
     request: ImproveResumeRequest,
+    user=Depends(get_current_user),
 ) -> ImproveResumeResponse:
     """Preview a tailored resume without persisting it.
 
@@ -483,7 +545,7 @@ async def improve_resume_preview_endpoint(
         content_hash = _hash_job_content(job["content"])
         if not job_keywords or job_keywords_hash != content_hash:
             stage = "extract_job_keywords"
-            job_keywords = await extract_job_keywords(job["content"])
+            job_keywords = await extract_job_keywords(job["content"], user_id=user.id)
             stage = "persist_job_keywords"
             # Cache extracted keywords with a content hash for basic invalidation.
             try:
@@ -509,6 +571,7 @@ async def improve_resume_preview_endpoint(
             job_keywords=job_keywords,
             language=language,
             prompt_id=prompt_id,
+            user_id=user.id,
         )
         # Collect warnings throughout the process
         response_warnings: list[str] = []
@@ -541,6 +604,7 @@ async def improve_resume_preview_endpoint(
                     job_description=job["content"],
                     job_keywords=job_keywords,
                     config=RefinementConfig(),
+                    user_id=user.id,
                 )
                 improved_data = refinement_result.refined_data
                 refinement_stats = RefinementStats(
@@ -644,6 +708,7 @@ async def improve_resume_preview_endpoint(
 @router.post("/improve/confirm", response_model=ImproveResumeResponse)
 async def improve_resume_confirm_endpoint(
     request: ImproveResumeConfirmRequest,
+    user=Depends(get_current_user),
 ) -> ImproveResumeResponse:
     """Confirm and persist a tailored resume."""
     resume = db.get_resume(request.resume_id)
@@ -726,6 +791,7 @@ async def improve_resume_confirm_endpoint(
             language,
             enable_cover_letter,
             enable_outreach,
+            user.id,
         )
         response_warnings.extend(aux_warnings)
 
@@ -779,6 +845,7 @@ async def improve_resume_confirm_endpoint(
 @router.post("/improve", response_model=ImproveResumeResponse)
 async def improve_resume_endpoint(
     request: ImproveResumeRequest,
+    user=Depends(get_current_user),
 ) -> ImproveResumeResponse:
     """Improve/tailor a resume for a specific job description.
 
@@ -805,7 +872,7 @@ async def improve_resume_endpoint(
 
     try:
         # Extract keywords from job description
-        job_keywords = await extract_job_keywords(job["content"])
+        job_keywords = await extract_job_keywords(job["content"], user_id=user.id)
 
         # Generate improved resume in the configured language
         prompt_id = request.prompt_id or _get_default_prompt_id()
@@ -816,6 +883,7 @@ async def improve_resume_endpoint(
             job_keywords=job_keywords,
             language=language,
             prompt_id=prompt_id,
+            user_id=user.id,
         )
         # Collect warnings throughout the process
         response_warnings: list[str] = []
@@ -847,6 +915,7 @@ async def improve_resume_endpoint(
                     job_description=job["content"],
                     job_keywords=job_keywords,
                     config=RefinementConfig(),
+                    user_id=user.id,
                 )
                 improved_data = refinement_result.refined_data
                 refinement_stats = RefinementStats(
@@ -908,6 +977,7 @@ async def improve_resume_endpoint(
             language,
             enable_cover_letter,
             enable_outreach,
+            user.id,
         )
         response_warnings.extend(aux_warnings)
 
@@ -1112,7 +1182,10 @@ async def delete_resume(resume_id: str) -> dict:
 
 
 @router.post("/{resume_id}/retry-processing", response_model=ResumeUploadResponse)
-async def retry_processing(resume_id: str) -> ResumeUploadResponse:
+async def retry_processing(
+    resume_id: str,
+    user=Depends(get_current_user),
+) -> ResumeUploadResponse:
     """Retry AI processing for a failed resume.
 
     Re-runs parse_resume_to_json() on the stored markdown content.
@@ -1136,7 +1209,7 @@ async def retry_processing(resume_id: str) -> ResumeUploadResponse:
         )
 
     try:
-        processed_data = await parse_resume_to_json(markdown_content)
+        processed_data = await parse_resume_to_json(markdown_content, user_id=user.id)
         db.update_resume(
             resume_id,
             {
@@ -1204,7 +1277,10 @@ async def update_title(resume_id: str, request: UpdateTitleRequest) -> dict:
 @router.post(
     "/{resume_id}/generate-cover-letter", response_model=GenerateContentResponse
 )
-async def generate_cover_letter_endpoint(resume_id: str) -> GenerateContentResponse:
+async def generate_cover_letter_endpoint(
+    resume_id: str,
+    user=Depends(get_current_user),
+) -> GenerateContentResponse:
     """Generate a cover letter on-demand for an existing tailored resume.
 
     This endpoint allows users to generate a cover letter after a resume has been
@@ -1256,7 +1332,10 @@ async def generate_cover_letter_endpoint(resume_id: str) -> GenerateContentRespo
     # Generate cover letter
     try:
         cover_letter_content = await generate_cover_letter(
-            resume_data, job["content"], language
+            resume_data,
+            job["content"],
+            language,
+            user_id=user.id,
         )
     except Exception as e:
         logger.error(f"Cover letter generation failed: {e}")
@@ -1275,7 +1354,10 @@ async def generate_cover_letter_endpoint(resume_id: str) -> GenerateContentRespo
 
 
 @router.post("/{resume_id}/generate-outreach", response_model=GenerateContentResponse)
-async def generate_outreach_endpoint(resume_id: str) -> GenerateContentResponse:
+async def generate_outreach_endpoint(
+    resume_id: str,
+    user=Depends(get_current_user),
+) -> GenerateContentResponse:
     """Generate an outreach message on-demand for an existing tailored resume.
 
     This endpoint allows users to generate a cold outreach message after a resume
@@ -1327,7 +1409,10 @@ async def generate_outreach_endpoint(resume_id: str) -> GenerateContentResponse:
     # Generate outreach message
     try:
         outreach_content = await generate_outreach_message(
-            resume_data, job["content"], language
+            resume_data,
+            job["content"],
+            language,
+            user_id=user.id,
         )
     except Exception as e:
         logger.error(f"Outreach message generation failed: {e}")

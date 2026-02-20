@@ -33,6 +33,17 @@ async def main():
             )
             print("Created 'admin' role.")
 
+        # Ensure 'user' role exists for self-registration and admin Add User form
+        user_role = await prisma.role.find_unique(where={"name": "user"})
+        if not user_role:
+            await prisma.role.create(
+                data={
+                    "name": "user",
+                    "permissions": "[]"
+                }
+            )
+            print("Created 'user' role.")
+
         # Check if user already exists
         existing_user = await prisma.user.find_unique(where={"email": email})
         if existing_user:

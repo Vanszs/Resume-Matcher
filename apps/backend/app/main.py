@@ -44,6 +44,15 @@ async def lifespan(app: FastAPI):
     # Startup
     settings.data_dir.mkdir(parents=True, exist_ok=True)
     await prisma.connect()
+    # Ensure default roles exist (admin + user) for the Add User form and registration
+    try:
+        for role_name, permissions in [("admin", '["*"]'), ("user", "[]")]:
+            existing = await prisma.role.find_unique(where={"name": role_name})
+            if not existing:
+                await prisma.role.create(data={"name": role_name, "permissions": permissions})
+                logger.info("Created default role: %s", role_name)
+    except Exception as e:
+        logger.warning("Failed to seed default roles: %s", e)
     # PDF renderer uses lazy initialization - will initialize on first use
     # await init_pdf_renderer()
     yield

@@ -216,8 +216,20 @@ def _to_code_block(content: str | None, language: str = "text") -> str:
     return f"```{language}\n{text}\n```"
 
 
-def _load_stored_config() -> dict:
-    """Load config from config.json file."""
+def _load_stored_config(user_id: str | None = None) -> dict:
+    """Load config from storage.
+
+    If user_id is provided, loads per-user config first and falls back to
+    global config for defaults/backward compatibility.
+    """
+    if user_id:
+        user_config_path = settings.config_path.parent / "user_configs" / f"{user_id}.json"
+        if user_config_path.exists():
+            try:
+                return json.loads(user_config_path.read_text())
+            except (json.JSONDecodeError, OSError):
+                return {}
+
     config_path = settings.config_path
     if config_path.exists():
         try:
@@ -227,12 +239,12 @@ def _load_stored_config() -> dict:
     return {}
 
 
-def get_llm_config() -> LLMConfig:
+def get_llm_config(user_id: str | None = None) -> LLMConfig:
     """Get current LLM configuration.
 
     Priority: config.json file > environment variables/settings
     """
-    stored = _load_stored_config()
+    stored = _load_stored_config(user_id)
 
     return LLMConfig(
         provider=stored.get("provider", settings.llm_provider),
@@ -404,12 +416,13 @@ async def complete(
     prompt: str,
     system_prompt: str | None = None,
     config: LLMConfig | None = None,
+    user_id: str | None = None,
     max_tokens: int = 4096,
     temperature: float = 0.7,
 ) -> str:
     """Make a completion request to the LLM."""
     if config is None:
-        config = get_llm_config()
+        config = get_llm_config(user_id)
 
     model_name = get_model_name(config)
 
@@ -614,6 +627,7 @@ async def complete_json(
     prompt: str,
     system_prompt: str | None = None,
     config: LLMConfig | None = None,
+    user_id: str | None = None,
     max_tokens: int = 4096,
     retries: int = 2,
 ) -> dict[str, Any]:
@@ -622,7 +636,7 @@ async def complete_json(
     Uses JSON mode when available, with retry logic for reliability.
     """
     if config is None:
-        config = get_llm_config()
+        config = get_llm_config(user_id)
 
     model_name = get_model_name(config)
 

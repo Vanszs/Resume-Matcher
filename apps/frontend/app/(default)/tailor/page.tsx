@@ -188,6 +188,12 @@ export default function TailorPage() {
         errorMessage.includes('429')
       ) {
         setError(t('tailor.errors.rateLimit'));
+      } else if (
+        errorMessage.includes('503') ||
+        errorMessage.toLowerCase().includes('service unavailable') ||
+        errorMessage.toLowerCase().includes('temporarily unavailable')
+      ) {
+        setError(t('tailor.errors.failedToGenerate'));
       } else {
         setError(t('tailor.errors.failedToPreview'));
       }

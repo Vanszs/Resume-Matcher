@@ -54,6 +54,7 @@ async def refine_resume(
     job_description: str,
     job_keywords: dict[str, Any],
     config: RefinementConfig | None = None,
+    user_id: str | None = None,
 ) -> RefinementResult:
     """Multi-pass refinement of an initially tailored resume.
 
@@ -91,6 +92,7 @@ async def refine_resume(
                     keyword_analysis.injectable_keywords,
                     master_resume,
                     job_description,
+                    user_id=user_id,
                 )
                 passes += 1
             except Exception as e:
@@ -378,6 +380,7 @@ async def inject_keywords(
     keywords_to_inject: list[str],
     master: dict[str, Any],
     job_description: str,
+    user_id: str | None = None,
 ) -> dict[str, Any]:
     """Use LLM to inject missing keywords into appropriate sections.
 
@@ -415,6 +418,7 @@ async def inject_keywords(
                 "You are a resume editor. Inject keywords naturally without adding "
                 "fabricated content. Return only valid JSON matching the input schema."
             ),
+            user_id=user_id,
             max_tokens=8192,
         )
 

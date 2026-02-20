@@ -133,14 +133,19 @@ async def update_llm_config(
     """
     stored = _load_config(user.id)
 
-    # Update only provided fields
-    if request.provider is not None:
+    # Update only provided fields.
+    # Use `model_fields_set` to distinguish "field not sent" from "field explicitly set
+    # to null". This is critical for api_base: sending null means "clear it", while
+    # not sending the field means "don't change it".
+    if "provider" in request.model_fields_set and request.provider is not None:
         stored["provider"] = request.provider
-    if request.model is not None:
+    if "model" in request.model_fields_set and request.model is not None:
         stored["model"] = request.model
-    if request.api_key is not None:
+    if "api_key" in request.model_fields_set and request.api_key is not None:
+        # Never clear the key via null – user must send an empty string explicitly.
         stored["api_key"] = request.api_key
-    if request.api_base is not None:
+    if "api_base" in request.model_fields_set:
+        # null is valid here and means "clear the api_base field".
         stored["api_base"] = request.api_base
 
     # Build normalized config for response
@@ -151,7 +156,7 @@ async def update_llm_config(
         api_base=stored.get("api_base", settings.llm_api_base),
     )
 
-    # Save config regardless of health check outcome (see docstring).
+    # Save to per-user config file.
     _save_config(stored, user.id)
 
     # Best-effort health check for server-side logs/diagnostics (do not block response).
@@ -193,7 +198,9 @@ async def test_llm_connection(request: LLMConfigRequest | None = None, user=Depe
         ),
         api_base=(
             request.api_base
-            if request and request.api_base is not None
+            # Use model_fields_set so that an explicit null clears api_base instead
+            # of falling back to the stored value.
+            if request and "api_base" in request.model_fields_set
             else stored.get("api_base", settings.llm_api_base)
         ),
     )

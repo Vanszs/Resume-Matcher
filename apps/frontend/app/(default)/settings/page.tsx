@@ -348,14 +348,33 @@ export default function SettingsPage() {
 
       await updateLlmConfig(config);
 
-      // Update the "saved" baseline so switching providers after a save still
-      // behaves correctly.
-      const newHasStoredApiKey = Boolean(trimmedKey) || (requiresApiKey && hasStoredApiKey);
-      setSavedProvider(provider);
-      setSavedHasStoredApiKey(newHasStoredApiKey);
-      if (trimmedKey) {
-        setApiKey('');
-        setHasStoredApiKey(true);
+      // Re-fetch the full config from backend so the form always reflects what
+      // was actually persisted (e.g. api_base might have been coerced or cleared).
+      const freshConfig = await fetchLlmConfig().catch(() => null);
+      if (freshConfig) {
+        const savedProviderFromServer = (freshConfig.provider as LLMProvider) || provider;
+        setProvider(savedProviderFromServer);
+        setModel(freshConfig.model || PROVIDER_INFO[savedProviderFromServer].defaultModel);
+        setApiBase(freshConfig.api_base || '');
+        const isMasked = Boolean(freshConfig.api_key) && freshConfig.api_key.includes('*');
+        setHasStoredApiKey(Boolean(freshConfig.api_key));
+        setSavedProvider(savedProviderFromServer);
+        setSavedHasStoredApiKey(Boolean(freshConfig.api_key));
+        if (isMasked) {
+          setApiKey('');
+        }
+      }
+
+      const newHasStoredApiKey = freshConfig
+        ? Boolean(freshConfig.api_key)
+        : Boolean(trimmedKey) || (requiresApiKey && hasStoredApiKey);
+      if (!freshConfig) {
+        setSavedProvider(provider);
+        setSavedHasStoredApiKey(newHasStoredApiKey);
+        if (trimmedKey) {
+          setApiKey('');
+          setHasStoredApiKey(true);
+        }
       }
 
       // Refresh cached system status after save (fast path is fine here)

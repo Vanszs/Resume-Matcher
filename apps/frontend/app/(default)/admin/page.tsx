@@ -141,11 +141,14 @@ export default function AdminPage() {
     async function handleToggleActive(userId: string) {
         try {
             const res = await apiFetch(`/admin/users/${userId}/toggle-active`, { method: 'PATCH' });
-            if (!res.ok) throw new Error('Failed to toggle user status');
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.detail || `Failed to toggle user status (${res.status})`);
+            }
             await loadData();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Toggle active failed:', err);
-            setFeedback({ type: 'error', message: 'Failed to update user status' });
+            setFeedback({ type: 'error', message: err.message || 'Failed to update user status' });
         }
     }
 
