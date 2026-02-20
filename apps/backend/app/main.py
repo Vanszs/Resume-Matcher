@@ -19,7 +19,7 @@ from app.config import settings
 from app.database import db
 from app.prisma_db import prisma
 from app.pdf import close_pdf_renderer, init_pdf_renderer
-from app.routers import auth_router, config_router, enrichment_router, health_router, jobs_router, resumes_router
+from app.routers import admin_router, auth_router, config_router, enrichment_router, health_router, jobs_router, resumes_router, user_config_router
 
 
 @asynccontextmanager
@@ -66,6 +66,8 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth_router, prefix="/api/v1")
+app.include_router(admin_router, prefix="/api/v1")
+app.include_router(user_config_router, prefix="/api/v1")
 app.include_router(health_router, prefix="/api/v1")
 app.include_router(config_router, prefix="/api/v1")
 app.include_router(resumes_router, prefix="/api/v1")

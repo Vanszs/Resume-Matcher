@@ -1,7 +1,7 @@
 // Default config for SQLite, can be changed to PostgreSQL later
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -71,7 +71,7 @@ model User {
 model LLMConfig {
   id           String   @id @default(uuid())
   userId       String
-  user         User     @relation(fields: [userId], references: [id])
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // e.g., "openai", "anthropic", "openrouter", "google", "deepseek", "ollama"
   provider     String   

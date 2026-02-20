@@ -4,7 +4,7 @@ import json
 import logging
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 
 from app.config import settings
 from app.llm import check_llm_health, LLMConfig
@@ -32,8 +32,9 @@ from app.config import (
     clear_all_api_keys,
 )
 from app.database import db
+from app.dependencies import get_current_user, get_current_admin
 
-router = APIRouter(prefix="/config", tags=["Configuration"])
+router = APIRouter(prefix="/config", tags=["Configuration"], dependencies=[Depends(get_current_user)])
 
 
 def _get_config_path() -> Path:
@@ -411,7 +412,7 @@ async def update_api_keys(request: ApiKeysUpdateRequest) -> ApiKeysUpdateRespons
 
 
 @router.delete("/api-keys")
-async def delete_all_api_keys(confirm: str | None = None) -> dict:
+async def delete_all_api_keys(confirm: str | None = None, _admin=Depends(get_current_admin)) -> dict:
     """Clear all configured API keys.
 
     This is a destructive operation. Requires confirmation token.
@@ -457,7 +458,7 @@ async def delete_api_key(provider: str) -> dict:
 
 
 @router.post("/reset")
-async def reset_database_endpoint(request: ResetDatabaseRequest) -> dict:
+async def reset_database_endpoint(request: ResetDatabaseRequest, _admin=Depends(get_current_admin)) -> dict:
     """Reset the database and clear all data.
 
     WARNING: This action is irreversible. It will:

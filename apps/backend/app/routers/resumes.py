@@ -11,10 +11,11 @@ from pathlib import Path
 from typing import Any, NoReturn
 from uuid import uuid4
 
-from fastapi import APIRouter, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import Response
 
 from app.database import db
+from app.dependencies import get_current_user
 from app.pdf import render_resume_pdf, PDFRenderError
 from app.config import settings
 
@@ -293,7 +294,7 @@ async def _generate_auxiliary_messages(
     return cover_letter, outreach_message, title, warnings
 
 
-router = APIRouter(prefix="/resumes", tags=["Resumes"])
+router = APIRouter(prefix="/resumes", tags=["Resumes"], dependencies=[Depends(get_current_user)])
 
 ALLOWED_TYPES = {
     "application/pdf",

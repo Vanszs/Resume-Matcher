@@ -7,10 +7,11 @@ import logging
 import re
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.config import settings
 from app.database import db
+from app.dependencies import get_current_user
 from app.llm import complete_json
 from app.prompts.enrichment import (
     ANALYZE_RESUME_PROMPT,
@@ -37,7 +38,7 @@ from app.schemas.enrichment import (
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/enrichment", tags=["Enrichment"])
+router = APIRouter(prefix="/enrichment", tags=["Enrichment"], dependencies=[Depends(get_current_user)])
 
 
 def _get_content_language() -> str:
