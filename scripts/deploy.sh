@@ -32,6 +32,12 @@ echo "Installing Node dependencies..."
 npm install
 echo "Building Next.js app..."
 npm run build
+
+# Standalone mode requires manual copy of static assets
+echo "Copying static assets to standalone directory..."
+cp -r public .next/standalone/ 2>/dev/null || true
+cp -r .next/static .next/standalone/.next/
+
 cd ../..
 
 echo "=== Backend Setup ==="

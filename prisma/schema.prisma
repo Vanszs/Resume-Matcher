@@ -1,0 +1,88 @@
+// Default config for SQLite, can be changed to PostgreSQL later
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------------------------------------------------------
+// ROLE MODEL (RBAC)
+// ----------------------------------------------------------------------
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique // e.g., "admin", "manager", "staff"
+  
+  // Storing permissions as a JSON array of strings e.g., ["create_user", "edit_role"]
+  // (In SQLite it is stored as a String, in Postgres it can be native Json API)
+  permissions String   @default("[]") 
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  users       User[]   @relation("UserRole")
+}
+
+// ----------------------------------------------------------------------
+// USER MODEL
+// ----------------------------------------------------------------------
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  username     String
+  
+  // Hashed password string from bcrypt/argon2
+  passwordHash String   
+  
+  // Status to disable/block a user
+  isActive     Boolean  @default(true)
+
+  // Foreign Key to the Role model
+  roleId       String
+  role         Role     @relation("UserRole", fields: [roleId], references: [id])
+
+  // Optional: Track which admin created this user
+  createdById  String?
+  createdBy    User?    @relation("UserCreator", fields: [createdById], references: [id])
+  createdUsers User[]   @relation("UserCreator")
+
+  // API Keys / LLM Configuration
+  llmConfigs   LLMConfig[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ----------------------------------------------------------------------
+// LLM CONFIG MODEL (USER API KEYS)
+// ----------------------------------------------------------------------
+
+model LLMConfig {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+
+  // e.g., "openai", "gemini", "claude", "custom"
+  provider     String   
+  
+  // Stored API key (ideally encrypted on the app level before saving)
+  apiKey       String   
+  
+  // Custom API configuration (only used if provider == "custom")
+  customUrl    String?  // e.g., "https://api.deepseek.com/v1" or local model
+  customModel  String?  // e.g., "deepseek-chat"
+  
+  // Whether this is the user's currently active/selected provider
+  isDefault    Boolean  @default(false) 
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Ensures a user only has one configuration per provider type
+  @@unique([userId, provider]) 
+}
