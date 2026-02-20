@@ -260,9 +260,11 @@ def get_model_name(config: LLMConfig) -> str:
     For most providers, adds the provider prefix if not already present.
     For OpenRouter, always adds 'openrouter/' prefix since OpenRouter models
     use nested prefixes like 'openrouter/anthropic/claude-3.5-sonnet'.
+    For OpenAI with custom api_base (e.g., Novita AI, Together AI), adds 'openai/'
+    prefix so LiteLLM knows to use OpenAI-compatible protocol.
     """
     provider_prefixes = {
-        "openai": "",  # OpenAI models don't need prefix
+        "openai": "",  # OpenAI models don't need prefix (unless custom api_base)
         "anthropic": "anthropic/",
         "openrouter": "openrouter/",
         "gemini": "gemini/",
@@ -279,8 +281,15 @@ def get_model_name(config: LLMConfig) -> str:
             return config.model
         return f"openrouter/{config.model}"
 
+    # OpenAI with custom api_base needs explicit prefix for LiteLLM to recognize
+    # the protocol (e.g., Novita AI, Together AI, local proxies)
+    if config.provider == "openai" and config.api_base:
+        if config.model.startswith("openai/"):
+            return config.model
+        return f"openai/{config.model}"
+
     # For other providers, don't add prefix if model already has a known prefix
-    known_prefixes = ["openrouter/", "anthropic/", "gemini/", "deepseek/", "ollama/"]
+    known_prefixes = ["openrouter/", "anthropic/", "gemini/", "deepseek/", "ollama/", "openai/"]
     if any(config.model.startswith(p) for p in known_prefixes):
         return config.model
 
