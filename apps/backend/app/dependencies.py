@@ -1,5 +1,6 @@
 """Authentication dependencies for FastAPI route protection."""
 
+import logging
 from typing import Annotated
 
 import jwt
@@ -8,6 +9,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import settings
 from app.prisma_db import prisma
+
+logger = logging.getLogger(__name__)
 
 security = HTTPBearer()
 
@@ -27,7 +30,7 @@ async def get_current_user(
         payload = jwt.decode(
             token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
         )
-        user_id: str = payload.get("sub")
+        user_id: str | None = payload.get("sub")
         if user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -38,16 +41,24 @@ async def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
         )
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        logger.warning("Invalid JWT token: %s", e)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
         )
 
-    user = await prisma.user.find_unique(
-        where={"id": user_id},
-        include={"role": True},
-    )
+    try:
+        user = await prisma.user.find_unique(
+            where={"id": user_id},
+            include={"role": True},
+        )
+    except Exception as e:
+        logger.error("Database error while fetching user %s: %s", user_id, e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Authentication error. Please try again.",
+        )
 
     if user is None:
         raise HTTPException(
@@ -73,6 +84,11 @@ async def get_current_admin(user=Depends(get_current_user)):
             ...
     """
     if not user.role or user.role.name != "admin":
+        logger.warning(
+            "Unauthorised admin access attempt by user %s (role=%s)",
+            getattr(user, "email", "unknown"),
+            getattr(user.role, "name", "none") if user.role else "none",
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin privileges required",

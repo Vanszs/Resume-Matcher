@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,13 +30,20 @@ export default function LoginPage() {
 
             const data = await response.json();
 
-            // Store the token and user info
+            // Store in localStorage (used by API client for Bearer headers)
             localStorage.setItem('auth_token', data.access_token);
             localStorage.setItem('user_role', data.role);
             localStorage.setItem('user_email', data.email);
 
-            // Redirect to dashboard or settings
-            router.push('/dashboard');
+            // Also set cookies so the Next.js middleware can gate page access
+            // server-side (HttpOnly is NOT set so JS can also clear them on logout)
+            const maxAge = 60 * 60 * 24; // 24 hours
+            document.cookie = `auth_token=${data.access_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
+            document.cookie = `user_role=${data.role}; path=/; max-age=${maxAge}; SameSite=Lax`;
+
+            // Redirect to originally requested page, or dashboard
+            const params = new URLSearchParams(window.location.search);
+            router.push(params.get('from') || '/dashboard');
 
         } catch (err: any) {
             setError(err.message || 'An unexpected error occurred.');

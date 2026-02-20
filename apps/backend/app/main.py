@@ -5,21 +5,37 @@ import logging
 import sys
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 # Fix for Windows: Use ProactorEventLoop for subprocess support (Playwright)
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
 logger = logging.getLogger(__name__)
-from fastapi.middleware.cors import CORSMiddleware
 
 from app import __version__
 from app.config import settings
 from app.database import db
 from app.prisma_db import prisma
 from app.pdf import close_pdf_renderer, init_pdf_renderer
-from app.routers import admin_router, auth_router, config_router, enrichment_router, health_router, jobs_router, resumes_router, user_config_router
+from app.routers import (
+    admin_router,
+    auth_router,
+    config_router,
+    enrichment_router,
+    health_router,
+    jobs_router,
+    resumes_router,
+    user_config_router,
+)
+
+# Rate limiter (in-memory, keyed by client IP)
+limiter = Limiter(key_func=get_remote_address)
 
 
 @asynccontextmanager
@@ -41,7 +57,7 @@ async def lifespan(app: FastAPI):
         db.close()
     except Exception as e:
         logger.error(f"Error closing TinyDB: {e}")
-        
+
     try:
         await prisma.disconnect()
     except Exception as e:
@@ -54,6 +70,10 @@ app = FastAPI(
     version=__version__,
     lifespan=lifespan,
 )
+
+# Attach rate limiter state and 429 handler
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware - origins configurable via CORS_ORIGINS env var
 app.add_middleware(
@@ -76,7 +96,7 @@ app.include_router(enrichment_router, prefix="/api/v1")
 
 
 @app.get("/")
-async def root():
+async def root() -> dict:
     """Root endpoint."""
     return {
         "name": "Resume Matcher API",

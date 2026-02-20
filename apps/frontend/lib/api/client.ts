@@ -55,6 +55,8 @@ export async function apiFetch(endpoint: string, options?: RequestInit): Promise
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_email');
+    document.cookie = 'auth_token=; path=/; max-age=0; SameSite=Lax';
+    document.cookie = 'user_role=; path=/; max-age=0; SameSite=Lax';
     window.location.href = '/login';
   }
 
@@ -122,6 +124,9 @@ export function logout(): void {
   localStorage.removeItem('auth_token');
   localStorage.removeItem('user_role');
   localStorage.removeItem('user_email');
+  // Clear middleware cookies
+  document.cookie = 'auth_token=; path=/; max-age=0; SameSite=Lax';
+  document.cookie = 'user_role=; path=/; max-age=0; SameSite=Lax';
   if (typeof window !== 'undefined') {
     window.location.href = '/login';
   }
