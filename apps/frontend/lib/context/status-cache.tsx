@@ -60,13 +60,13 @@ export function StatusCacheProvider({ children }: { children: React.ReactNode })
       if (!mountedRef.current) return;
 
       const now = Date.now();
-      setCache({
+      setCache((prev) => ({
         status,
         lastFetched: now,
-        lastLlmCheck: now,
+        lastLlmCheck: fullCheck ? now : prev.lastLlmCheck,
         isLoading: false,
         error: null,
-      });
+      }));
     } catch (err) {
       if (!mountedRef.current) return;
       setCache((prev) => ({

@@ -95,6 +95,10 @@ async def get_status(
 
     is_configured = bool(config.api_key) or config.provider == "ollama"
     db_stats = db.get_stats()
+    resumes = db.list_resumes()
+    db_stats["total_resumes"] = sum(
+        1 for resume in resumes if not resume.get("is_master", False)
+    )
 
     if include_llm_health:
         # Full path: live LLM connectivity test (may take several seconds)

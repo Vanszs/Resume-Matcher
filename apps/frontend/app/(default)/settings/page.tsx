@@ -413,10 +413,12 @@ export default function SettingsPage() {
 
       const result = await testLlmConnection(testConfig);
       setHealthCheck(result);
+      await refreshStatus(true);
       setStatus('idle');
     } catch (err) {
       console.error('Failed to test connection', err);
       setHealthCheck({ healthy: false, provider, model, error: (err as Error).message });
+      await refreshStatus(true);
       setStatus('idle');
     }
   };
