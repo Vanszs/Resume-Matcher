@@ -208,30 +208,58 @@ async def test_llm_connection(request: LLMConfigRequest | None = None, user=Depe
             ),
         )
 
-    # Build config: use request values if provided, otherwise fall back to stored/default
-    config = LLMConfig(
-        provider=(
-            request.provider
-            if request and request.provider
-            else stored.get("provider", settings.llm_provider)
-        ),
-        model=(
-            request.model
-            if request and request.model
+    target_provider = (
+        request.provider
+        if request and request.provider
+        else stored.get("provider", settings.llm_provider)
+    )
+
+    user_provider_config = None
+    try:
+        from app.prisma_db import prisma
+
+        user_provider_config = await prisma.llmconfig.find_unique(
+            where={"userId_provider": {"userId": user.id, "provider": target_provider}}
+        )
+    except Exception:
+        logging.exception("Failed to load user provider config for llm-test")
+
+    resolved_model = (
+        request.model
+        if request and request.model
+        else (
+            user_provider_config.model
+            if user_provider_config and user_provider_config.model
             else stored.get("model", settings.llm_model)
-        ),
-        api_key=(
-            request.api_key
-            if request and request.api_key
-            else stored.get("api_key", settings.llm_api_key)
-        ),
-        api_base=(
-            request.api_base
-            # Use model_fields_set so that an explicit null clears api_base instead
-            # of falling back to the stored value.
-            if request and "api_base" in request.model_fields_set
+        )
+    )
+
+    if request and request.api_key:
+        resolved_api_key = request.api_key
+    elif user_provider_config and user_provider_config.apiKey:
+        resolved_api_key = user_provider_config.apiKey
+    else:
+        resolved_api_key = stored.get("api_key", settings.llm_api_key)
+
+    resolved_api_base = (
+        request.api_base
+        # Use model_fields_set so that an explicit null clears api_base instead
+        # of falling back to the stored value.
+        if request and "api_base" in request.model_fields_set
+        else (
+            user_provider_config.baseUrl
+            if user_provider_config and user_provider_config.baseUrl is not None
             else stored.get("api_base", settings.llm_api_base)
-        ),
+        )
+    )
+
+    # Build config: use request values if provided, otherwise per-provider DB fallback,
+    # then legacy file/env values.
+    config = LLMConfig(
+        provider=target_provider,
+        model=resolved_model,
+        api_key=resolved_api_key,
+        api_base=resolved_api_base,
     )
 
     if not _is_valid_provider(config.provider):

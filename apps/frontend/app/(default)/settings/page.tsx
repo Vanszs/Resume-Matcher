@@ -385,11 +385,19 @@ export default function SettingsPage() {
 
       const selectedConfig = userProviderConfigs.find((item) => item.provider === targetProvider);
       handleProviderChange(targetProvider);
+      const providerHasStoredKey = Boolean(selectedConfig?.api_key_masked) || targetProvider === 'ollama';
+      setHasStoredApiKey(providerHasStoredKey);
+      setSavedProvider(targetProvider);
+      setSavedHasStoredApiKey(providerHasStoredKey);
       if (selectedConfig?.model) {
         setModel(selectedConfig.model);
+      } else {
+        setModel(PROVIDER_INFO[targetProvider].defaultModel);
       }
       if (selectedConfig?.base_url !== undefined && selectedConfig?.base_url !== null) {
         setApiBase(selectedConfig.base_url);
+      } else if (!PROVIDER_INFO[targetProvider].supportsCustomBase) {
+        setApiBase('');
       }
 
       await refreshUserProviderConfigs();
