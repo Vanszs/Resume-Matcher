@@ -274,7 +274,14 @@ def get_model_name(config: LLMConfig) -> str:
 
     # OpenRouter is special: always add openrouter/ prefix unless already present
     # OpenRouter models use nested format: openrouter/anthropic/claude-3.5-sonnet
+    # Exception: if a custom api_base is set that isn't openrouter.ai, treat as a
+    # generic OpenAI-compatible endpoint (don't add openrouter/ prefix, use model as-is).
     if config.provider == "openrouter":
+        if config.api_base and "openrouter.ai" not in config.api_base:
+            # Custom base URL (e.g. Novita AI) — behave like openai-compatible
+            if config.model.startswith("openai/"):
+                return config.model[len("openai/"):]
+            return config.model
         if config.model.startswith("openrouter/"):
             return config.model
         return f"openrouter/{config.model}"

@@ -124,18 +124,19 @@ export async function fetchSystemStatus(includeLlmHealth = false): Promise<Syste
 // Provider display names and default models
 export const PROVIDER_INFO: Record<
   LLMProvider,
-  { name: string; defaultModel: string; requiresKey: boolean }
+  { name: string; defaultModel: string; requiresKey: boolean; supportsCustomBase: boolean }
 > = {
-  openai: { name: 'OpenAI', defaultModel: 'gpt-5-nano-2025-08-07', requiresKey: true },
-  anthropic: { name: 'Anthropic', defaultModel: 'claude-haiku-4-5-20251001', requiresKey: true },
+  openai: { name: 'OpenAI', defaultModel: 'gpt-5-nano-2025-08-07', requiresKey: true, supportsCustomBase: false },
+  anthropic: { name: 'Anthropic', defaultModel: 'claude-haiku-4-5-20251001', requiresKey: true, supportsCustomBase: false },
   openrouter: {
     name: 'OpenRouter',
     defaultModel: 'deepseek/deepseek-chat',
     requiresKey: true,
+    supportsCustomBase: true,
   },
-  gemini: { name: 'Google Gemini', defaultModel: 'gemini-3-flash-preview', requiresKey: true },
-  deepseek: { name: 'DeepSeek', defaultModel: 'deepseek-chat', requiresKey: true },
-  ollama: { name: 'Ollama (Local)', defaultModel: 'gemma3:4b', requiresKey: false },
+  gemini: { name: 'Google Gemini', defaultModel: 'gemini-3-flash-preview', requiresKey: true, supportsCustomBase: false },
+  deepseek: { name: 'DeepSeek', defaultModel: 'deepseek-chat', requiresKey: true, supportsCustomBase: false },
+  ollama: { name: 'Ollama (Local)', defaultModel: 'gemma3:4b', requiresKey: false, supportsCustomBase: true },
 };
 
 // Feature configuration types

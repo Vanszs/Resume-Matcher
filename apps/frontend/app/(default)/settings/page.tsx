@@ -857,20 +857,22 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              {/* API Base URL (optional, for proxies/aggregators/custom endpoints) */}
-              <div className="space-y-2">
-                <Label htmlFor="apiBase">{t('settings.llmConfiguration.baseUrlLabel')}</Label>
-                <Input
-                  id="apiBase"
-                  value={apiBase}
-                  onChange={(e) => setApiBase(e.target.value)}
-                  placeholder={t('settings.llmConfiguration.baseUrlPlaceholder')}
-                  className="font-mono"
-                />
-                <p className="text-xs text-gray-500 font-mono">
-                  {t('settings.llmConfiguration.baseUrlDescription')}
-                </p>
-              </div>
+              {/* API Base URL (optional, only for providers that support it) */}
+              {providerInfo.supportsCustomBase && (
+                <div className="space-y-2">
+                  <Label htmlFor="apiBase">{t('settings.llmConfiguration.baseUrlLabel')}</Label>
+                  <Input
+                    id="apiBase"
+                    value={apiBase}
+                    onChange={(e) => setApiBase(e.target.value)}
+                    placeholder={t('settings.llmConfiguration.baseUrlPlaceholder')}
+                    className="font-mono"
+                  />
+                  <p className="text-xs text-gray-500 font-mono">
+                    {t('settings.llmConfiguration.baseUrlDescription')}
+                  </p>
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex gap-4">
