@@ -5,7 +5,19 @@ from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-async def main(email: str, password: str, username: str):
+import sys
+import os
+
+# Add the parent directory to sys.path to allow absolute imports from 'app'
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from app.config import settings
+
+async def main():
+    email = settings.default_admin_email
+    password = settings.default_admin_password
+    username = settings.default_admin_username
+
     prisma = Prisma()
     await prisma.connect()
 
@@ -46,10 +58,4 @@ async def main(email: str, password: str, username: str):
         await prisma.disconnect()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Seed the initial admin user.")
-    parser.add_argument("--email", required=True, help="Admin email address")
-    parser.add_argument("--password", required=True, help="Admin password")
-    parser.add_argument("--username", default="admin", help="Admin username")
-    
-    args = parser.parse_args()
-    asyncio.run(main(args.email, args.password, args.username))
+    asyncio.run(main())

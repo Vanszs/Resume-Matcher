@@ -145,6 +145,11 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expiration_minutes: int = 1440 # 24 hours
 
+    # Default Admin Credentials
+    default_admin_email: str = "admin@example.com"
+    default_admin_password: str = "changeme123"
+    default_admin_username: str = "admin"
+
     # CORS Configuration
     cors_origins: list[str] = [
         "http://localhost:3000",
