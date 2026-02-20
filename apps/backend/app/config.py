@@ -140,6 +140,11 @@ class Settings(BaseSettings):
     port: int = 8000
     frontend_base_url: str = "http://localhost:3000"
 
+    # JWT Authentication
+    jwt_secret_key: str = "super-secret-key-please-change-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_expiration_minutes: int = 1440 # 24 hours
+
     # CORS Configuration
     cors_origins: list[str] = [
         "http://localhost:3000",
