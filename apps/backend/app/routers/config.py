@@ -237,7 +237,7 @@ async def test_llm_connection(request: LLMConfigRequest | None = None, user=Depe
     if not _is_valid_provider(config.provider):
         config.provider = settings.llm_provider if _is_valid_provider(settings.llm_provider) else "openai"
 
-    test_prompt = "Hi"
+    test_prompt = "Health check: reply with exactly 'OK' and nothing else."
     return await check_llm_health(config, include_details=True, test_prompt=test_prompt)
 
 
