@@ -1,5 +1,7 @@
 """Health check and status endpoints."""
 
+import json
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
@@ -7,12 +9,39 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import settings
 from app.database import db
-from app.llm import check_llm_health, get_llm_config, get_llm_config_async, LLMConfig
+from app.llm import check_llm_health, get_llm_config, LLMConfig
 from app.schemas import HealthResponse, StatusResponse
 
 router = APIRouter(tags=["Health"])
 
 _optional_bearer = HTTPBearer(auto_error=False)
+
+
+def _get_user_llm_config(user_id: str) -> LLMConfig:
+    """Load per-user LLM config, fallback to global config file then env vars."""
+    user_config_path = settings.config_path.parent / "user_configs" / f"{user_id}.json"
+    if user_config_path.exists():
+        try:
+            stored = json.loads(user_config_path.read_text())
+        except (json.JSONDecodeError, OSError):
+            stored = {}
+    else:
+        # Fall back to global config as baseline
+        global_path = settings.config_path
+        if global_path.exists():
+            try:
+                stored = json.loads(global_path.read_text())
+            except (json.JSONDecodeError, OSError):
+                stored = {}
+        else:
+            stored = {}
+
+    return LLMConfig(
+        provider=stored.get("provider", settings.llm_provider),
+        model=stored.get("model", settings.llm_model),
+        api_key=stored.get("api_key", settings.llm_api_key),
+        api_base=stored.get("api_base", settings.llm_api_base),
+    )
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -49,8 +78,7 @@ async def get_status(
     import jwt as pyjwt
     from app.config import settings as app_settings
 
-    config = get_llm_config()  # global default (sync fallback)
-    user_id: str | None = None
+    config = get_llm_config()  # global default
 
     if credentials:
         try:
@@ -61,18 +89,12 @@ async def get_status(
             )
             user_id = payload.get("sub")
             if user_id:
-                # Use async Prisma-backed config loader for user-specific config
-                config = await get_llm_config_async(user_id)
+                config = _get_user_llm_config(user_id)
         except Exception:
             pass  # Invalid/expired token → fall back to global config
 
     is_configured = bool(config.api_key) or config.provider == "ollama"
-    scoped_user_id = user_id if credentials else None
-    db_stats = db.get_stats(user_id=scoped_user_id)
-    resumes = db.list_resumes(user_id=scoped_user_id)
-    db_stats["total_resumes"] = sum(
-        1 for resume in resumes if not resume.get("is_master", False)
-    )
+    db_stats = db.get_stats()
 
     if include_llm_health:
         # Full path: live LLM connectivity test (may take several seconds)

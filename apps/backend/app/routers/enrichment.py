@@ -38,76 +38,31 @@ from app.schemas.enrichment import (
 
 logger = logging.getLogger(__name__)
 
-
-def _llm_error_detail(e: Exception, fallback: str) -> str:
-    """Convert an LLM exception to an actionable user-facing error message.
-
-    Inspects the exception string to classify common LLM provider errors
-    (bad model name, wrong API key, rate limits, timeouts, connection issues)
-    so users know exactly what to fix in Settings rather than seeing a generic
-    'please try again' message.
-    """
-    s = str(e).lower()
-    if any(t in s for t in ("not found", "notfounderror", "model not found", "no such model")):
-        return (
-            "AI model not found. Check the model name in Settings → LLM Configuration."
-        )
-    if any(t in s for t in ("auth", "api key", "unauthorized", "invalid_api_key", "401", "403")):
-        return (
-            "API authentication failed. Check your API key in Settings → LLM Configuration."
-        )
-    if any(t in s for t in ("rate limit", "ratelimit", "429", "too many requests")):
-        return "Rate limit reached. Please wait a moment and try again."
-    if any(t in s for t in ("timeout", "timed out", "read timeout")):
-        return "The AI request timed out. Please try again."
-    if any(t in s for t in ("connection", "connect", "network", "unreachable", "refused")):
-        return (
-            "Could not connect to the AI provider. "
-            "Check the Base URL in Settings → LLM Configuration."
-        )
-    return fallback
-
 router = APIRouter(prefix="/enrichment", tags=["Enrichment"], dependencies=[Depends(get_current_user)])
 
 
-def _get_content_language(user_id: str | None = None) -> str:
-    """Get content language from stored config.
-
-    When user_id is provided, reads from the per-user config file first,
-    falling back to the global config for missing fields.
-    """
-    base: dict = {}
-    global_path = settings.config_path
+def _get_content_language() -> str:
+    """Get content language from stored config."""
+    config_path = settings.config_path
     try:
-        if global_path.exists():
-            base = json.loads(global_path.read_text())
+        if config_path.exists():
+            config = json.loads(config_path.read_text())
+            # Use content_language, fall back to legacy 'language' field, then default to 'en'
+            return config.get("content_language", config.get("language", "en"))
     except (OSError, json.JSONDecodeError) as e:
-        logger.warning(f"Failed to read global config: {e}")
-
-    if user_id:
-        user_path = global_path.parent / "user_configs" / f"{user_id}.json"
-        try:
-            if user_path.exists():
-                user_cfg = json.loads(user_path.read_text())
-                base = {**base, **user_cfg}
-        except (OSError, json.JSONDecodeError) as e:
-            logger.warning(f"Failed to read user config: {e}")
-
-    return base.get("content_language", base.get("language", "en"))
+        logger.warning(f"Failed to read content language from config: {e}")
+    return "en"
 
 
 @router.post("/analyze/{resume_id}", response_model=AnalysisResponse)
-async def analyze_resume(
-    resume_id: str,
-    user=Depends(get_current_user),
-) -> AnalysisResponse:
+async def analyze_resume(resume_id: str) -> AnalysisResponse:
     """Analyze a resume to identify items that need enrichment.
 
     Uses AI to examine Experience and Projects sections for weak,
     vague, or incomplete descriptions and generates clarifying questions.
     """
     # Fetch resume
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_resume(resume_id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -121,7 +76,7 @@ async def analyze_resume(
 
     # Build prompt with content language
     resume_json = json.dumps(processed_data, indent=2)
-    language = _get_content_language(user_id=user.id)
+    language = _get_content_language()
     output_language = get_language_name(language)
     prompt = ANALYZE_RESUME_PROMPT.format(
         resume_json=resume_json,
@@ -130,7 +85,7 @@ async def analyze_resume(
 
     try:
         # Call LLM with increased max_tokens for non-English languages
-        result = await complete_json(prompt, user_id=user.id, max_tokens=8192)
+        result = await complete_json(prompt, max_tokens=8192)
 
         # Parse response into schema objects
         items_to_enrich = [
@@ -165,22 +120,19 @@ async def analyze_resume(
         logger.error(f"Resume analysis failed: {e}")
         raise HTTPException(
             status_code=500,
-            detail=_llm_error_detail(e, "Failed to analyze resume. Please try again."),
+            detail="Failed to analyze resume. Please try again.",
         )
 
 
 @router.post("/enhance", response_model=EnhancementPreview)
-async def generate_enhancements(
-    request: EnhanceRequest,
-    user=Depends(get_current_user),
-) -> EnhancementPreview:
+async def generate_enhancements(request: EnhanceRequest) -> EnhancementPreview:
     """Generate enhanced descriptions from user answers.
 
     Takes the answers to clarifying questions and uses AI to generate
     improved description bullets for each item.
     """
     # Fetch resume
-    resume = db.get_resume(request.resume_id, user_id=user.id)
+    resume = db.get_resume(request.resume_id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -199,7 +151,7 @@ async def generate_enhancements(
     # Actually, let's parse the answers differently - the frontend should include item context
     # For now, we'll get the analysis to build the mapping
     resume_json = json.dumps(processed_data, indent=2)
-    language = _get_content_language(user_id=user.id)
+    language = _get_content_language()
     output_language = get_language_name(language)
     analysis_prompt = ANALYZE_RESUME_PROMPT.format(
         resume_json=resume_json,
@@ -207,16 +159,12 @@ async def generate_enhancements(
     )
 
     try:
-        analysis_result = await complete_json(
-            analysis_prompt,
-            user_id=user.id,
-            max_tokens=8192,
-        )
+        analysis_result = await complete_json(analysis_prompt, max_tokens=8192)
     except Exception as e:
         logger.error(f"Failed to re-analyze resume: {e}")
         raise HTTPException(
             status_code=500,
-            detail=_llm_error_detail(e, "Failed to process enhancements. Please try again."),
+            detail="Failed to process enhancements. Please try again.",
         )
 
     # Build question_id -> item_id mapping
@@ -270,7 +218,7 @@ async def generate_enhancements(
         current_desc = item.get("current_description", [])
         current_desc_text = "\n".join(f"- {d}" for d in current_desc) if current_desc else "(No description)"
         
-        language = _get_content_language(user_id=user.id)
+        language = _get_content_language()
         output_language = get_language_name(language)
 
         prompt = ENHANCE_DESCRIPTION_PROMPT.format(
@@ -283,7 +231,7 @@ async def generate_enhancements(
         )
 
         try:
-            result = await complete_json(prompt, user_id=user.id)
+            result = await complete_json(prompt)
             # Get additional bullets from LLM (new key name)
             additional_bullets = result.get("additional_bullets", [])
             # Fallback to old key for backwards compatibility
@@ -308,9 +256,7 @@ async def generate_enhancements(
 
 @router.post("/apply/{resume_id}")
 async def apply_enhancements(
-    resume_id: str,
-    request: ApplyEnhancementsRequest,
-    user=Depends(get_current_user),
+    resume_id: str, request: ApplyEnhancementsRequest
 ) -> dict:
     """Apply enhancements to the master resume.
 
@@ -318,7 +264,7 @@ async def apply_enhancements(
     the enhanced descriptions.
     """
     # Fetch resume
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_resume(resume_id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -377,7 +323,6 @@ async def apply_enhancements(
                 "content": updated_content,
                 "processed_data": updated_data,
             },
-            user_id=user.id,
         )
     except Exception as e:
         logger.error(f"Failed to save enhancements to database: {e}")
@@ -401,7 +346,6 @@ async def _regenerate_experience_or_project(
     item: RegenerateItemInput,
     instruction: str,
     output_language: str,
-    user_id: str,
 ) -> RegeneratedItem:
     """Regenerate a single experience or project item."""
     current_desc_text = (
@@ -419,7 +363,7 @@ async def _regenerate_experience_or_project(
         user_instruction=instruction,
     )
 
-    result = await complete_json(prompt, user_id=user_id, max_tokens=4096)
+    result = await complete_json(prompt, max_tokens=4096)
 
     return RegeneratedItem(
         item_id=item.item_id,
@@ -436,7 +380,6 @@ async def _regenerate_skills(
     item: RegenerateItemInput,
     instruction: str,
     output_language: str,
-    user_id: str,
 ) -> RegeneratedItem:
     """Regenerate the skills section."""
     current_skills_text = ", ".join(item.current_content) if item.current_content else "(No skills)"
@@ -447,7 +390,7 @@ async def _regenerate_skills(
         user_instruction=instruction,
     )
 
-    result = await complete_json(prompt, user_id=user_id, max_tokens=2048)
+    result = await complete_json(prompt, max_tokens=2048)
 
     return RegeneratedItem(
         item_id=item.item_id,
@@ -461,17 +404,14 @@ async def _regenerate_skills(
 
 
 @router.post("/regenerate", response_model=RegenerateResponse)
-async def regenerate_items(
-    request: RegenerateRequest,
-    user=Depends(get_current_user),
-) -> RegenerateResponse:
+async def regenerate_items(request: RegenerateRequest) -> RegenerateResponse:
     """Regenerate selected resume items based on user feedback.
 
     Takes selected items (experience, projects, skills) and a user instruction,
     then uses AI to rewrite the content addressing the user's concerns.
     """
     # Validate resume exists
-    resume = db.get_resume(request.resume_id, user_id=user.id)
+    resume = db.get_resume(request.resume_id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -485,23 +425,9 @@ async def regenerate_items(
     tasks = []
     for item in request.items:
         if item.item_type == "skills":
-            tasks.append(
-                _regenerate_skills(
-                    item,
-                    request.instruction,
-                    output_language,
-                    user.id,
-                )
-            )
+            tasks.append(_regenerate_skills(item, request.instruction, output_language))
         else:
-            tasks.append(
-                _regenerate_experience_or_project(
-                    item,
-                    request.instruction,
-                    output_language,
-                    user.id,
-                )
-            )
+            tasks.append(_regenerate_experience_or_project(item, request.instruction, output_language))
 
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -539,9 +465,7 @@ async def regenerate_items(
 
 @router.post("/apply-regenerated/{resume_id}")
 async def apply_regenerated_items(
-    resume_id: str,
-    regenerated_items: list[RegeneratedItem],
-    user=Depends(get_current_user),
+    resume_id: str, regenerated_items: list[RegeneratedItem]
 ) -> dict:
     """Apply regenerated items to the master resume.
 
@@ -549,7 +473,7 @@ async def apply_regenerated_items(
     the regenerated descriptions.
     """
     # Fetch resume
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_resume(resume_id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -790,7 +714,6 @@ async def apply_regenerated_items(
                 "content": updated_content,
                 "processed_data": updated_data,
             },
-            user_id=user.id,
         )
     except Exception as e:
         logger.error(f"Failed to save regenerated content to database: {e}")

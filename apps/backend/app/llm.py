@@ -61,20 +61,6 @@ class LLMConfig(BaseModel):
     api_base: str | None = None
 
 
-def _is_custom_openai_compatible_endpoint(provider: str, api_base: str | None) -> bool:
-    """Return True when OpenRouter is configured with a non-openrouter.ai base URL.
-
-    In this mode the endpoint is treated as a generic OpenAI-compatible service
-    (e.g. Novita AI, Together AI, any self-hosted OpenAI-compatible server).
-    The routing logic in get_model_name and _normalize_api_base both rely on this.
-    """
-    if provider != "openrouter":
-        return False
-    if not api_base:
-        return False
-    return "openrouter.ai" not in api_base
-
-
 def _normalize_api_base(provider: str, api_base: str | None) -> str | None:
     """Normalize api_base for LiteLLM provider-specific expectations.
 
@@ -100,12 +86,6 @@ def _normalize_api_base(provider: str, api_base: str | None) -> str | None:
     # Gemini handler appends '/v1/models/...'. If base already ends with '/v1',
     # strip it to avoid '/v1/v1/models/...'.
     if provider == "gemini" and base.endswith("/v1"):
-        base = base[: -len("/v1")].rstrip("/")
-
-    # OpenAI-compatible custom endpoints (OpenRouter with non-openrouter.ai base):
-    # LiteLLM's OpenAI handler appends '/v1/chat/completions'. If the user already
-    # included '/v1', strip it to avoid '/v1/v1/chat/completions'.
-    if _is_custom_openai_compatible_endpoint(provider, api_base) and base.endswith("/v1"):
         base = base[: -len("/v1")].rstrip("/")
 
     return base or None
@@ -182,26 +162,7 @@ def _extract_message_text(message: Any) -> str | None:
     elif isinstance(message, dict):
         content = message.get("content")
 
-    text = _join_text_parts(_extract_text_parts(content))
-    if text:
-        return text
-
-    # Reasoning models (e.g. openai/o-series, deepseek-r1, gpt-oss-120b) may return
-    # empty `content` but populate `reasoning_content` / `reasoning` instead.
-    # Accept either as a sign that the model is alive and responding.
-    for attr in ("reasoning_content", "reasoning"):
-        if hasattr(message, attr):
-            rc = getattr(message, attr)
-        elif isinstance(message, dict):
-            rc = message.get(attr)
-        else:
-            rc = None
-        if rc:
-            reasoning_text = _join_text_parts(_extract_text_parts(rc))
-            if reasoning_text:
-                return reasoning_text
-
-    return None
+    return _join_text_parts(_extract_text_parts(content))
 
 
 def _extract_choice_text(choice: Any) -> str | None:
@@ -255,31 +216,8 @@ def _to_code_block(content: str | None, language: str = "text") -> str:
     return f"```{language}\n{text}\n```"
 
 
-# Provider default models - used when no model is specified in config
-PROVIDER_DEFAULT_MODELS = {
-    "openai": "gpt-5-nano-2025-08-07",
-    "anthropic": "claude-haiku-4-5-20251001",
-    "openrouter": "deepseek/deepseek-chat",
-    "gemini": "gemini-3-flash-preview",
-    "deepseek": "deepseek-chat",
-    "ollama": "gemma3:4b",
-}
-
-
-def _load_stored_config(user_id: str | None = None) -> dict:
-    """Load config from storage.
-
-    If user_id is provided, loads per-user config first and falls back to
-    global config for defaults/backward compatibility.
-    """
-    if user_id:
-        user_config_path = settings.config_path.parent / "user_configs" / f"{user_id}.json"
-        if user_config_path.exists():
-            try:
-                return json.loads(user_config_path.read_text())
-            except (json.JSONDecodeError, OSError):
-                return {}
-
+def _load_stored_config() -> dict:
+    """Load config from config.json file."""
     config_path = settings.config_path
     if config_path.exists():
         try:
@@ -289,80 +227,19 @@ def _load_stored_config(user_id: str | None = None) -> dict:
     return {}
 
 
-def get_llm_config(user_id: str | None = None) -> LLMConfig:
+def get_llm_config() -> LLMConfig:
     """Get current LLM configuration.
 
-    Priority (per-provider):
-      1. provider_configs[active_provider] values
-      2. Legacy top-level api_key / api_base fields
-      3. Environment variables / settings defaults
+    Priority: config.json file > environment variables/settings
     """
-    stored = _load_stored_config(user_id)
-
-    active_provider = stored.get("provider", settings.llm_provider)
-
-    # Per-provider config (if it exists) takes priority over the legacy single
-    # top-level api_key / api_base so that each provider can carry its own key.
-    pconf: dict = stored.get("provider_configs", {}).get(active_provider, {})
-
-    api_key = pconf.get("api_key") or stored.get("api_key", settings.llm_api_key)
-    model = pconf.get("model") or stored.get("model", settings.llm_model)
-    api_base = (
-        pconf["api_base"] if "api_base" in pconf
-        else stored.get("api_base", settings.llm_api_base)
-    )
+    stored = _load_stored_config()
 
     return LLMConfig(
-        provider=active_provider,
-        model=model,
-        api_key=api_key,
-        api_base=api_base,
+        provider=stored.get("provider", settings.llm_provider),
+        model=stored.get("model", settings.llm_model),
+        api_key=stored.get("api_key", settings.llm_api_key),
+        api_base=stored.get("api_base", settings.llm_api_base),
     )
-
-
-async def get_llm_config_async(user_id: str | None = None) -> LLMConfig:
-    """Get LLM configuration from database (async, Prisma-backed).
-
-    This is the preferred method for async contexts. It reads from the
-    Prisma database where per-user, per-provider API keys are stored.
-
-    Priority:
-      1. User's default (active) provider config from Prisma database
-      2. Fallback to legacy file-based config / environment variables
-    """
-    if user_id:
-        try:
-            from app.prisma_db import prisma
-
-            # Find the default (active) config for this user
-            config = await prisma.llmconfig.find_first(
-                where={"userId": user_id, "isDefault": True}
-            )
-            if config and (config.apiKey or config.provider == "ollama"):
-                return LLMConfig(
-                    provider=config.provider,
-                    model=config.model or PROVIDER_DEFAULT_MODELS.get(config.provider, ""),
-                    api_key=config.apiKey or "",
-                    api_base=config.baseUrl,
-                )
-
-            # If no default is set but user has configs, use the most recent one
-            fallback_config = await prisma.llmconfig.find_first(
-                where={"userId": user_id},
-                order={"createdAt": "desc"},
-            )
-            if fallback_config and (fallback_config.apiKey or fallback_config.provider == "ollama"):
-                return LLMConfig(
-                    provider=fallback_config.provider,
-                    model=fallback_config.model or PROVIDER_DEFAULT_MODELS.get(fallback_config.provider, ""),
-                    api_key=fallback_config.apiKey or "",
-                    api_base=fallback_config.baseUrl,
-                )
-        except Exception as e:
-            logging.warning(f"Failed to load user LLM config from database: {e}")
-
-    # Fallback to legacy sync method (env vars / file-based config)
-    return get_llm_config(user_id)
 
 
 def get_model_name(config: LLMConfig) -> str:
@@ -383,45 +260,12 @@ def get_model_name(config: LLMConfig) -> str:
 
     prefix = provider_prefixes.get(config.provider, "")
 
-    # OpenRouter: two routing modes depending on api_base.
-    #
-    # MODE A — Standard OpenRouter gateway (api_base is openrouter.ai or not set):
-    #   LiteLLM uses the dedicated 'openrouter' handler.
-    #   Models use nested format:  openrouter/anthropic/claude-3.5-sonnet
-    #
-    # MODE B — Custom OpenAI-compatible endpoint (api_base is NOT openrouter.ai):
-    #   Examples: Novita AI, Together AI, any self-hosted OpenAI-compatible server.
-    #   LiteLLM must use the 'openai' handler so it calls /v1/chat/completions.
-    #   The OpenAI handler ALWAYS strips the leading "openai/" prefix before sending
-    #   the model name. We therefore wrap the raw model with an extra "openai/" so the
-    #   value received by the endpoint is exactly what the user typed:
-    #
-    #     user model               LiteLLM input                sent to endpoint
-    #     deepseek/deepseek-v3.2   openai/deepseek/deepseek-v3.2  deepseek/deepseek-v3.2  ✓
-    #     openai/gpt-oss-120b      openai/openai/gpt-oss-120b     openai/gpt-oss-120b     ✓
-    #     llama3                   openai/llama3                  llama3                  ✓
+    # OpenRouter is special: always add openrouter/ prefix unless already present
+    # OpenRouter models use nested format: openrouter/anthropic/claude-3.5-sonnet
     if config.provider == "openrouter":
-        if _is_custom_openai_compatible_endpoint(config.provider, config.api_base):
-            # Guard against double-wrapping on repeated calls.
-            if config.model.startswith("openai/"):
-                # Already has one openai/ layer — ensure exactly one wrap.
-                inner = config.model[len("openai/"):]
-                if inner.startswith("openai/"):
-                    # Already correctly double-wrapped.
-                    return config.model
-                return f"openai/{config.model}"
-            return f"openai/{config.model}"
-        # MODE A: standard OpenRouter gateway.
         if config.model.startswith("openrouter/"):
             return config.model
         return f"openrouter/{config.model}"
-
-    # For native OpenAI provider (including custom base URLs like Novita AI),
-    # strip the redundant "openai/" prefix. LiteLLM's openai handler sends the
-    # model name as-is to the API, so "openai/gpt-oss-120b" would fail on any
-    # endpoint that only knows "gpt-oss-120b".
-    if config.provider == "openai" and config.model.startswith("openai/"):
-        return config.model[len("openai/"):]
 
     # For other providers, don't add prefix if model already has a known prefix
     known_prefixes = ["openrouter/", "anthropic/", "gemini/", "deepseek/", "ollama/"]
@@ -432,43 +276,28 @@ def get_model_name(config: LLMConfig) -> str:
     return f"{prefix}{config.model}" if prefix else config.model
 
 
-def _supports_temperature(provider: str, model: str, api_base: str | None = None) -> bool:
+def _supports_temperature(provider: str, model: str) -> bool:
     """Return whether passing `temperature` is supported for this model/provider combo.
 
-    Some models (e.g., OpenAI gpt-5 family on native OpenAI) reject temperature values
-    other than 1, and LiteLLM may error when temperature is passed.
-
-    Custom OpenAI-compatible endpoints (Novita AI, Together AI, etc.) generally support
-    temperature even for gpt-5 model names, so we don't restrict them.
+    Some models (e.g., OpenAI gpt-5 family) reject temperature values other than 1,
+    and LiteLLM may error when temperature is passed.
     """
-    # Custom OpenAI-compatible endpoints generally support temperature
-    if _is_custom_openai_compatible_endpoint(provider, api_base):
-        return True
-
+    _ = provider
     model_lower = model.lower()
-    # Only restrict gpt-5 on native OpenAI provider
-    if provider == "openai" and "gpt-5" in model_lower:
+    if "gpt-5" in model_lower:
         return False
     return True
 
 
-def _get_reasoning_effort(provider: str, model: str, api_base: str | None = None) -> str | None:
+def _get_reasoning_effort(provider: str, model: str) -> str | None:
     """Return a default reasoning_effort for models that require it.
 
-    Some OpenAI gpt-5 models and reasoning models (o-series) may return empty
-    message.content unless a supported `reasoning_effort` is explicitly set.
-    This keeps downstream JSON parsing reliable.
-
-    Note: Only apply to *native* OpenAI endpoints — custom OpenAI-compatible
-    endpoints (e.g. Novita AI) may not support this parameter.
+    Some OpenAI gpt-5 models may return empty message.content unless a supported
+    `reasoning_effort` is explicitly set. This keeps downstream JSON parsing reliable.
     """
-    # Skip for custom OpenAI-compatible endpoints — they may reject unknown params.
-    if _is_custom_openai_compatible_endpoint(provider, api_base):
-        return None
-
+    _ = provider
     model_lower = model.lower()
-    # gpt-5 family on native OpenAI
-    if provider == "openai" and "gpt-5" in model_lower:
+    if "gpt-5" in model_lower:
         return "minimal"
     return None
 
@@ -494,28 +323,20 @@ async def check_llm_health(
 
     model_name = get_model_name(config)
 
-    prompt = test_prompt or "Health check: reply with exactly 'OK' and nothing else."
+    prompt = test_prompt or "Hi"
 
     try:
         # Make a minimal test call with timeout
         # Pass API key directly to avoid race conditions with global os.environ
         kwargs: dict[str, Any] = {
             "model": model_name,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": "You are a connectivity checker. Reply with exactly OK.",
-                },
-                {"role": "user", "content": prompt},
-            ],
-            "max_tokens": 8,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 16,
             "api_key": config.api_key,
             "api_base": _normalize_api_base(config.provider, config.api_base),
             "timeout": LLM_TIMEOUT_HEALTH_CHECK,
         }
-        if _supports_temperature(config.provider, model_name, config.api_base):
-            kwargs["temperature"] = 0
-        reasoning_effort = _get_reasoning_effort(config.provider, model_name, config.api_base)
+        reasoning_effort = _get_reasoning_effort(config.provider, model_name)
         if reasoning_effort:
             kwargs["reasoning_effort"] = reasoning_effort
 
@@ -540,18 +361,12 @@ async def check_llm_health(
                 result["model_output"] = _to_code_block(None)
             return result
 
-        normalized = content.strip().strip("`\"'").upper()
-        ack_like = normalized == "OK" or normalized.startswith("OK\n")
-
         result = {
             "healthy": True,
             "provider": config.provider,
             "model": config.model,
             "response_model": response.model if response else None,
         }
-        if not ack_like:
-            result["warning_code"] = "unexpected_health_response"
-            result["warning"] = "Model responded, but did not return the expected health-check ACK."
         if include_details:
             result["test_prompt"] = _to_code_block(prompt)
             result["model_output"] = _to_code_block(content)
@@ -589,13 +404,12 @@ async def complete(
     prompt: str,
     system_prompt: str | None = None,
     config: LLMConfig | None = None,
-    user_id: str | None = None,
     max_tokens: int = 4096,
     temperature: float = 0.7,
 ) -> str:
     """Make a completion request to the LLM."""
     if config is None:
-        config = await get_llm_config_async(user_id)
+        config = get_llm_config()
 
     model_name = get_model_name(config)
 
@@ -614,9 +428,9 @@ async def complete(
             "api_base": _normalize_api_base(config.provider, config.api_base),
             "timeout": LLM_TIMEOUT_COMPLETION,
         }
-        if _supports_temperature(config.provider, model_name, config.api_base):
+        if _supports_temperature(config.provider, model_name):
             kwargs["temperature"] = temperature
-        reasoning_effort = _get_reasoning_effort(config.provider, model_name, config.api_base)
+        reasoning_effort = _get_reasoning_effort(config.provider, model_name)
         if reasoning_effort:
             kwargs["reasoning_effort"] = reasoning_effort
 
@@ -634,23 +448,13 @@ async def complete(
         ) from e
 
 
-def _supports_json_mode(provider: str, model: str, api_base: str | None = None) -> bool:
-    """Check if the model supports JSON mode.
-
-    Most OpenAI-compatible APIs support response_format={"type": "json_object"}.
-    Custom endpoints (Novita AI, Together AI, etc.) are treated as OpenAI-compatible.
-    """
-    # Custom OpenAI-compatible endpoints generally support JSON mode
-    if _is_custom_openai_compatible_endpoint(provider, api_base):
-        return True
-
-    # Native providers that support JSON mode
+def _supports_json_mode(provider: str, model: str) -> bool:
+    """Check if the model supports JSON mode."""
+    # Models that support response_format={"type": "json_object"}
     json_mode_providers = ["openai", "anthropic", "gemini", "deepseek"]
     if provider in json_mode_providers:
         return True
-
     # LLM-004: OpenRouter models - use explicit allowlist instead of substring matching
-    # This is for standard OpenRouter gateway (openrouter.ai), not custom endpoints
     if provider == "openrouter":
         return model in OPENROUTER_JSON_CAPABLE_MODELS
     return False
@@ -810,7 +614,6 @@ async def complete_json(
     prompt: str,
     system_prompt: str | None = None,
     config: LLMConfig | None = None,
-    user_id: str | None = None,
     max_tokens: int = 4096,
     retries: int = 2,
 ) -> dict[str, Any]:
@@ -819,7 +622,7 @@ async def complete_json(
     Uses JSON mode when available, with retry logic for reliability.
     """
     if config is None:
-        config = await get_llm_config_async(user_id)
+        config = get_llm_config()
 
     model_name = get_model_name(config)
 
@@ -833,11 +636,9 @@ async def complete_json(
     ]
 
     # Check if we can use JSON mode
-    use_json_mode = _supports_json_mode(config.provider, config.model, config.api_base)
+    use_json_mode = _supports_json_mode(config.provider, config.model)
 
     last_error = None
-    last_content: str | None = None
-    strict_retry_hint = ""
     for attempt in range(retries + 1):
         try:
             # Build request kwargs
@@ -850,14 +651,10 @@ async def complete_json(
                 "api_base": _normalize_api_base(config.provider, config.api_base),
                 "timeout": _calculate_timeout("json", max_tokens, config.provider),
             }
-            if _supports_temperature(config.provider, model_name, config.api_base):
-                # For JSON mode, deterministic decoding is more reliable.
-                if use_json_mode:
-                    kwargs["temperature"] = 0
-                else:
-                    # LLM-002: Increase temperature on retry for variation
-                    kwargs["temperature"] = _get_retry_temperature(attempt)
-            reasoning_effort = _get_reasoning_effort(config.provider, model_name, config.api_base)
+            if _supports_temperature(config.provider, model_name):
+                # LLM-002: Increase temperature on retry for variation
+                kwargs["temperature"] = _get_retry_temperature(attempt)
+            reasoning_effort = _get_reasoning_effort(config.provider, model_name)
             if reasoning_effort:
                 kwargs["reasoning_effort"] = reasoning_effort
 
@@ -867,7 +664,6 @@ async def complete_json(
 
             response = await litellm.acompletion(**kwargs)
             content = _extract_choice_text(response.choices[0])
-            last_content = content
 
             if not content:
                 raise ValueError("Empty response from LLM")
@@ -877,9 +673,6 @@ async def complete_json(
             # Extract and parse JSON
             json_str = _extract_json(content)
             result = json.loads(json_str)
-
-            if not isinstance(result, dict):
-                raise ValueError("JSON root must be an object")
 
             # LLM-001: Check if parsed result appears truncated
             if isinstance(result, dict) and _appears_truncated(result):
@@ -894,17 +687,10 @@ async def complete_json(
             logging.warning(f"JSON parse failed (attempt {attempt + 1}): {e}")
             if attempt < retries:
                 # Add hint to prompt for retry
-                strict_retry_hint = (
-                    "\n\nIMPORTANT: Output ONLY a valid JSON object. "
-                    "Do NOT explain, do NOT restate the request, do NOT include markdown/code fences. "
-                    "Start with { and end with }."
+                messages[-1]["content"] = (
+                    prompt
+                    + "\n\nIMPORTANT: Output ONLY a valid JSON object. Start with { and end with }."
                 )
-                if last_content:
-                    strict_retry_hint += (
-                        "\n\nPrevious output was invalid. Fix it into valid JSON only. "
-                        f"Previous output (truncated): {last_content[:400]}"
-                    )
-                messages[-1]["content"] = prompt + strict_retry_hint
                 continue
             raise ValueError(f"Failed to parse JSON after {retries + 1} attempts: {e}")
 
@@ -912,17 +698,6 @@ async def complete_json(
             last_error = e
             logging.warning(f"LLM call failed (attempt {attempt + 1}): {e}")
             if attempt < retries:
-                if isinstance(e, ValueError):
-                    strict_retry_hint = (
-                        "\n\nIMPORTANT: Return ONLY valid JSON object. "
-                        "No prose, no analysis, no reasoning."
-                    )
-                    if last_content:
-                        strict_retry_hint += (
-                            "\n\nYour previous output was not acceptable JSON. "
-                            f"Previous output (truncated): {last_content[:400]}"
-                        )
-                    messages[-1]["content"] = prompt + strict_retry_hint
                 continue
             raise
 

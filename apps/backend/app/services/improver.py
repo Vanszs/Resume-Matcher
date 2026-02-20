@@ -68,10 +68,7 @@ def _check_for_truncation(data: dict[str, Any]) -> None:
         )
 
 
-async def extract_job_keywords(
-    job_description: str,
-    user_id: str | None = None,
-) -> dict[str, Any]:
+async def extract_job_keywords(job_description: str) -> dict[str, Any]:
     """Extract keywords and requirements from job description.
 
     Args:
@@ -87,7 +84,6 @@ async def extract_job_keywords(
     return await complete_json(
         prompt=prompt,
         system_prompt="You are an expert job description analyzer.",
-        user_id=user_id,
     )
 
 
@@ -97,7 +93,6 @@ async def improve_resume(
     job_keywords: dict[str, Any],
     language: str = "en",
     prompt_id: str | None = None,
-    user_id: str | None = None,
 ) -> dict[str, Any]:
     """Improve resume to better match job description.
 
@@ -144,7 +139,6 @@ async def improve_resume(
     result = await complete_json(
         prompt=prompt,
         system_prompt="You are an expert resume editor. Output only valid JSON.",
-        user_id=user_id,
         max_tokens=8192,
     )
 

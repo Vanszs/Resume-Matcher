@@ -4,7 +4,7 @@ import json
 import logging
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 
 from app.config import settings
 from app.llm import check_llm_health, LLMConfig
@@ -25,15 +25,16 @@ from app.schemas import (
     ResetDatabaseRequest,
 )
 from app.prompts import DEFAULT_IMPROVE_PROMPT_ID, IMPROVE_PROMPT_OPTIONS
+from app.config import (
+    get_api_keys_from_config,
+    save_api_keys_to_config,
+    delete_api_key_from_config,
+    clear_all_api_keys,
+)
 from app.database import db
 from app.dependencies import get_current_user, get_current_admin
 
 router = APIRouter(prefix="/config", tags=["Configuration"])
-SUPPORTED_LLM_PROVIDERS = {"openai", "anthropic", "openrouter", "gemini", "deepseek", "ollama"}
-
-
-def _is_valid_provider(provider: str | None) -> bool:
-    return bool(provider) and provider in SUPPORTED_LLM_PROVIDERS
 
 
 def _get_config_path(user_id: str | None = None) -> Path:
@@ -55,21 +56,13 @@ def _load_config(user_id: str | None = None) -> dict:
     """Load config from file."""
     path = _get_config_path(user_id)
     if path.exists():
-        try:
-            return json.loads(path.read_text())
-        except (json.JSONDecodeError, OSError):
-            logging.exception("Failed to parse config file: %s", path)
-            return {}
+        return json.loads(path.read_text())
     # For per-user configs fall back to global defaults so existing
     # environment-variable / shared config still applies as a baseline.
     if user_id:
         global_path = _get_config_path()
         if global_path.exists():
-            try:
-                return json.loads(global_path.read_text())
-            except (json.JSONDecodeError, OSError):
-                logging.exception("Failed to parse global config file: %s", global_path)
-                return {}
+            return json.loads(global_path.read_text())
     return {}
 
 
@@ -114,12 +107,9 @@ async def _log_llm_health_check(config: LLMConfig) -> None:
 async def get_llm_config_endpoint(user=Depends(get_current_user)) -> LLMConfigResponse:
     """Get current LLM configuration (API key masked, per-user)."""
     stored = _load_config(user.id)
-    provider = stored.get("provider", settings.llm_provider)
-    if not _is_valid_provider(provider):
-        provider = settings.llm_provider if _is_valid_provider(settings.llm_provider) else "openai"
 
     return LLMConfigResponse(
-        provider=provider,
+        provider=stored.get("provider", settings.llm_provider),
         model=stored.get("model", settings.llm_model),
         api_key=_mask_api_key(stored.get("api_key", settings.llm_api_key)),
         api_base=stored.get("api_base", settings.llm_api_base),
@@ -143,29 +133,14 @@ async def update_llm_config(
     """
     stored = _load_config(user.id)
 
-    if "provider" in request.model_fields_set and request.provider is not None:
-        if not _is_valid_provider(request.provider):
-            raise HTTPException(
-                status_code=400,
-                detail=(
-                    "Unsupported provider: "
-                    f"{request.provider}. Supported: {sorted(SUPPORTED_LLM_PROVIDERS)}"
-                ),
-            )
-
-    # Update only provided fields.
-    # Use `model_fields_set` to distinguish "field not sent" from "field explicitly set
-    # to null". This is critical for api_base: sending null means "clear it", while
-    # not sending the field means "don't change it".
-    if "provider" in request.model_fields_set and request.provider is not None:
+    # Update only provided fields
+    if request.provider is not None:
         stored["provider"] = request.provider
-    if "model" in request.model_fields_set and request.model is not None:
+    if request.model is not None:
         stored["model"] = request.model
-    if "api_key" in request.model_fields_set and request.api_key is not None:
-        # Never clear the key via null – user must send an empty string explicitly.
+    if request.api_key is not None:
         stored["api_key"] = request.api_key
-    if "api_base" in request.model_fields_set:
-        # null is valid here and means "clear the api_base field".
+    if request.api_base is not None:
         stored["api_base"] = request.api_base
 
     # Build normalized config for response
@@ -176,7 +151,7 @@ async def update_llm_config(
         api_base=stored.get("api_base", settings.llm_api_base),
     )
 
-    # Save to per-user config file.
+    # Save config regardless of health check outcome (see docstring).
     _save_config(stored, user.id)
 
     # Best-effort health check for server-side logs/diagnostics (do not block response).
@@ -199,73 +174,31 @@ async def test_llm_connection(request: LLMConfigRequest | None = None, user=Depe
     """
     stored = _load_config(user.id)
 
-    if request and request.provider and not _is_valid_provider(request.provider):
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "Unsupported provider: "
-                f"{request.provider}. Supported: {sorted(SUPPORTED_LLM_PROVIDERS)}"
-            ),
-        )
-
-    target_provider = (
-        request.provider
-        if request and request.provider
-        else stored.get("provider", settings.llm_provider)
-    )
-
-    user_provider_config = None
-    try:
-        from app.prisma_db import prisma
-
-        user_provider_config = await prisma.llmconfig.find_unique(
-            where={"userId_provider": {"userId": user.id, "provider": target_provider}}
-        )
-    except Exception:
-        logging.exception("Failed to load user provider config for llm-test")
-
-    resolved_model = (
-        request.model
-        if request and request.model
-        else (
-            user_provider_config.model
-            if user_provider_config and user_provider_config.model
-            else stored.get("model", settings.llm_model)
-        )
-    )
-
-    if request and request.api_key:
-        resolved_api_key = request.api_key
-    elif user_provider_config and user_provider_config.apiKey:
-        resolved_api_key = user_provider_config.apiKey
-    else:
-        resolved_api_key = stored.get("api_key", settings.llm_api_key)
-
-    resolved_api_base = (
-        request.api_base
-        # Use model_fields_set so that an explicit null clears api_base instead
-        # of falling back to the stored value.
-        if request and "api_base" in request.model_fields_set
-        else (
-            user_provider_config.baseUrl
-            if user_provider_config and user_provider_config.baseUrl is not None
-            else stored.get("api_base", settings.llm_api_base)
-        )
-    )
-
-    # Build config: use request values if provided, otherwise per-provider DB fallback,
-    # then legacy file/env values.
+    # Build config: use request values if provided, otherwise fall back to stored/default
     config = LLMConfig(
-        provider=target_provider,
-        model=resolved_model,
-        api_key=resolved_api_key,
-        api_base=resolved_api_base,
+        provider=(
+            request.provider
+            if request and request.provider
+            else stored.get("provider", settings.llm_provider)
+        ),
+        model=(
+            request.model
+            if request and request.model
+            else stored.get("model", settings.llm_model)
+        ),
+        api_key=(
+            request.api_key
+            if request and request.api_key
+            else stored.get("api_key", settings.llm_api_key)
+        ),
+        api_base=(
+            request.api_base
+            if request and request.api_base is not None
+            else stored.get("api_base", settings.llm_api_base)
+        ),
     )
 
-    if not _is_valid_provider(config.provider):
-        config.provider = settings.llm_provider if _is_valid_provider(settings.llm_provider) else "openai"
-
-    test_prompt = "Health check: reply with exactly 'OK' and nothing else."
+    test_prompt = "Hi"
     return await check_llm_health(config, include_details=True, test_prompt=test_prompt)
 
 
@@ -420,57 +353,14 @@ def _mask_key_short(key: str | None) -> str | None:
     return "..." + key[-4:]
 
 
-def _get_stored_api_keys(user_id: str) -> dict[str, str]:
-    """Get per-user provider API keys from user config storage."""
-    stored = _load_config(user_id)
-    api_keys = stored.get("api_keys", {})
-    return api_keys if isinstance(api_keys, dict) else {}
-
-
-def _save_stored_api_keys(user_id: str, api_keys: dict[str, str]) -> None:
-    """Save per-user provider API keys in user config storage."""
-    stored = _load_config(user_id)
-    stored["api_keys"] = api_keys
-    _save_config(stored, user_id)
-
-
-def _clear_api_keys_for_user(user_id: str) -> None:
-    """Clear all API keys for a specific user from their config file."""
-    stored = _load_config(user_id)
-    stored["api_keys"] = {}
-    stored["api_key"] = ""
-    _save_config(stored, user_id)
-
-
-def _clear_api_keys_for_all_users() -> None:
-    """Clear API keys from global and all per-user config files."""
-    global_config = _load_config()
-    global_config["api_keys"] = {}
-    global_config["api_key"] = ""
-    _save_config(global_config)
-
-    user_config_dir = settings.config_path.parent / "user_configs"
-    if not user_config_dir.exists():
-        return
-
-    for config_file in user_config_dir.glob("*.json"):
-        try:
-            stored = json.loads(config_file.read_text())
-            stored["api_keys"] = {}
-            stored["api_key"] = ""
-            config_file.write_text(json.dumps(stored, indent=2))
-        except Exception:
-            logging.exception("Failed to clear API keys in %s", config_file)
-
-
-@router.get("/api-keys", response_model=ApiKeyStatusResponse)
-async def get_api_keys_status(user=Depends(get_current_user)) -> ApiKeyStatusResponse:
+@router.get("/api-keys", response_model=ApiKeyStatusResponse, dependencies=[Depends(get_current_user)])
+async def get_api_keys_status() -> ApiKeyStatusResponse:
     """Get status of all configured API keys (masked).
 
     Returns the configuration status for each supported provider.
     API keys are masked to show only the last 4 characters.
     """
-    stored_keys = _get_stored_api_keys(user.id)
+    stored_keys = get_api_keys_from_config()
 
     providers = []
     for provider in SUPPORTED_PROVIDERS:
@@ -486,14 +376,14 @@ async def get_api_keys_status(user=Depends(get_current_user)) -> ApiKeyStatusRes
     return ApiKeyStatusResponse(providers=providers)
 
 
-@router.post("/api-keys", response_model=ApiKeysUpdateResponse)
-async def update_api_keys(request: ApiKeysUpdateRequest, user=Depends(get_current_user)) -> ApiKeysUpdateResponse:
+@router.post("/api-keys", response_model=ApiKeysUpdateResponse, dependencies=[Depends(get_current_user)])
+async def update_api_keys(request: ApiKeysUpdateRequest) -> ApiKeysUpdateResponse:
     """Update API keys for one or more providers.
 
     Only updates the providers that are explicitly set in the request.
     Empty strings will clear the key for that provider.
     """
-    stored_keys = _get_stored_api_keys(user.id)
+    stored_keys = get_api_keys_from_config()
     updated = []
 
     # Update each provider if provided in request
@@ -532,7 +422,7 @@ async def update_api_keys(request: ApiKeysUpdateRequest, user=Depends(get_curren
             del stored_keys["deepseek"]
         updated.append("deepseek")
 
-    _save_stored_api_keys(user.id, stored_keys)
+    save_api_keys_to_config(stored_keys)
 
     return ApiKeysUpdateResponse(
         message=f"Updated {len(updated)} API key(s)",
@@ -541,11 +431,7 @@ async def update_api_keys(request: ApiKeysUpdateRequest, user=Depends(get_curren
 
 
 @router.delete("/api-keys")
-async def delete_all_api_keys(
-    confirm: str | None = None,
-    scope: str = Query("self", pattern="^(self|all)$"),
-    user=Depends(get_current_user),
-) -> dict:
+async def delete_all_api_keys(confirm: str | None = None, _admin=Depends(get_current_admin)) -> dict:
     """Clear all configured API keys.
 
     This is a destructive operation. Requires confirmation token.
@@ -565,19 +451,12 @@ async def delete_all_api_keys(
             status_code=400,
             detail="Confirmation required. Pass confirm=CLEAR_ALL_KEYS query parameter.",
         )
-
-    if scope == "all":
-        if not user.role or user.role.name != "admin":
-            raise HTTPException(status_code=403, detail="Admin privileges required")
-        _clear_api_keys_for_all_users()
-        return {"message": "All API keys for all users have been cleared"}
-
-    _clear_api_keys_for_user(user.id)
-    return {"message": "Your API keys have been cleared"}
+    clear_all_api_keys()
+    return {"message": "All API keys have been cleared"}
 
 
-@router.delete("/api-keys/{provider}")
-async def delete_api_key(provider: str, user=Depends(get_current_user)) -> dict:
+@router.delete("/api-keys/{provider}", dependencies=[Depends(get_current_user)])
+async def delete_api_key(provider: str) -> dict:
     """Delete API key for a specific provider.
 
     Args:
@@ -592,16 +471,13 @@ async def delete_api_key(provider: str, user=Depends(get_current_user)) -> dict:
             detail=f"Unsupported provider: {provider}. Supported: {SUPPORTED_PROVIDERS}",
         )
 
-    stored_keys = _get_stored_api_keys(user.id)
-    if provider in stored_keys:
-        del stored_keys[provider]
-    _save_stored_api_keys(user.id, stored_keys)
+    delete_api_key_from_config(provider)
 
     return {"message": f"API key for {provider} has been removed"}
 
 
 @router.post("/reset")
-async def reset_database_endpoint(request: ResetDatabaseRequest, user=Depends(get_current_user)) -> dict:
+async def reset_database_endpoint(request: ResetDatabaseRequest, _admin=Depends(get_current_admin)) -> dict:
     """Reset the database and clear all data.
 
     WARNING: This action is irreversible. It will:
@@ -625,13 +501,5 @@ async def reset_database_endpoint(request: ResetDatabaseRequest, user=Depends(ge
             status_code=400,
             detail="Confirmation required. Pass confirm=RESET_ALL_DATA in request body.",
         )
-
-    scope = request.scope or "self"
-    if scope == "all":
-        if not user.role or user.role.name != "admin":
-            raise HTTPException(status_code=403, detail="Admin privileges required")
-        db.reset_database()
-        return {"message": "Database and all users data have been reset successfully"}
-
-    db.reset_user_data(user.id)
-    return {"message": "Your data has been reset successfully"}
+    db.reset_database()
+    return {"message": "Database and all data have been reset successfully"}

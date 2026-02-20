@@ -89,52 +89,40 @@ ORIGINAL ITEM:
 Type: {item_type}
 Title: {title}
 Subtitle: {subtitle}
-Current Description (KEEP ALL OF THESE - do NOT repeat these in additional_bullets):
+Current Description (KEEP ALL OF THESE):
 {current_description}
 
 CANDIDATE'S ADDITIONAL CONTEXT:
 {answers}
 
-FRAMEWORK SELECTION — choose the best fit for each bullet based on available data:
-
-1. XYZ (Google format) — use when the candidate provided METRICS or MEASURABLE OUTCOMES:
-   Pattern: "[Strong verb] [X: what was accomplished] by [Y: measurable result — %, $, time, scale], by [Z: method/tool/approach]"
-   Example: "Reduced cloud infrastructure costs by 35% by migrating batch jobs from EC2 to Lambda"
-   Trigger: candidate mentions numbers, percentages, dollar amounts, user counts, time saved
-
-2. CAR (Challenge → Action → Result) — use when the candidate described a PROBLEM or OBSTACLE:
-   Pattern: "[Action verb] [Challenge: problem or constraint], [Action: specific steps taken], resulting in [Result: outcome]"
-   Example: "Resolved recurring API timeout failures by implementing circuit-breaker pattern with Redis, eliminating 99% of customer-reported errors"
-   Trigger: candidate mentions "issue", "problem", "slow", "failing", "needed to fix", or a difficulty
-
-3. STAR (compressed for bullets) — use when the candidate described a COMPLEX or CROSS-FUNCTIONAL scenario:
-   Pattern: "[Action verb] [Task in context of Situation], [specific Actions taken], achieving [Result]"
-   Example: "Led cross-functional team of 8 to redesign onboarding flow under tight deadline, delivering redesign 2 weeks ahead of schedule with 20% drop in support tickets"
-   Trigger: candidate mentions team size, stakeholders, deadlines, multi-step projects, or coordination
-
 TASK:
-Generate NEW bullet points to ADD to the existing description using the framework most appropriate to each piece of information. Mix frameworks across bullets as the data warrants. All bullets must:
-- Start with a strong action verb (Led, Built, Resolved, Designed, Optimized, Shipped, Reduced, Scaled, Automated)
-- Draw ONLY from facts in the current description and candidate's answers — never invent data
-- If no metric exists but scope/impact is described, qualify without inventing numbers ("significantly", "across the team", "for all production services")
-- Be concise (1-2 lines), use past tense for past roles, present tense for current roles
-- Avoid em-dashes (—), buzzwords, and filler phrases
+Generate NEW bullet points to ADD to the existing description. The original bullets will be kept as-is.
+New bullets should be:
+1. Action-oriented: Start with strong verbs (Led, Built, Architected, Implemented, Optimized)
+2. Quantified: Include metrics, numbers, percentages where the candidate provided them
+3. Technically specific: Mention technologies, tools, and methodologies
+4. Impact-focused: Clearly state the business or technical outcome
+5. Ownership-clear: Show what the candidate personally did vs. the team
 
 OUTPUT FORMAT (JSON only, no other text):
 {{
   "additional_bullets": [
-    "XYZ/CAR/STAR bullet 1",
-    "XYZ/CAR/STAR bullet 2",
-    "XYZ/CAR/STAR bullet 3"
+    "New bullet point 1 with metrics and impact",
+    "New bullet point 2 with technologies used",
+    "New bullet point 3 with scope and ownership"
   ]
 }}
 
 IMPORTANT RULES:
-- Generate 2-4 NEW bullet points only
-- DO NOT repeat or rephrase existing bullets — only surface new information from the answers
-- DO NOT invent metrics, tools, companies, dates, or achievements not in the provided text
-- Each bullet should use the framework that fits the data, not forced uniformly
-- If answers are brief, still apply the best framework to what is available"""
+- Generate 2-4 NEW bullet points to ADD (not replace)
+- DO NOT repeat or rephrase existing bullets - only add new information
+- Preserve factual accuracy - only use information provided by the candidate
+- Don't invent metrics or details not given by the candidate
+- If candidate's answers are brief, still add what you can
+- Keep bullets concise (1-2 lines each)
+- Use past tense for past roles, present tense for current roles
+- Avoid buzzwords and fluff - be specific and concrete
+- Focus on information from the candidate's answers that isn't already in the original bullets"""
 
 
 # ============================================
@@ -151,56 +139,37 @@ Type: {item_type}
 Title: {title}
 Subtitle: {subtitle}
 
-CURRENT DESCRIPTION (the user is NOT satisfied with this — use as the source of facts):
+CURRENT DESCRIPTION (the user is NOT satisfied with this):
 {current_description}
 
 USER'S FEEDBACK/INSTRUCTION:
 {user_instruction}
 
-FRAMEWORK SELECTION — for each rewritten bullet, pick the framework that best fits the available facts:
-
-1. XYZ (Google format) — use when METRICS or MEASURABLE RESULTS exist in the current description or user feedback:
-   Pattern: "[Strong verb] [X: accomplishment] by [Y: measurable result — %, time, scale, $], by [Z: method/technology/approach]"
-   Example: "Cut page load time by 60% by replacing synchronous API calls with parallel Promise.all across 12 endpoints"
-   Trigger: numbers, percentages, counts, durations, dollar values already present in the text
-
-2. CAR (Challenge → Action → Result) — use when a PROBLEM, CONSTRAINT, or OBSTACLE is described:
-   Pattern: "[Action verb] [Challenge: what was broken or lacking], [Action: concrete steps taken], [Result: outcome achieved]"
-   Example: "Fixed intermittent data loss bug affecting nightly reports by adding idempotent retry logic, restoring 100% pipeline reliability"
-   Trigger: words like "issue", "slow", "broken", "failing", "needed", "lacked", or implied friction
-
-3. STAR (compressed for resume bullets) — use when a COMPLEX, MULTI-STEP, or COLLABORATIVE scenario is present:
-   Pattern: "[Action verb] [Task within Situation context], [key Actions taken with specifics], achieving [Result]"
-   Example: "Coordinated migration of legacy monolith to microservices across 3 teams over 6 months, delivering zero-downtime cutover for 500K active users"
-   Trigger: team collaboration, cross-functional work, phased delivery, leadership, stakeholders, deadlines
-
-FRAMEWORK SELECTION LOGIC:
-- Scan current description AND user feedback for: numbers → prefer XYZ; problems/obstacles → prefer CAR; teamwork/scope/phases → prefer STAR
-- A single bullet can ONLY use one framework — choose the strongest fit
-- Mix frameworks across bullets in the same item if different bullets have different data types
-- When no clear metric, challenge, or scope exists, default to XYZ structure qualitatively: "[Verb] [accomplishment], improving [outcome area] for [scope]"
-
 TASK:
-Completely REWRITE all bullets using the selected frameworks. Address the user's instruction while restructuring each bullet for maximum impact.
+Based on the user's feedback, completely REWRITE the description bullets. The new description should:
+1. Address the user's specific concerns/requests
+2. Be action-oriented with strong verbs
+3. Highlight quantifiable impact ONLY when it already exists in the current description or the user's feedback (never invent numbers)
+4. Be technically specific with tools/technologies
+5. Show clear impact and ownership
 
 OUTPUT FORMAT (JSON only):
 {{
   "new_bullets": [
-    "Framework-structured rewritten bullet 1",
-    "Framework-structured rewritten bullet 2",
-    "Framework-structured rewritten bullet 3"
+    "Completely rewritten bullet point 1",
+    "Completely rewritten bullet point 2",
+    "Completely rewritten bullet point 3"
   ],
-  "change_summary": "Brief explanation of frameworks used and what changed"
+  "change_summary": "Brief explanation of what was changed based on user feedback"
 }}
 
 RULES:
-- Generate 2-5 rewritten bullets
+- Generate 2-5 NEW bullets (not additions, but replacements)
 - Directly address the user's instruction
-- ONLY use facts present in CURRENT DESCRIPTION or USER'S FEEDBACK — never invent metrics, tools, companies, or achievements
-- If user requests metrics but none exist, restructure to emphasize scope/impact qualitatively without fabricating numbers
-- No em-dashes (—), no buzzwords, no filler phrases
-- Past tense for past roles, present tense for current roles
-- Each bullet must be concise (1-2 lines)"""
+- Do NOT add any new facts, metrics, dates, companies, titles, or accomplishments that are not already present in CURRENT DESCRIPTION or USER'S FEEDBACK/INSTRUCTION
+- If the user asks for metrics but none exist in the provided text, do not fabricate numbers; rewrite to emphasize scope/impact qualitatively instead
+- Keep bullets concise (1-2 lines each)
+- Use past tense for past roles, present tense for current"""
 
 
 REGENERATE_SKILLS_PROMPT = """You are a professional resume writer. Rewrite the technical skills section based on user feedback.

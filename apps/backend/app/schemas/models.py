@@ -545,14 +545,6 @@ class LLMConfigRequest(BaseModel):
     api_base: str | None = None
 
 
-class ProviderConfig(BaseModel):
-    """Stored configuration for a single provider (api_key masked when returned)."""
-
-    api_key: str = ""
-    model: str = ""
-    api_base: str | None = None
-
-
 class LLMConfigResponse(BaseModel):
     """Response for LLM configuration."""
 
@@ -560,9 +552,6 @@ class LLMConfigResponse(BaseModel):
     model: str
     api_key: str  # Masked
     api_base: str | None = None
-    # Per-provider stored configs (api_keys masked). Allows the frontend to
-    # remember each provider's key/model/base independently.
-    provider_configs: dict[str, ProviderConfig] = {}
 
 
 class FeatureConfigRequest(BaseModel):
@@ -670,7 +659,6 @@ class ResetDatabaseRequest(BaseModel):
     """Request to reset database with confirmation."""
 
     confirm: str | None = None
-    scope: Literal["self", "all"] | None = "self"
 
 
 class GenerateContentResponse(BaseModel):
