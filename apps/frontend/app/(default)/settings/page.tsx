@@ -383,7 +383,13 @@ export default function SettingsPage() {
         await setDefaultProvider(targetProvider);
       }
 
-      const selectedConfig = userProviderConfigs.find((item) => item.provider === targetProvider);
+      // CRITICAL: Fetch fresh configs from backend BEFORE reading state.
+      // The old code read from stale `userProviderConfigs` which caused API keys
+      // to appear lost when switching providers.
+      const freshConfigs = await fetchUserLLMConfigs();
+      setUserProviderConfigs(freshConfigs);
+
+      const selectedConfig = freshConfigs.find((item) => item.provider === targetProvider);
       handleProviderChange(targetProvider);
       const providerHasStoredKey = Boolean(selectedConfig?.api_key_masked) || targetProvider === 'ollama';
       setHasStoredApiKey(providerHasStoredKey);
@@ -400,7 +406,6 @@ export default function SettingsPage() {
         setApiBase('');
       }
 
-      await refreshUserProviderConfigs();
       await refreshStatus(true);
     } catch (err) {
       console.error('Failed to set active provider', err);
