@@ -14,7 +14,7 @@ import {
   renameResume,
 } from '@/lib/api/resume';
 import { useStatusCache } from '@/lib/context/status-cache';
-import { ArrowLeft, Edit, Download, Loader2, AlertCircle, Sparkles, Pencil } from 'lucide-react';
+import { ArrowLeft, Edit, Download, Loader2, AlertCircle, Sparkles, Pencil, RefreshCw } from 'lucide-react';
 import { EnrichmentModal } from '@/components/enrichment/enrichment-modal';
 import { useTranslations } from '@/lib/i18n';
 import { withLocalizedDefaultSections } from '@/lib/utils/section-helpers';
@@ -252,6 +252,17 @@ export default function ResumeViewerPage() {
             {error || t('resumeViewer.resumeNotFound')}
           </p>
           <div className="flex flex-col gap-2">
+            {isProcessing && (
+              <>
+                <Button onClick={() => window.location.reload()}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  {t('resumeViewer.refreshStatus')}
+                </Button>
+                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+                  {t('resumeViewer.cancelProcessing')}
+                </Button>
+              </>
+            )}
             {isFailed && (
               <>
                 <Button onClick={handleRetryProcessing} disabled={isRetrying}>

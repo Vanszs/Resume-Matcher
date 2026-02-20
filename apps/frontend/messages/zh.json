@@ -714,6 +714,8 @@
     "useTailorFeature": "使用定制功能",
     "retryProcessing": "重试处理",
     "deleteAndStartOver": "删除并重新开始",
+    "refreshStatus": "刷新状态",
+    "cancelProcessing": "取消并删除",
     "returnToDashboard": "返回仪表板",
     "enhanceResume": "增强简历",
     "downloadResume": "下载简历",

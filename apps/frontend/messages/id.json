@@ -714,6 +714,8 @@
     "useTailorFeature": "Gunakan Fitur Penyesuaian",
     "retryProcessing": "Coba Proses Ulang",
     "deleteAndStartOver": "Hapus & Mulai Ulang",
+    "refreshStatus": "Segarkan Status",
+    "cancelProcessing": "Batalkan & Hapus",
     "returnToDashboard": "Kembali ke Dasbor",
     "enhanceResume": "Tingkatkan Resume",
     "downloadResume": "Unduh Resume",

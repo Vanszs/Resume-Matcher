@@ -714,6 +714,8 @@
     "useTailorFeature": "Use Tailor Feature",
     "retryProcessing": "Retry Processing",
     "deleteAndStartOver": "Delete & Start Over",
+    "refreshStatus": "Refresh Status",
+    "cancelProcessing": "Cancel & Delete",
     "returnToDashboard": "Return to Dashboard",
     "enhanceResume": "Enhance Resume",
     "downloadResume": "Download Resume",

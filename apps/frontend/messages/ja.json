@@ -714,6 +714,8 @@
     "useTailorFeature": "カスタマイズ機能を使う",
     "retryProcessing": "再処理",
     "deleteAndStartOver": "削除してやり直す",
+    "refreshStatus": "ステータスを更新",
+    "cancelProcessing": "キャンセルして削除",
     "returnToDashboard": "ダッシュボードに戻る",
     "enhanceResume": "履歴書を強化",
     "downloadResume": "履歴書をダウンロード",
