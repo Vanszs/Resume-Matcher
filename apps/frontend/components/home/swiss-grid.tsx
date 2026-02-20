@@ -3,14 +3,18 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import LogOut from 'lucide-react/dist/esm/icons/log-out';
 import { useTranslations } from '@/lib/i18n';
+import { logout } from '@/lib/api/client';
 
 export const SwissGrid = ({ children }: { children: React.ReactNode }) => {
   const { t } = useTranslations();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
 
   useEffect(() => {
     setIsAdmin(localStorage.getItem('user_role') === 'admin');
+    setUserEmail(localStorage.getItem('user_email') || '');
   }, []);
 
   return (
@@ -56,6 +60,9 @@ export const SwissGrid = ({ children }: { children: React.ReactNode }) => {
               className="w-5 h-5"
             />
             <span className="uppercase font-bold">Resume Matcher</span>
+            {userEmail && (
+              <span className="hidden sm:inline text-gray-500 font-normal normal-case">— {userEmail}</span>
+            )}
           </div>
           <div className="flex items-center gap-4">
             {isAdmin && (
@@ -72,6 +79,14 @@ export const SwissGrid = ({ children }: { children: React.ReactNode }) => {
             >
               {t('nav.settings')}
             </Link>
+            <button
+              type="button"
+              onClick={() => logout()}
+              className="flex items-center gap-2 bg-[#DC2626] text-white border border-black px-6 py-2 uppercase font-bold tracking-wide shadow-[2px_2px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
+            >
+              <LogOut className="w-4 h-4" />
+              {t('nav.logout')}
+            </button>
           </div>
         </div>
       </div>

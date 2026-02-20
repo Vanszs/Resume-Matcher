@@ -45,7 +45,8 @@
     "settings": "Settings",
     "backToDashboard": "Back to Dashboard",
     "goToSettings": "Go to Settings",
-    "admin": "Admin Panel"
+    "admin": "Admin Panel",
+    "logout": "Logout"
   },
   "dashboard": {
     "title": "Dashboard",

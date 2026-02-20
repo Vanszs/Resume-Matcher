@@ -45,7 +45,8 @@
     "settings": "设置",
     "backToDashboard": "返回仪表板",
     "goToSettings": "前往设置",
-    "admin": "管理面板"
+    "admin": "管理面板",
+    "logout": "退出登录"
   },
   "dashboard": {
     "title": "仪表板",

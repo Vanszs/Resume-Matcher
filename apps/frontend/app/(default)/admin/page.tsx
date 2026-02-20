@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
-import { apiFetch, apiPost, apiDelete } from '@/lib/api/client';
+import { apiFetch, apiPost, apiDelete, logout } from '@/lib/api/client';
 import {
     ArrowLeft,
     Users,
@@ -19,6 +19,7 @@ import {
     Trash2,
     ToggleLeft,
     ToggleRight,
+    LogOut,
 } from 'lucide-react';
 
 type UserEntry = {
@@ -214,6 +215,14 @@ export default function AdminPage() {
                             Back
                         </Button>
                     </Link>
+                    <button
+                        type="button"
+                        onClick={() => logout()}
+                        className="flex items-center gap-1.5 border border-black bg-[#DC2626] text-white px-3 py-1.5 font-mono text-xs uppercase tracking-wider shadow-[2px_2px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
+                    >
+                        <LogOut className="w-3.5 h-3.5" />
+                        Logout
+                    </button>
                 </div>
 
                 <div className="p-8 space-y-10">

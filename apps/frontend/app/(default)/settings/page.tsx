@@ -19,7 +19,7 @@ import {
   type LLMHealthCheck,
   type PromptOption,
 } from '@/lib/api/config';
-import { API_URL } from '@/lib/api/client';
+import { API_URL, logout } from '@/lib/api/client';
 import { getVersionString } from '@/lib/config/version';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { useStatusCache } from '@/lib/context/status-cache';
@@ -35,6 +35,7 @@ import {
   Activity,
   Loader2,
   ArrowLeft,
+  LogOut,
   CheckCircle2,
   XCircle,
   RefreshCw,
@@ -526,6 +527,14 @@ export default function SettingsPage() {
               {t('common.back')}
             </Button>
           </Link>
+          <button
+            type="button"
+            onClick={() => logout()}
+            className="flex items-center gap-1.5 border border-black bg-[#DC2626] text-white px-3 py-1.5 font-mono text-xs uppercase tracking-wider shadow-[2px_2px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            Logout
+          </button>
         </div>
 
         <div className="p-8 space-y-10">

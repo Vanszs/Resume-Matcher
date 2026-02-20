@@ -45,7 +45,8 @@
     "settings": "Configurações",
     "backToDashboard": "Voltar ao Painel",
     "goToSettings": "Ir para Configurações",
-    "admin": "Painel Admin"
+    "admin": "Painel Admin",
+    "logout": "Sair"
   },
   "dashboard": {
     "title": "Painel",

@@ -45,7 +45,8 @@
     "settings": "Configuración",
     "backToDashboard": "Volver al Panel",
     "goToSettings": "Ir a Configuración",
-    "admin": "Panel de Admin"
+    "admin": "Panel de Admin",
+    "logout": "Cerrar Sesión"
   },
   "dashboard": {
     "title": "Panel",
