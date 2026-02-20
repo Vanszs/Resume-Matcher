@@ -19,6 +19,52 @@ check_port() {
     fi
 }
 
+# Try to free a TCP port by terminating processes bound to it.
+free_port() {
+    local port=$1
+    local name=$2
+
+    if ! ss -tuln | grep -q ":$port "; then
+        return 0
+    fi
+
+    echo "$name port $port is in use. Attempting to stop existing process..."
+
+    if command -v fuser >/dev/null 2>&1; then
+        fuser -k "${port}/tcp" >/dev/null 2>&1 || true
+    elif command -v lsof >/dev/null 2>&1; then
+        lsof -ti tcp:"$port" | xargs -r kill -TERM >/dev/null 2>&1 || true
+    else
+        # Fallback: parse PID from ss output
+        local pids
+        pids=$(ss -ltnp 2>/dev/null | grep ":$port " | sed -n 's/.*pid=\([0-9]\+\).*/\1/p' | sort -u)
+        if [ -n "$pids" ]; then
+            echo "$pids" | xargs -r kill -TERM >/dev/null 2>&1 || true
+        fi
+    fi
+
+    sleep 2
+
+    # Escalate only if still occupied
+    if ss -tuln | grep -q ":$port "; then
+        if command -v fuser >/dev/null 2>&1; then
+            fuser -k -9 "${port}/tcp" >/dev/null 2>&1 || true
+        elif command -v lsof >/dev/null 2>&1; then
+            lsof -ti tcp:"$port" | xargs -r kill -KILL >/dev/null 2>&1 || true
+        else
+            local pids
+            pids=$(ss -ltnp 2>/dev/null | grep ":$port " | sed -n 's/.*pid=\([0-9]\+\).*/\1/p' | sort -u)
+            if [ -n "$pids" ]; then
+                echo "$pids" | xargs -r kill -KILL >/dev/null 2>&1 || true
+            fi
+        fi
+        sleep 1
+    fi
+
+    check_port "$port" "$name"
+    echo "$name port $port is now free."
+}
+
 # Navigate to the repository root directory (assumes script is inside scripts/ folder)
 cd "$(dirname "$0")/.."
 
@@ -81,7 +127,7 @@ cd apps/frontend
 sleep 2
 
 # Check if port is free before starting
-check_port $FRONTEND_PORT "Frontend"
+free_port $FRONTEND_PORT "Frontend"
 
 FRONTEND_STANDALONE="$(pwd)/.next/standalone"
 # Next.js standalone in a monorepo may nest server.js under the full app path.
@@ -105,7 +151,7 @@ cd apps/backend
 sleep 2
 
 # Check if port is free before starting
-check_port $BACKEND_PORT "Backend"
+free_port $BACKEND_PORT "Backend"
 
 source venv/bin/activate
 screen -dmS resume-backend python -m uvicorn app.main:app --host 127.0.0.1 --port $BACKEND_PORT
