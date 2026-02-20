@@ -432,15 +432,22 @@ def get_model_name(config: LLMConfig) -> str:
     return f"{prefix}{config.model}" if prefix else config.model
 
 
-def _supports_temperature(provider: str, model: str) -> bool:
+def _supports_temperature(provider: str, model: str, api_base: str | None = None) -> bool:
     """Return whether passing `temperature` is supported for this model/provider combo.
 
-    Some models (e.g., OpenAI gpt-5 family) reject temperature values other than 1,
-    and LiteLLM may error when temperature is passed.
+    Some models (e.g., OpenAI gpt-5 family on native OpenAI) reject temperature values
+    other than 1, and LiteLLM may error when temperature is passed.
+
+    Custom OpenAI-compatible endpoints (Novita AI, Together AI, etc.) generally support
+    temperature even for gpt-5 model names, so we don't restrict them.
     """
-    _ = provider
+    # Custom OpenAI-compatible endpoints generally support temperature
+    if _is_custom_openai_compatible_endpoint(provider, api_base):
+        return True
+
     model_lower = model.lower()
-    if "gpt-5" in model_lower:
+    # Only restrict gpt-5 on native OpenAI provider
+    if provider == "openai" and "gpt-5" in model_lower:
         return False
     return True
 
@@ -593,7 +600,7 @@ async def complete(
             "api_base": _normalize_api_base(config.provider, config.api_base),
             "timeout": LLM_TIMEOUT_COMPLETION,
         }
-        if _supports_temperature(config.provider, model_name):
+        if _supports_temperature(config.provider, model_name, config.api_base):
             kwargs["temperature"] = temperature
         reasoning_effort = _get_reasoning_effort(config.provider, model_name, config.api_base)
         if reasoning_effort:
@@ -613,13 +620,23 @@ async def complete(
         ) from e
 
 
-def _supports_json_mode(provider: str, model: str) -> bool:
-    """Check if the model supports JSON mode."""
-    # Models that support response_format={"type": "json_object"}
+def _supports_json_mode(provider: str, model: str, api_base: str | None = None) -> bool:
+    """Check if the model supports JSON mode.
+
+    Most OpenAI-compatible APIs support response_format={"type": "json_object"}.
+    Custom endpoints (Novita AI, Together AI, etc.) are treated as OpenAI-compatible.
+    """
+    # Custom OpenAI-compatible endpoints generally support JSON mode
+    if _is_custom_openai_compatible_endpoint(provider, api_base):
+        return True
+
+    # Native providers that support JSON mode
     json_mode_providers = ["openai", "anthropic", "gemini", "deepseek"]
     if provider in json_mode_providers:
         return True
+
     # LLM-004: OpenRouter models - use explicit allowlist instead of substring matching
+    # This is for standard OpenRouter gateway (openrouter.ai), not custom endpoints
     if provider == "openrouter":
         return model in OPENROUTER_JSON_CAPABLE_MODELS
     return False
@@ -802,7 +819,7 @@ async def complete_json(
     ]
 
     # Check if we can use JSON mode
-    use_json_mode = _supports_json_mode(config.provider, config.model)
+    use_json_mode = _supports_json_mode(config.provider, config.model, config.api_base)
 
     last_error = None
     for attempt in range(retries + 1):
@@ -817,7 +834,7 @@ async def complete_json(
                 "api_base": _normalize_api_base(config.provider, config.api_base),
                 "timeout": _calculate_timeout("json", max_tokens, config.provider),
             }
-            if _supports_temperature(config.provider, model_name):
+            if _supports_temperature(config.provider, model_name, config.api_base):
                 # LLM-002: Increase temperature on retry for variation
                 kwargs["temperature"] = _get_retry_temperature(attempt)
             reasoning_effort = _get_reasoning_effort(config.provider, model_name, config.api_base)
