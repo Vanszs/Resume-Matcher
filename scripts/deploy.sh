@@ -8,13 +8,46 @@ set -e
 FRONTEND_PORT="${FRONTEND_PORT:-3000}"
 BACKEND_PORT="${BACKEND_PORT:-8000}"
 
+# Return success when there is a LISTEN socket on the given TCP port.
+is_port_in_use() {
+    local port=$1
+
+    if command -v lsof >/dev/null 2>&1; then
+        lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1
+        return $?
+    fi
+
+    ss -ltn 2>/dev/null | grep -qE "[\[\:]$port([[:space:]]|$)"
+}
+
+# Get listener PIDs for a TCP port (newline-separated).
+port_listener_pids() {
+    local port=$1
+
+    if command -v lsof >/dev/null 2>&1; then
+        lsof -ti -sTCP:LISTEN -iTCP:"$port" 2>/dev/null | sort -u
+        return 0
+    fi
+
+    ss -ltnp 2>/dev/null \
+        | grep -E "[\[\:]$port([[:space:]]|$)" \
+        | sed -n 's/.*pid=\([0-9]\+\).*/\1/p' \
+        | sort -u
+}
+
 # Function to check if a port is free
 check_port() {
     local port=$1
     local name=$2
-    if ss -tuln | grep -q ":$port "; then
+    if is_port_in_use "$port"; then
         echo "Error: Port $port is already in use for $name."
         echo "Please free up the port or set FRONTEND_PORT/BACKEND_PORT appropriately."
+        if command -v lsof >/dev/null 2>&1; then
+            echo "Port owner info:"
+            lsof -nP -iTCP:"$port" -sTCP:LISTEN || true
+        else
+            ss -ltnp | grep -E "[\[\:]$port([[:space:]]|$)" || true
+        fi
         exit 1
     fi
 }
@@ -23,41 +56,39 @@ check_port() {
 free_port() {
     local port=$1
     local name=$2
+    local pids
+    local attempt
 
-    if ! ss -tuln | grep -q ":$port "; then
+    if ! is_port_in_use "$port"; then
         return 0
     fi
 
     echo "$name port $port is in use. Attempting to stop existing process..."
 
-    if command -v fuser >/dev/null 2>&1; then
-        fuser -k "${port}/tcp" >/dev/null 2>&1 || true
-    elif command -v lsof >/dev/null 2>&1; then
-        lsof -ti tcp:"$port" | xargs -r kill -TERM >/dev/null 2>&1 || true
-    else
-        # Fallback: parse PID from ss output
-        local pids
-        pids=$(ss -ltnp 2>/dev/null | grep ":$port " | sed -n 's/.*pid=\([0-9]\+\).*/\1/p' | sort -u)
+    for attempt in 1 2 3; do
+        pids="$(port_listener_pids "$port")"
         if [ -n "$pids" ]; then
             echo "$pids" | xargs -r kill -TERM >/dev/null 2>&1 || true
+        elif command -v sudo >/dev/null 2>&1; then
+            sudo -n fuser -k "${port}/tcp" >/dev/null 2>&1 || true
         fi
-    fi
 
-    sleep 2
-
-    # Escalate only if still occupied
-    if ss -tuln | grep -q ":$port "; then
-        if command -v fuser >/dev/null 2>&1; then
-            fuser -k -9 "${port}/tcp" >/dev/null 2>&1 || true
-        elif command -v lsof >/dev/null 2>&1; then
-            lsof -ti tcp:"$port" | xargs -r kill -KILL >/dev/null 2>&1 || true
-        else
-            local pids
-            pids=$(ss -ltnp 2>/dev/null | grep ":$port " | sed -n 's/.*pid=\([0-9]\+\).*/\1/p' | sort -u)
-            if [ -n "$pids" ]; then
-                echo "$pids" | xargs -r kill -KILL >/dev/null 2>&1 || true
-            fi
+        sleep 1
+        if ! is_port_in_use "$port"; then
+            break
         fi
+    done
+
+    if is_port_in_use "$port"; then
+        pids="$(port_listener_pids "$port")"
+        if [ -n "$pids" ]; then
+            echo "$pids" | xargs -r kill -KILL >/dev/null 2>&1 || true
+        fi
+
+        if is_port_in_use "$port" && command -v sudo >/dev/null 2>&1; then
+            sudo -n fuser -k -9 "${port}/tcp" >/dev/null 2>&1 || true
+        fi
+
         sleep 1
     fi
 
