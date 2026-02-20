@@ -285,6 +285,31 @@ export default function ResumeViewerPage() {
             </Button>
           </div>
         </div>
+
+        {/* Delete confirmation dialog for processing/error state */}
+        <ConfirmDialog
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          title={t('confirmations.deleteMasterResumeTitle')}
+          description={t('confirmations.deleteMasterResumeDescription')}
+          confirmLabel={t('confirmations.deleteResumeConfirmLabel')}
+          cancelLabel={t('confirmations.keepResumeCancelLabel')}
+          onConfirm={handleDeleteResume}
+          variant="danger"
+          closeOnConfirm={false}
+        />
+
+        {/* Delete success dialog */}
+        <ConfirmDialog
+          open={showDeleteSuccessDialog}
+          onOpenChange={setShowDeleteSuccessDialog}
+          title={t('resumeViewer.deletedTitle')}
+          description={t('resumeViewer.deletedDescriptionMaster')}
+          confirmLabel={t('resumeViewer.returnToDashboard')}
+          onConfirm={handleDeleteSuccessConfirm}
+          variant="success"
+          showCancelButton={false}
+        />
       </div>
     );
   }
@@ -404,6 +429,7 @@ export default function ResumeViewerPage() {
         cancelLabel={t('confirmations.keepResumeCancelLabel')}
         onConfirm={handleDeleteResume}
         variant="danger"
+        closeOnConfirm={false}
       />
 
       <ConfirmDialog
