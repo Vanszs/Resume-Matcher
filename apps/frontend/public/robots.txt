@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /builder
+Disallow: /tailor
+Disallow: /resumes
+Disallow: /settings
+Disallow: /print
+Disallow: /api
+
+Host: https://resume.bevansatria.my.id
+Sitemap: https://resume.bevansatria.my.id/sitemap.xml
