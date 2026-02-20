@@ -16,7 +16,7 @@ wait_for_http_status() {
   local status=""
 
   while [ "$elapsed" -lt "$timeout_seconds" ]; do
-    status="$(curl -sS -o /dev/null -w "%{http_code}" "$url" || true)"
+    status="$(curl -s -o /dev/null -w "%{http_code}" "$url" || true)"
     if [ "$status" = "$expected_status" ]; then
       echo "$label is ready ($status)"
       return 0
