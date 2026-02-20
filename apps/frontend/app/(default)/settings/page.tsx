@@ -1384,61 +1384,97 @@ export default function SettingsPage() {
         onConfirm={() => setShowSuccessDialog(false)}
       />
 
+      {/* Scope Dialog: Clear API Keys */}
       <Dialog open={showClearApiKeysScopeDialog} onOpenChange={setShowClearApiKeysScopeDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('settings.clearApiKeys')}</DialogTitle>
-            <DialogDescription>
-              Choose scope: clear only your API keys, or clear API keys for all users.
-            </DialogDescription>
+        <DialogContent className="sm:max-w-[480px] p-0 gap-0">
+          <DialogHeader className="p-6 pb-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 border-2 border-orange-500 bg-orange-50 flex items-center justify-center shrink-0">
+                <Key className="w-6 h-6 text-orange-500" />
+              </div>
+              <div className="flex-1">
+                <DialogTitle className="font-serif text-xl font-bold uppercase tracking-tight">
+                  {t('settings.clearApiKeys')}
+                </DialogTitle>
+                <DialogDescription className="font-mono text-xs text-gray-600 mt-2">
+                  {t('settings.scopeDialog.clearKeysDescription')}
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black gap-2">
-            <Button variant="outline" onClick={() => setShowClearApiKeysScopeDialog(false)}>
-              {t('common.cancel')}
-            </Button>
-            <Button
-              variant="warning"
+          <div className="px-6 pb-4 space-y-3">
+            <button
               onClick={() => handleClearApiKeysWithScope('self')}
               disabled={isResetting}
+              className="w-full text-left border-2 border-black p-4 bg-white hover:bg-orange-50 hover:border-orange-500 transition-colors disabled:opacity-50"
             >
-              Clear Only My Keys
-            </Button>
-            <Button
-              variant="destructive"
+              <div className="font-sans text-sm font-bold">{t('settings.scopeDialog.myDataOnly')}</div>
+              <div className="font-mono text-xs text-gray-600 mt-1">{t('settings.scopeDialog.myKeysOnlyDesc')}</div>
+            </button>
+            <button
               onClick={() => handleClearApiKeysWithScope('all')}
               disabled={isResetting}
+              className="w-full text-left border-2 border-red-600 p-4 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
             >
-              Clear All Users Keys
+              <div className="font-sans text-sm font-bold text-red-700">{t('settings.scopeDialog.allUsers')}</div>
+              <div className="font-mono text-xs text-red-600 mt-1">{t('settings.scopeDialog.allUsersKeysDesc')}</div>
+            </button>
+          </div>
+          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black flex-row justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowClearApiKeysScopeDialog(false)}
+              className="rounded-none border-black"
+            >
+              {t('common.cancel')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
+      {/* Scope Dialog: Reset Database */}
       <Dialog open={showResetDatabaseScopeDialog} onOpenChange={setShowResetDatabaseScopeDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('settings.resetDatabase')}</DialogTitle>
-            <DialogDescription>
-              Choose scope: reset only your data, or reset all users data.
-            </DialogDescription>
+        <DialogContent className="sm:max-w-[480px] p-0 gap-0">
+          <DialogHeader className="p-6 pb-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 border-2 border-red-600 bg-red-50 flex items-center justify-center shrink-0">
+                <span className="text-red-600 text-2xl font-bold">!</span>
+              </div>
+              <div className="flex-1">
+                <DialogTitle className="font-serif text-xl font-bold uppercase tracking-tight">
+                  {t('settings.resetDatabase')}
+                </DialogTitle>
+                <DialogDescription className="font-mono text-xs text-gray-600 mt-2">
+                  {t('settings.scopeDialog.resetDatabaseDescription')}
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black gap-2">
-            <Button variant="outline" onClick={() => setShowResetDatabaseScopeDialog(false)}>
-              {t('common.cancel')}
-            </Button>
-            <Button
-              variant="warning"
+          <div className="px-6 pb-4 space-y-3">
+            <button
               onClick={() => handleResetDatabaseWithScope('self')}
               disabled={isResetting}
+              className="w-full text-left border-2 border-black p-4 bg-white hover:bg-orange-50 hover:border-orange-500 transition-colors disabled:opacity-50"
             >
-              Reset Only My Data
-            </Button>
-            <Button
-              variant="destructive"
+              <div className="font-sans text-sm font-bold">{t('settings.scopeDialog.myDataOnly')}</div>
+              <div className="font-mono text-xs text-gray-600 mt-1">{t('settings.scopeDialog.myDataOnlyDesc')}</div>
+            </button>
+            <button
               onClick={() => handleResetDatabaseWithScope('all')}
               disabled={isResetting}
+              className="w-full text-left border-2 border-red-600 p-4 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
             >
-              Reset All Users Data
+              <div className="font-sans text-sm font-bold text-red-700">{t('settings.scopeDialog.allUsers')}</div>
+              <div className="font-mono text-xs text-red-600 mt-1">{t('settings.scopeDialog.allUsersDataDesc')}</div>
+            </button>
+          </div>
+          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black flex-row justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setShowResetDatabaseScopeDialog(false)}
+              className="rounded-none border-black"
+            >
+              {t('common.cancel')}
             </Button>
           </DialogFooter>
         </DialogContent>
