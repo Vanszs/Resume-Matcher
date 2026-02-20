@@ -334,7 +334,9 @@ export default function SettingsPage() {
     setProvider(newProvider);
     setModel(PROVIDER_INFO[newProvider].defaultModel);
 
-    if (newProvider === 'ollama' && !apiBase.trim()) {
+    if (PROVIDER_INFO[newProvider].supportsCustomBase === false) {
+      setApiBase('');
+    } else if (newProvider === 'ollama' && !apiBase.trim()) {
       setApiBase('http://localhost:11434');
     }
 
@@ -417,7 +419,7 @@ export default function SettingsPage() {
       const config: Partial<LLMConfig> = {
         provider,
         model: model.trim(),
-        api_base: apiBase.trim() || null,
+        api_base: providerInfo.supportsCustomBase ? apiBase.trim() || null : null,
       };
       if (requiresApiKey) {
         if (trimmedKey) {
@@ -494,7 +496,7 @@ export default function SettingsPage() {
       const testConfig: Partial<LLMConfig> = {
         provider,
         model: model.trim() || providerInfo.defaultModel,
-        api_base: apiBase.trim() || null,
+        api_base: providerInfo.supportsCustomBase ? apiBase.trim() || null : null,
       };
 
       // Only include API key if provided or if we have a stored key

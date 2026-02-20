@@ -494,19 +494,27 @@ async def check_llm_health(
 
     model_name = get_model_name(config)
 
-    prompt = test_prompt or "Hi"
+    prompt = test_prompt or "Health check: reply with exactly 'OK' and nothing else."
 
     try:
         # Make a minimal test call with timeout
         # Pass API key directly to avoid race conditions with global os.environ
         kwargs: dict[str, Any] = {
             "model": model_name,
-            "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 16,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a connectivity checker. Reply with exactly OK.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+            "max_tokens": 8,
             "api_key": config.api_key,
             "api_base": _normalize_api_base(config.provider, config.api_base),
             "timeout": LLM_TIMEOUT_HEALTH_CHECK,
         }
+        if _supports_temperature(config.provider, model_name, config.api_base):
+            kwargs["temperature"] = 0
         reasoning_effort = _get_reasoning_effort(config.provider, model_name, config.api_base)
         if reasoning_effort:
             kwargs["reasoning_effort"] = reasoning_effort
@@ -532,12 +540,18 @@ async def check_llm_health(
                 result["model_output"] = _to_code_block(None)
             return result
 
+        normalized = content.strip().strip("`\"'").upper()
+        ack_like = normalized == "OK" or normalized.startswith("OK\n")
+
         result = {
             "healthy": True,
             "provider": config.provider,
             "model": config.model,
             "response_model": response.model if response else None,
         }
+        if not ack_like:
+            result["warning_code"] = "unexpected_health_response"
+            result["warning"] = "Model responded, but did not return the expected health-check ACK."
         if include_details:
             result["test_prompt"] = _to_code_block(prompt)
             result["model_output"] = _to_code_block(content)
@@ -822,6 +836,8 @@ async def complete_json(
     use_json_mode = _supports_json_mode(config.provider, config.model, config.api_base)
 
     last_error = None
+    last_content: str | None = None
+    strict_retry_hint = ""
     for attempt in range(retries + 1):
         try:
             # Build request kwargs
@@ -835,8 +851,12 @@ async def complete_json(
                 "timeout": _calculate_timeout("json", max_tokens, config.provider),
             }
             if _supports_temperature(config.provider, model_name, config.api_base):
-                # LLM-002: Increase temperature on retry for variation
-                kwargs["temperature"] = _get_retry_temperature(attempt)
+                # For JSON mode, deterministic decoding is more reliable.
+                if use_json_mode:
+                    kwargs["temperature"] = 0
+                else:
+                    # LLM-002: Increase temperature on retry for variation
+                    kwargs["temperature"] = _get_retry_temperature(attempt)
             reasoning_effort = _get_reasoning_effort(config.provider, model_name, config.api_base)
             if reasoning_effort:
                 kwargs["reasoning_effort"] = reasoning_effort
@@ -847,6 +867,7 @@ async def complete_json(
 
             response = await litellm.acompletion(**kwargs)
             content = _extract_choice_text(response.choices[0])
+            last_content = content
 
             if not content:
                 raise ValueError("Empty response from LLM")
@@ -856,6 +877,9 @@ async def complete_json(
             # Extract and parse JSON
             json_str = _extract_json(content)
             result = json.loads(json_str)
+
+            if not isinstance(result, dict):
+                raise ValueError("JSON root must be an object")
 
             # LLM-001: Check if parsed result appears truncated
             if isinstance(result, dict) and _appears_truncated(result):
@@ -870,10 +894,17 @@ async def complete_json(
             logging.warning(f"JSON parse failed (attempt {attempt + 1}): {e}")
             if attempt < retries:
                 # Add hint to prompt for retry
-                messages[-1]["content"] = (
-                    prompt
-                    + "\n\nIMPORTANT: Output ONLY a valid JSON object. Start with { and end with }."
+                strict_retry_hint = (
+                    "\n\nIMPORTANT: Output ONLY a valid JSON object. "
+                    "Do NOT explain, do NOT restate the request, do NOT include markdown/code fences. "
+                    "Start with { and end with }."
                 )
+                if last_content:
+                    strict_retry_hint += (
+                        "\n\nPrevious output was invalid. Fix it into valid JSON only. "
+                        f"Previous output (truncated): {last_content[:400]}"
+                    )
+                messages[-1]["content"] = prompt + strict_retry_hint
                 continue
             raise ValueError(f"Failed to parse JSON after {retries + 1} attempts: {e}")
 
@@ -881,6 +912,17 @@ async def complete_json(
             last_error = e
             logging.warning(f"LLM call failed (attempt {attempt + 1}): {e}")
             if attempt < retries:
+                if isinstance(e, ValueError):
+                    strict_retry_hint = (
+                        "\n\nIMPORTANT: Return ONLY valid JSON object. "
+                        "No prose, no analysis, no reasoning."
+                    )
+                    if last_content:
+                        strict_retry_hint += (
+                            "\n\nYour previous output was not acceptable JSON. "
+                            f"Previous output (truncated): {last_content[:400]}"
+                        )
+                    messages[-1]["content"] = prompt + strict_retry_hint
                 continue
             raise
 
