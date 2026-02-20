@@ -164,7 +164,7 @@ interface DialogHeaderProps {
 }
 
 const DialogHeader: React.FC<DialogHeaderProps> = ({ className, children, ...props }) => (
-  <div className={cn('flex flex-col space-y-1.5 text-center sm:text-left', className)} {...props}>
+  <div className={cn('flex flex-col space-y-1.5 p-6 text-center sm:text-left', className)} {...props}>
     {children}
   </div>
 );
@@ -176,7 +176,7 @@ interface DialogFooterProps {
 
 const DialogFooter: React.FC<DialogFooterProps> = ({ className, children, ...props }) => (
   <div
-    className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
+    className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 p-6 pt-0', className)}
     {...props}
   >
     {children}
