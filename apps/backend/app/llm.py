@@ -255,6 +255,17 @@ def _to_code_block(content: str | None, language: str = "text") -> str:
     return f"```{language}\n{text}\n```"
 
 
+# Provider default models - used when no model is specified in config
+PROVIDER_DEFAULT_MODELS = {
+    "openai": "gpt-5-nano-2025-08-07",
+    "anthropic": "claude-haiku-4-5-20251001",
+    "openrouter": "deepseek/deepseek-chat",
+    "gemini": "gemini-3-flash-preview",
+    "deepseek": "deepseek-chat",
+    "ollama": "gemma3:4b",
+}
+
+
 def _load_stored_config(user_id: str | None = None) -> dict:
     """Load config from storage.
 
@@ -307,6 +318,51 @@ def get_llm_config(user_id: str | None = None) -> LLMConfig:
         api_key=api_key,
         api_base=api_base,
     )
+
+
+async def get_llm_config_async(user_id: str | None = None) -> LLMConfig:
+    """Get LLM configuration from database (async, Prisma-backed).
+
+    This is the preferred method for async contexts. It reads from the
+    Prisma database where per-user, per-provider API keys are stored.
+
+    Priority:
+      1. User's default (active) provider config from Prisma database
+      2. Fallback to legacy file-based config / environment variables
+    """
+    if user_id:
+        try:
+            from app.prisma_db import prisma
+
+            # Find the default (active) config for this user
+            config = await prisma.llmconfig.find_first(
+                where={"userId": user_id, "isDefault": True}
+            )
+            if config and (config.apiKey or config.provider == "ollama"):
+                return LLMConfig(
+                    provider=config.provider,
+                    model=config.model or PROVIDER_DEFAULT_MODELS.get(config.provider, ""),
+                    api_key=config.apiKey or "",
+                    api_base=config.baseUrl,
+                )
+
+            # If no default is set but user has configs, use the most recent one
+            fallback_config = await prisma.llmconfig.find_first(
+                where={"userId": user_id},
+                order={"createdAt": "desc"},
+            )
+            if fallback_config and (fallback_config.apiKey or fallback_config.provider == "ollama"):
+                return LLMConfig(
+                    provider=fallback_config.provider,
+                    model=fallback_config.model or PROVIDER_DEFAULT_MODELS.get(fallback_config.provider, ""),
+                    api_key=fallback_config.apiKey or "",
+                    api_base=fallback_config.baseUrl,
+                )
+        except Exception as e:
+            logging.warning(f"Failed to load user LLM config from database: {e}")
+
+    # Fallback to legacy sync method (env vars / file-based config)
+    return get_llm_config(user_id)
 
 
 def get_model_name(config: LLMConfig) -> str:
@@ -518,7 +574,7 @@ async def complete(
 ) -> str:
     """Make a completion request to the LLM."""
     if config is None:
-        config = get_llm_config(user_id)
+        config = await get_llm_config_async(user_id)
 
     model_name = get_model_name(config)
 
@@ -732,7 +788,7 @@ async def complete_json(
     Uses JSON mode when available, with retry logic for reliability.
     """
     if config is None:
-        config = get_llm_config(user_id)
+        config = await get_llm_config_async(user_id)
 
     model_name = get_model_name(config)
 

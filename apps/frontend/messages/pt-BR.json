@@ -1,6 +1,7 @@
 {
   "common": {
     "save": "Salvar",
+    "saved": "Salvo",
     "saving": "Salvando...",
     "cancel": "Cancelar",
     "delete": "Excluir",
@@ -16,6 +17,7 @@
     "confirm": "Confirmar",
     "back": "Voltar",
     "retry": "Tentar novamente",
+    "refresh": "Atualizar",
     "next": "Próximo",
     "continue": "Continuar",
     "finish": "Finalizar",
@@ -639,6 +641,7 @@
       "defaultModel": "PADRÃO: {model}",
       "apiKeyLabel": "Chave de API",
       "apiKeyOptionalForOllama": "(Opcional para Ollama)",
+      "optional": "opcional",
       "apiKeyPlaceholder": "sk-...",
       "apiKeyNotRequiredPlaceholder": "Não necessário para modelos locais",
       "leaveBlankToKeepExistingKey": "DEIXE EM BRANCO PARA MANTER A CHAVE EXISTENTE",
@@ -697,7 +700,32 @@
       "unknownProvider": "Provedor desconhecido retornado do backend: {provider}",
       "unableToSaveConfiguration": "Não foi possível salvar a configuração",
       "failedToClearApiKeys": "Falha ao limpar chaves de API. Por favor, tente novamente.",
-      "failedToResetDatabase": "Falha ao redefinir banco de dados. Por favor, tente novamente."
+      "failedToResetDatabase": "Falha ao redefinir banco de dados. Por favor, tente novamente.",
+      "failedToSave": "Falha ao salvar configuração.",
+      "failedToSetDefault": "Falha ao definir provedor padrão.",
+      "failedToLoadConfigs": "Falha ao carregar configurações."
+    },
+    "scopeDialog": {
+      "clearKeysDescription": "Escolha quais chaves de API limpar. Esta ação não pode ser desfeita.",
+      "resetDatabaseDescription": "Escolha quais dados redefinir. Esta ação não pode ser desfeita.",
+      "myDataOnly": "Apenas Meus Dados",
+      "myKeysOnlyDesc": "Limpar apenas suas chaves de API pessoais",
+      "myDataOnlyDesc": "Redefinir apenas seus currículos, vagas e configurações",
+      "allUsers": "Dados de Todos os Usuários",
+      "allUsersKeysDesc": "Limpar chaves de API de TODOS os usuários (Apenas admin)",
+      "allUsersDataDesc": "Redefinir dados de TODOS os usuários (Apenas admin)"
+    },
+    "multiProvider": {
+      "title": "Configuração de Provedor LLM",
+      "description": "Configure múltiplos provedores de IA. Defina um como ativo para personalização de currículo.",
+      "configuredProviders": "Configurados",
+      "activeProvider": "Ativo",
+      "noneSet": "Nenhum",
+      "configured": "Configurado",
+      "notConfigured": "Não configurado",
+      "useAsActive": "Usar Este Provedor",
+      "currentlyActive": "Provedor atualmente ativo",
+      "keyStored": "Chave de API armazenada (deixe em branco para manter)"
     }
   },
   "resumeViewer": {

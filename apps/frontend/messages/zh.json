@@ -1,6 +1,7 @@
 {
   "common": {
     "save": "保存",
+    "saved": "已保存",
     "saving": "保存中...",
     "cancel": "取消",
     "delete": "删除",
@@ -16,6 +17,7 @@
     "confirm": "确认",
     "back": "返回",
     "retry": "重试",
+    "refresh": "刷新",
     "next": "下一步",
     "continue": "继续",
     "finish": "完成",
@@ -639,6 +641,7 @@
       "defaultModel": "默认：{model}",
       "apiKeyLabel": "API 密钥",
       "apiKeyOptionalForOllama": "（Ollama 可选）",
+      "optional": "可选",
       "apiKeyPlaceholder": "sk-...",
       "apiKeyNotRequiredPlaceholder": "本地模型不需要",
       "leaveBlankToKeepExistingKey": "留空以保留现有密钥",
@@ -697,7 +700,32 @@
       "unknownProvider": "后端返回未知提供商：{provider}",
       "unableToSaveConfiguration": "无法保存配置",
       "failedToClearApiKeys": "清除 API 密钥失败，请重试。",
-      "failedToResetDatabase": "重置数据库失败，请重试。"
+      "failedToResetDatabase": "重置数据库失败，请重试。",
+      "failedToSave": "保存配置失败。",
+      "failedToSetDefault": "设置默认提供商失败。",
+      "failedToLoadConfigs": "加载配置失败。"
+    },
+    "scopeDialog": {
+      "clearKeysDescription": "选择要清除的 API 密钥。此操作无法撤销。",
+      "resetDatabaseDescription": "选择要重置的数据。此操作无法撤销。",
+      "myDataOnly": "仅我的数据",
+      "myKeysOnlyDesc": "仅清除您的个人 API 密钥",
+      "myDataOnlyDesc": "仅重置您的简历、职位和设置",
+      "allUsers": "所有用户数据",
+      "allUsersKeysDesc": "清除所有用户的 API 密钥（仅管理员）",
+      "allUsersDataDesc": "重置所有用户的数据（仅管理员）"
+    },
+    "multiProvider": {
+      "title": "LLM 提供商配置",
+      "description": "配置多个 AI 提供商。设置一个为活动状态以用于简历定制。",
+      "configuredProviders": "已配置",
+      "activeProvider": "活动",
+      "noneSet": "无",
+      "configured": "已配置",
+      "notConfigured": "未配置",
+      "useAsActive": "使用此提供商",
+      "currentlyActive": "当前活动提供商",
+      "keyStored": "API 密钥已存储（留空以保留）"
     }
   },
   "resumeViewer": {
