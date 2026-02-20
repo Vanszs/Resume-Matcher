@@ -23,7 +23,8 @@ interface StatusCacheContextValue {
   lastFetched: Date | null;
 
   // Actions
-  refreshStatus: () => Promise<void>;
+  // fullCheck=true performs a live LLM connectivity test (slower)
+  refreshStatus: (fullCheck?: boolean) => Promise<void>;
   refreshLlmHealth: () => Promise<void>;
 
   // Increment counters (for optimistic updates)
@@ -48,19 +49,21 @@ export function StatusCacheProvider({ children }: { children: React.ReactNode })
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
 
-  // Fetch full status from backend
-  const refreshStatus = useCallback(async () => {
+  // Fetch status from backend.
+  // fullCheck=true performs a live LLM connectivity test (slow path).
+  // fullCheck=false (default) skips the LLM call for a near-instant response.
+  const refreshStatus = useCallback(async (fullCheck = false) => {
     setCache((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const status = await fetchSystemStatus();
+      const status = await fetchSystemStatus(fullCheck);
       if (!mountedRef.current) return;
 
       const now = Date.now();
       setCache({
         status,
         lastFetched: now,
-        lastLlmCheck: now, // Full status includes LLM health
+        lastLlmCheck: now,
         isLoading: false,
         error: null,
       });
@@ -74,10 +77,10 @@ export function StatusCacheProvider({ children }: { children: React.ReactNode })
     }
   }, []);
 
-  // Refresh just LLM health (called periodically)
+  // Refresh just LLM health (called periodically) – always uses full live check
   const refreshLlmHealth = useCallback(async () => {
     try {
-      const status = await fetchSystemStatus();
+      const status = await fetchSystemStatus(true);
       if (!mountedRef.current) return;
 
       const now = Date.now();

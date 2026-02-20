@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import settings
@@ -57,6 +57,13 @@ async def health_check() -> HealthResponse:
 
 @router.get("/status", response_model=StatusResponse)
 async def get_status(
+    include_llm_health: bool = Query(
+        False,
+        description=(
+            "When False (default), skip the actual LLM API call and derive health from "
+            "configuration only. Use True for a full live health check."
+        ),
+    ),
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_optional_bearer)] = None,
 ) -> StatusResponse:
     """Get comprehensive application status.
@@ -64,6 +71,9 @@ async def get_status(
     When a valid JWT is included, returns LLM status scoped to that user's
     configuration.  Without a token it falls back to the global config so
     the endpoint remains usable for unauthenticated health probes.
+
+    By default the LLM health check is skipped (fast path).  Pass
+    ``include_llm_health=true`` to perform a live connectivity test.
     """
     import jwt as pyjwt
     from app.config import settings as app_settings
@@ -83,13 +93,21 @@ async def get_status(
         except Exception:
             pass  # Invalid/expired token → fall back to global config
 
-    llm_status = await check_llm_health(config)
+    is_configured = bool(config.api_key) or config.provider == "ollama"
     db_stats = db.get_stats()
 
+    if include_llm_health:
+        # Full path: live LLM connectivity test (may take several seconds)
+        llm_status = await check_llm_health(config)
+        llm_healthy = llm_status["healthy"]
+    else:
+        # Fast path: assume healthy when configured, skip the API round-trip
+        llm_healthy = is_configured
+
     return StatusResponse(
-        status="ready" if llm_status["healthy"] and db_stats["has_master_resume"] else "setup_required",
-        llm_configured=bool(config.api_key) or config.provider == "ollama",
-        llm_healthy=llm_status["healthy"],
+        status="ready" if llm_healthy and db_stats["has_master_resume"] else "setup_required",
+        llm_configured=is_configured,
+        llm_healthy=llm_healthy,
         has_master_resume=db_stats["has_master_resume"],
         database_stats=db_stats,
     )

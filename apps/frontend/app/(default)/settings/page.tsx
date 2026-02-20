@@ -105,6 +105,9 @@ export default function SettingsPage() {
   const [apiKey, setApiKey] = useState('');
   const [apiBase, setApiBase] = useState('');
   const [hasStoredApiKey, setHasStoredApiKey] = useState(false);
+  // Remember what was last saved to restore hasStoredApiKey when user switches back
+  const [savedProvider, setSavedProvider] = useState<LLMProvider>('openai');
+  const [savedHasStoredApiKey, setSavedHasStoredApiKey] = useState(false);
 
   // Use cached system status (loaded on app start, refreshes every 30 min)
   const {
@@ -252,9 +255,14 @@ export default function SettingsPage() {
           setProvider(safeProvider);
           setModel(llmConfig.model || PROVIDER_INFO[safeProvider].defaultModel);
           const isMaskedKey = Boolean(llmConfig.api_key) && llmConfig.api_key.includes('*');
-          setHasStoredApiKey(Boolean(llmConfig.api_key));
+          const storedKey = Boolean(llmConfig.api_key);
+          setHasStoredApiKey(storedKey);
           setApiKey(isMaskedKey ? '' : llmConfig.api_key || '');
           setApiBase(llmConfig.api_base || '');
+          // Remember the persisted state so we can restore it if the user
+          // switches provider tabs and then comes back.
+          setSavedProvider(safeProvider);
+          setSavedHasStoredApiKey(storedKey);
 
           if (providerFromBackend !== safeProvider) {
             setError(t('settings.errors.unknownProvider', { provider: providerFromBackend }));
@@ -296,9 +304,17 @@ export default function SettingsPage() {
       setApiBase('http://localhost:11434');
     }
 
-    // Clear API key input when switching providers to avoid accidental cross-provider usage.
+    // When the user switches back to the previously saved provider, restore the
+    // stored-key indicator so they aren't prompted to re-enter the existing key
+    // and it doesn't get accidentally cleared on Save.
+    if (newProvider === savedProvider) {
+      setHasStoredApiKey(savedHasStoredApiKey);
+    } else {
+      setHasStoredApiKey(false);
+    }
+    // Always clear the text input when switching so the old masked value isn't
+    // accidentally sent to the new (or restored) provider.
     setApiKey('');
-    setHasStoredApiKey(false);
   };
 
   // Save configuration
@@ -332,7 +348,17 @@ export default function SettingsPage() {
 
       await updateLlmConfig(config);
 
-      // Refresh cached system status after save
+      // Update the "saved" baseline so switching providers after a save still
+      // behaves correctly.
+      const newHasStoredApiKey = Boolean(trimmedKey) || (requiresApiKey && hasStoredApiKey);
+      setSavedProvider(provider);
+      setSavedHasStoredApiKey(newHasStoredApiKey);
+      if (trimmedKey) {
+        setApiKey('');
+        setHasStoredApiKey(true);
+      }
+
+      // Refresh cached system status after save (fast path is fine here)
       await refreshStatus();
 
       setStatus('saved');
@@ -575,7 +601,7 @@ export default function SettingsPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={refreshStatus}
+                onClick={() => refreshStatus(true)}
                 disabled={statusLoading}
                 className="gap-1 text-xs"
               >
@@ -599,7 +625,7 @@ export default function SettingsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={refreshStatus}
+                  onClick={() => refreshStatus(true)}
                   className="gap-1 text-xs"
                 >
                   <RefreshCw className="w-3 h-3" />
@@ -791,9 +817,12 @@ export default function SettingsPage() {
                   disabled={!requiresApiKey}
                 />
                 {requiresApiKey && hasStoredApiKey && !apiKey && (
-                  <p className="text-xs text-gray-500 font-mono">
-                    {t('settings.llmConfiguration.leaveBlankToKeepExistingKey')}
-                  </p>
+                  <div className="flex items-center gap-1.5 px-2 py-1.5 bg-green-50 border border-green-300">
+                    <CheckCircle2 className="w-3 h-3 text-green-600 shrink-0" />
+                    <p className="text-xs text-green-700 font-mono">
+                      {t('settings.llmConfiguration.leaveBlankToKeepExistingKey')}
+                    </p>
+                  </div>
                 )}
               </div>
 

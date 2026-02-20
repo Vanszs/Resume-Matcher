@@ -1,0 +1,844 @@
+{
+  "common": {
+    "save": "Simpan",
+    "saving": "Menyimpan...",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "edit": "Ubah",
+    "download": "Unduh",
+    "loading": "Memuat...",
+    "uploading": "Mengunggah...",
+    "checking": "Memeriksa...",
+    "processing": "Memproses...",
+    "generating": "Menghasilkan...",
+    "error": "Kesalahan",
+    "success": "Berhasil",
+    "confirm": "Konfirmasi",
+    "back": "Kembali",
+    "retry": "Coba Lagi",
+    "next": "Selanjutnya",
+    "continue": "Lanjutkan",
+    "finish": "Selesai",
+    "optional": "Opsional",
+    "close": "Tutup",
+    "ok": "OK",
+    "search": "Cari",
+    "filter": "Filter",
+    "reset": "Reset",
+    "apply": "Terapkan",
+    "selectOption": "Pilih opsi...",
+    "unknown": "Tidak Diketahui",
+    "keysCleared": "Kunci API berhasil dihapus",
+    "databaseReset": "Database berhasil direset",
+    "popupBlocked": "Pop-up diblokir. Izinkan pop-up atau buka URL ini secara manual: {url}"
+  },
+  "home": {
+    "brandLine1": "Resume",
+    "brandLine2": "Matcher",
+    "docs": "Dokumentasi",
+    "launchApp": "Buka Aplikasi"
+  },
+  "nav": {
+    "dashboard": "Dasbor",
+    "builder": "Pembuat Resume",
+    "tailor": "Sesuaikan Resume",
+    "settings": "Pengaturan",
+    "backToDashboard": "Kembali ke Dasbor",
+    "goToSettings": "Buka Pengaturan",
+    "admin": "Panel Admin",
+    "logout": "Keluar"
+  },
+  "dashboard": {
+    "title": "Dasbor",
+    "subtitle": "Kelola resume dan lamaran pekerjaan Anda",
+    "myResumes": "Resume Saya",
+    "noResumes": "Belum ada resume",
+    "noResumesDescription": "Unggah resume pertama Anda untuk memulai",
+    "uploadResume": "Unggah Resume",
+    "createNew": "Buat Baru",
+    "lastModified": "Terakhir diubah",
+    "actions": "Tindakan",
+    "preview": "Pratinjau",
+    "viewResume": "Lihat Resume",
+    "editResume": "Ubah Resume",
+    "deleteResume": "Hapus Resume",
+    "downloadPdf": "Unduh PDF",
+    "tailorResume": "Sesuaikan untuk Pekerjaan",
+    "selectModule": "Pilih Modul",
+    "masterResume": "Resume Utama",
+    "tailoredResume": "Resume yang Disesuaikan",
+    "initializeMasterResume": "Inisialisasi Resume Utama",
+    "initializeSequence": "Mulai Urutan Inisialisasi",
+    "refreshStatus": "Perbarui status",
+    "retryProcessing": "Coba Proses Ulang",
+    "retryingProcessing": "Mencoba ulang...",
+    "deleteAndReupload": "Hapus & Unggah Ulang",
+    "processingFailedHint": "Pemrosesan AI gagal. Coba lagi atau hapus dan unggah file lain.",
+    "retrySuccess": "Pemrosesan berhasil!",
+    "retryFailed": "Gagal mencoba ulang. Coba unggah file yang berbeda.",
+    "createResume": "Buat Resume",
+    "edited": "Diubah {date}",
+    "statusLine": "STATUS: {status}",
+    "status": {
+      "checking": "Memeriksa...",
+      "processing": "Memproses...",
+      "ready": "Siap",
+      "failed": "Pemrosesan gagal",
+      "pending": "Menunggu"
+    },
+    "llmNotConfiguredTitle": "[ LLM BELUM DIKONFIGURASI ]",
+    "llmNotConfiguredMessage": "> Kunci API tidak ditemukan. Penyesuaian resume dinonaktifkan hingga dikonfigurasi di pengaturan.",
+    "setupRequiredTitle": "[ PENGATURAN DIPERLUKAN ]",
+    "setupRequiredMessage": "> Konfigurasikan kunci API di pengaturan untuk mengaktifkan penyesuaian resume.",
+    "uploadDialog": {
+      "success": "Resume berhasil diunggah.",
+      "successMaster": "Resume diunggah dan ditetapkan sebagai resume utama.",
+      "successMissingId": "Unggahan berhasil tetapi ID Resume tidak ditemukan.",
+      "parsingFailed": "Resume diunggah tetapi pemrosesan AI gagal. Anda masih dapat menyesuaikannya secara manual.",
+      "failed": "Unggahan gagal.",
+      "dropzoneTitle": "Klik atau Seret File",
+      "dropzoneSubtitle": "PDF, DOC, DOCX (Maks. 4MB)",
+      "tryDifferentFile": "Coba File Lain",
+      "parsingFailedKeepOpen": "Pemrosesan AI gagal. Coba file lain atau tutup dialog ini."
+    }
+  },
+  "builder": {
+    "title": "Pembuat Resume",
+    "editMode": "Mode Edit",
+    "previewMode": "Mode Pratinjau",
+    "createAndPreview": "Buat & Pratinjau",
+    "unsavedDraft": "Draf Belum Disimpan",
+    "personalInfo": "Informasi Pribadi",
+    "summary": "Ringkasan",
+    "experience": "Pengalaman Kerja",
+    "education": "Pendidikan",
+    "skills": "Keahlian",
+    "projects": "Proyek",
+    "certifications": "Sertifikasi",
+    "languages": "Bahasa",
+    "awards": "Penghargaan",
+    "addSection": "Tambah Bagian",
+    "removeSection": "Hapus Bagian",
+    "saveChanges": "Simpan Perubahan",
+    "discardChanges": "Batalkan Perubahan",
+    "placeholders": {
+      "summary": "Deskripsikan latar belakang profesional Anda secara singkat..."
+    },
+    "contentStats": {
+      "wordsChars": "{wordCount} kata / {charCount} karakter"
+    },
+    "additionalForm": {
+      "instructions": "Masukkan item yang dipisahkan baris baru (tekan Enter untuk setiap item).",
+      "placeholders": {
+        "technicalSkills": "React\nTypeScript\nNode.js",
+        "languages": "Bahasa Indonesia\nBahasa Inggris",
+        "certifications": "AWS Solution Architect\nGoogle Analytics",
+        "awards": "Karyawan Terbaik\nPemenang Hackathon"
+      }
+    },
+    "customSections": {
+      "dialogTitle": "Tambah Bagian Kustom",
+      "dialogDescription": "Buat bagian baru untuk resume Anda dengan nama dan tipe kustom.",
+      "sectionNameLabel": "Nama Bagian",
+      "sectionNamePlaceholder": "mis., Publikasi, Kegiatan Sukarela, Sertifikasi",
+      "sectionTypeLabel": "Tipe Bagian",
+      "addCustomSectionButton": "Tambah Bagian Kustom",
+      "sectionTypes": {
+        "textBlockLabel": "Blok Teks",
+        "textBlockDescription": "Area teks tunggal (seperti Ringkasan)",
+        "itemListLabel": "Daftar Item",
+        "itemListDescription": "Beberapa entri dengan detail (seperti Pengalaman)",
+        "stringListLabel": "Daftar Keahlian",
+        "stringListDescription": "Daftar item sederhana (seperti Keahlian)"
+      },
+      "contentLabel": "Konten",
+      "contentPlaceholder": "Masukkan konten untuk {name}...",
+      "defaultTextPlaceholder": "Masukkan konten teks...",
+      "entryLabel": "Entri",
+      "addEntryLabel": "Tambah Entri",
+      "itemsLabel": "Item",
+      "itemsPlaceholder": "Masukkan item, satu per baris",
+      "unknownSectionType": "Tipe bagian tidak dikenal: {type}",
+      "unknownDefaultSection": "Bagian default tidak dikenal: {section}"
+    },
+    "sectionHeader": {
+      "renameSection": "Ganti nama bagian",
+      "customTag": "Kustom",
+      "hiddenFromPdfTag": "Tersembunyi dari PDF",
+      "hideSection": "Sembunyikan bagian",
+      "showSection": "Tampilkan bagian",
+      "moveUp": "Pindah ke atas",
+      "moveDown": "Pindah ke bawah",
+      "deleteSection": "Hapus bagian",
+      "deleteTitle": "Hapus Bagian",
+      "deleteDescription": "Apakah Anda yakin ingin menghapus \"{name}\"? Tindakan ini tidak dapat dibatalkan."
+    },
+    "previewTabs": {
+      "resume": "RESUME",
+      "coverLetter": "SURAT LAMARAN",
+      "outreach": "PESAN JARINGAN",
+      "jdMatch": "KECOCOKAN LOWONGAN"
+    },
+    "footer": {
+      "moduleLabel": "Modul Pembuat Resume",
+      "singleColumn": "Satu Kolom",
+      "twoColumn": "Dua Kolom"
+    },
+    "pageSize": {
+      "usLetter": "US Letter"
+    },
+    "generatePrompt": {
+      "notAvailableTitle": "{title} Tidak Tersedia",
+      "notAvailableDescription": "Untuk menghasilkan {title}, sesuaikan terlebih dahulu resume Anda dengan deskripsi pekerjaan.",
+      "goToDashboard": "Ke Dasbor",
+      "generateTitle": "Hasilkan {title}",
+      "coverLetterDescription": "Hasilkan surat lamaran yang disesuaikan berdasarkan resume dan deskripsi pekerjaan Anda.",
+      "outreachDescription": "Hasilkan pesan jaringan ringkas untuk LinkedIn atau email berdasarkan resume dan deskripsi pekerjaan Anda.",
+      "generateButton": "Hasilkan {title}",
+      "coverLetterFooter": "Tips: sesuaikan resume terlebih dahulu untuk hasil terbaik.",
+      "outreachFooter": "Tips: buat pesan yang singkat dan personal."
+    },
+    "regenerateDialog": {
+      "title": "Hasilkan Ulang {title}?",
+      "description": "Ini akan menggantikan {title} Anda saat ini dengan yang baru dihasilkan. Setiap pengeditan yang Anda lakukan akan hilang."
+    },
+    "regenerate": {
+      "buttonLabel": "Regenerasi AI",
+      "selectDialog": {
+        "title": "Pilih Item untuk Diregenerasi",
+        "subtitle": "Pilih bagian resume yang ingin Anda tingkatkan",
+        "experience": "Pengalaman Kerja",
+        "projects": "Proyek",
+        "skills": "Keahlian Teknis",
+        "noItemsSelected": "Pilih setidaknya satu item",
+        "noItemsAvailable": "Tidak ada item yang tersedia untuk diregenerasi. Tambahkan pengalaman, proyek, atau keahlian terlebih dahulu.",
+        "itemCount": {
+          "one": "{count} item",
+          "other": "{count} item"
+        },
+        "continueButton": "Lanjutkan"
+      },
+      "instructionDialog": {
+        "title": "Apa yang Ingin Anda Tingkatkan?",
+        "subtitle": "Berikan masukan spesifik untuk memandu AI",
+        "defaultInstruction": "Tingkatkan konten dengan kata kerja tindakan yang lebih kuat dan dampak yang terukur jika tersedia.",
+        "selectedItems": "Item yang Dipilih",
+        "placeholder": "Contoh: Tambahkan lebih banyak metrik terukur, tekankan kemampuan kepemimpinan, gunakan kata kerja tindakan yang lebih kuat...",
+        "hint": "Jelaskan secara spesifik apa yang belum memuaskan",
+        "backButton": "Kembali",
+        "generateButton": "Hasilkan"
+      },
+      "diffPreview": {
+        "title": "Pratinjau Perubahan",
+        "subtitle": "Tinjau konten yang diperbarui sebelum diterapkan",
+        "expandItem": "Perluas {item}",
+        "collapseItem": "Ciutkan {item}",
+        "partialFailures": "Beberapa item tidak dapat diregenerasi ({count}). Anda tetap dapat meninjau dan menerapkan yang berhasil.",
+        "changesCount": "{count} item diubah",
+        "rejectButton": "Tolak & Regenerasi",
+        "acceptButton": "Terima Perubahan",
+        "originalLabel": "Asli",
+        "newLabel": "Baru",
+        "noContent": "Tidak ada konten",
+        "applying": "Menerapkan...",
+        "loading": "Menghasilkan konten yang ditingkatkan..."
+      },
+      "errors": {
+        "generationFailed": "Gagal menghasilkan konten. Silakan coba lagi.",
+        "applyFailed": "Gagal menerapkan perubahan. Silakan coba lagi.",
+        "resumeChanged": "Konten resume berubah sejak regenerasi. Hasilkan ulang dan coba lagi.",
+        "noChangesToApply": "Tidak ada perubahan untuk diterapkan.",
+        "networkError": "Kesalahan jaringan. Periksa koneksi Anda."
+      }
+    },
+    "jdMatch": {
+      "yourResume": "Resume Anda",
+      "matchingKeywordsHighlighted": "(kata kunci yang cocok disorot)",
+      "jobDescriptionTitle": "Deskripsi Pekerjaan",
+      "at": "di",
+      "atSeparator": " di ",
+      "roleSeparator": "-",
+      "aboutTitle": "Tentang Kecocokan Lowongan",
+      "aboutDescription": "Tampilan ini menunjukkan seberapa cocok resume Anda dengan deskripsi pekerjaan. Kata kunci dari lowongan disorot dengan warna kuning pada resume Anda.",
+      "highlightedKeywordsTitle": "Kata Kunci yang Disorot",
+      "highlightedKeywordsDescriptionTemplate": "Kata yang disorot dengan __COLOR__ muncul di deskripsi pekerjaan dan resume Anda. Tingkat kecocokan lebih tinggi menunjukkan keselarasan yang lebih baik.",
+      "highlightedKeywordsDescriptionPrefix": "Kata yang disorot dengan",
+      "highlightColor": "kuning",
+      "highlightedKeywordsDescriptionSuffix": "muncul di deskripsi pekerjaan dan resume Anda. Tingkat kecocokan lebih tinggi menunjukkan keselarasan yang lebih baik dengan persyaratan pekerjaan.",
+      "tipsTitle": "Tips",
+      "tips": {
+        "items": {
+          "addMissingKeywords": "Gunakan tab Resume untuk menambahkan kata kunci yang hilang",
+          "focusTechnicalSkills": "Fokus pada keahlian teknis dan alat yang disebutkan dalam lowongan",
+          "matchActionVerbs": "Gunakan kata kerja tindakan yang sesuai dengan persyaratan pekerjaan"
+        }
+      },
+      "stats": {
+        "keywordsExtracted": "{count} kata kunci diekstrak",
+        "matchesFound": "{count} kecocokan ditemukan",
+        "matchRateLabel": "Tingkat Kecocokan:"
+      }
+    },
+    "genericItemForm": {
+      "itemLabel": "Item",
+      "addItemLabel": "Tambah {label}",
+      "fields": {
+        "title": "Judul",
+        "organization": "Organisasi",
+        "location": "Lokasi",
+        "years": "Tahun",
+        "descriptionPoints": "Poin Deskripsi"
+      },
+      "actions": {
+        "addPoint": "Tambah Poin"
+      },
+      "placeholders": {
+        "title": "Judul",
+        "organization": "Organisasi",
+        "location": "Lokasi",
+        "years": "2020 - Sekarang",
+        "description": "Deskripsikan kontribusi Anda..."
+      },
+      "noEntries": "// TIDAK ADA ENTRI {label}",
+      "addFirstItem": "Tambah {label} Pertama"
+    },
+    "forms": {
+      "experience": {
+        "addJob": "Tambah Pekerjaan",
+        "addFirstJob": "Tambah Pekerjaan Pertama",
+        "fields": {
+          "jobTitle": "Jabatan",
+          "company": "Perusahaan"
+        },
+        "placeholders": {
+          "jobTitle": "Senior Developer",
+          "company": "PT Teknologi Indonesia",
+          "location": "Remote / Jakarta",
+          "years": "2020 - Sekarang",
+          "description": "Deskripsikan pencapaian Anda..."
+        }
+      },
+      "education": {
+        "addSchool": "Tambah Pendidikan",
+        "addFirstSchool": "Tambah Pendidikan Pertama",
+        "fields": {
+          "institution": "Institusi",
+          "degree": "Gelar",
+          "description": "Deskripsi",
+          "descriptionOptional": "Deskripsi (Opsional)"
+        },
+        "placeholders": {
+          "institution": "Nama Universitas",
+          "degree": "Sarjana Teknik Informatika",
+          "years": "2016 - 2020",
+          "description": "Detail tambahan..."
+        }
+      },
+      "projects": {
+        "addProject": "Tambah Proyek",
+        "addFirstProject": "Tambah Proyek Pertama",
+        "fields": {
+          "projectName": "Nama Proyek",
+          "role": "Peran",
+          "website": "Situs Web"
+        },
+        "placeholders": {
+          "projectName": "Resume Matcher",
+          "role": "Pembuat",
+          "years": "2023",
+          "github": "github.com/username/proyek",
+          "website": "https://demo-proyek.com",
+          "description": "Detail proyek..."
+        }
+      }
+    },
+    "formatting": {
+      "panelTitle": "Template & Pemformatan",
+      "template": "Template",
+      "templates": {
+        "swissSingle": {
+          "name": "Satu Kolom",
+          "description": "Tata letak lebar penuh tradisional dengan kepadatan konten maksimum"
+        },
+        "swissTwoColumn": {
+          "name": "Dua Kolom",
+          "description": "Kolom utama berfokus pada pengalaman dengan sidebar untuk keahlian"
+        },
+        "modern": {
+          "name": "Modern",
+          "description": "Aksen warna-warni dengan tema warna yang dapat dikustomisasi"
+        },
+        "modernTwoColumn": {
+          "name": "Modern Dua Kolom",
+          "description": "Tata letak dua kolom dengan aksen modern dan tema warna"
+        }
+      },
+      "accentColor": "Warna Aksen",
+      "accentColors": {
+        "blue": "Biru",
+        "green": "Hijau",
+        "orange": "Oranye",
+        "red": "Merah"
+      },
+      "pageSize": "Ukuran Halaman",
+      "margins": "Margin (mm)",
+      "margin": {
+        "top": "Atas",
+        "bottom": "Bawah",
+        "left": "Kiri",
+        "right": "Kanan"
+      },
+      "spacing": "Jarak",
+      "spacingSection": "Bagian",
+      "spacingItems": "Item",
+      "spacingLines": "Baris",
+      "fontSize": "Ukuran Font",
+      "baseFontSize": "Dasar",
+      "headerScale": "Judul",
+      "headerFontFamily": "Judul",
+      "bodyFontFamily": "Isi",
+      "fontNames": {
+        "serif": "Serif",
+        "sans": "Sans",
+        "mono": "Mono"
+      },
+      "options": "Opsi",
+      "compactMode": "Mode Ringkas",
+      "contactIcons": "Ikon Kontak",
+      "effectiveOutput": "Output Efektif",
+      "effectiveMargins": "Margin (mm): A{top} B{bottom} K{left} Ka{right}",
+      "effectiveSectionGap": "Jarak Bagian",
+      "effectiveItemGap": "Jarak Item",
+      "effectiveLineHeight": "Tinggi Baris",
+      "effectiveBaseFont": "Font Dasar",
+      "effectiveHeaderScale": "Skala Judul",
+      "effectiveHeaderFont": "Font Judul",
+      "effectiveBodyFont": "Font Isi",
+      "compactHint": "Mode ringkas memperketat jarak dan tinggi baris. Margin dan ukuran font dasar tetap literal.",
+      "resetDefaults": "Reset ke Default"
+    },
+    "personalInfoForm": {
+      "placeholders": {
+        "name": "Budi Santoso",
+        "title": "Insinyur Perangkat Lunak",
+        "email": "budi@contoh.com",
+        "phone": "+62 812-0000-0000",
+        "location": "Jakarta, Indonesia",
+        "website": "portofolio.com",
+        "linkedin": "linkedin.com/in/budi",
+        "github": "github.com/budi"
+      }
+    },
+    "leftPanel": {
+      "editorPanel": "Panel Editor",
+      "coverLetterEditor": "Editor Surat Lamaran",
+      "outreachEditor": "Editor Pesan Jaringan",
+      "jdMatchAnalysis": "Analisis Kecocokan Lowongan"
+    },
+    "alerts": {
+      "saveNotAvailable": "Simpan hanya tersedia saat mengedit resume yang sudah ada.",
+      "saveFailed": "Gagal menyimpan resume. Silakan coba lagi.",
+      "coverLetterSaveSuccess": "Surat lamaran disimpan",
+      "outreachSaveSuccess": "Pesan jaringan disimpan",
+      "downloadSuccess": "Resume diunduh",
+      "reloadFailed": "Perubahan diterapkan, tetapi gagal memuat ulang resume. Silakan segarkan halaman.",
+      "downloadNotAvailable": "Unduhan hanya tersedia untuk resume yang sudah disimpan.",
+      "downloadFailed": "Gagal mengunduh resume. Silakan coba lagi.",
+      "coverLetterSaveFailed": "Gagal menyimpan surat lamaran. Silakan coba lagi.",
+      "coverLetterDownloadRequiresResume": "Simpan resume terlebih dahulu untuk mengunduh surat lamaran.",
+      "coverLetterMissing": "Surat lamaran tidak tersedia. Aktifkan pembuatan surat lamaran di Pengaturan dan sesuaikan resume.",
+      "coverLetterDownloadFailed": "Gagal mengunduh surat lamaran: {error}",
+      "outreachSaveFailed": "Gagal menyimpan pesan jaringan. Silakan coba lagi.",
+      "coverLetterGenerateFailed": "Gagal menghasilkan surat lamaran: {error}",
+      "outreachGenerateFailed": "Gagal menghasilkan pesan jaringan: {error}"
+    }
+  },
+  "enrichment": {
+    "title": "Peningkatan Resume",
+    "loading": {
+      "analyzingTitle": "Menganalisis resume Anda...",
+      "analyzingDescription": "Mengidentifikasi area yang perlu detail lebih lanjut",
+      "generatingTitle": "Menyusun deskripsi yang ditingkatkan...",
+      "generatingDescription": "Menggunakan jawaban Anda untuk meningkatkan resume",
+      "applyingTitle": "Menerapkan peningkatan...",
+      "applyingDescription": "Memperbarui resume utama Anda"
+    },
+    "questionProgress": "Pertanyaan {current} dari {total}",
+    "itemType": {
+      "experience": "Pengalaman",
+      "project": "Proyek"
+    },
+    "shortcutHint": "Tekan Shift+Enter untuk baris baru, Cmd/Ctrl+Enter untuk melanjutkan",
+    "preview": {
+      "title": "Tinjau Konten Baru",
+      "description": "Tinjau poin-poin baru yang akan ditambahkan ke resume Anda",
+      "applyButton": "Tambahkan ke Resume",
+      "keepingLabel": "Dipertahankan",
+      "addingLabel": "Ditambahkan",
+      "existingCount": "({count} yang ada)",
+      "newCount": "({count} baru)",
+      "noExistingDescription": "Tidak ada deskripsi yang ada"
+    },
+    "complete": {
+      "title": "Resume Ditingkatkan!",
+      "updatedCountSingular": "{count} item berhasil diperbarui",
+      "updatedCountPlural": "{count} item berhasil diperbarui",
+      "updatedFallback": "Resume Anda telah diperbarui dengan deskripsi yang ditingkatkan",
+      "doneButton": "Selesai"
+    },
+    "noImprovements": {
+      "title": "Resume Anda sudah bagus!",
+      "defaultDescription": "Kami tidak menemukan item yang perlu ditingkatkan. Deskripsi pengalaman dan proyek Anda sudah cukup detail."
+    },
+    "error": {
+      "title": "Terjadi Kesalahan",
+      "unexpected": "Terjadi kesalahan yang tidak terduga"
+    }
+  },
+  "tailor": {
+    "title": "Sesuaikan Resume",
+    "subtitle": "Optimalkan resume Anda untuk pekerjaan tertentu",
+    "heroTitle": "Sesuaikan Resume Anda",
+    "selectResume": "Pilih Resume",
+    "pasteJobDescription": "Tempel Deskripsi Pekerjaan",
+    "pasteJobDescriptionBelow": "Tempel Deskripsi Pekerjaan di Bawah",
+    "jobDescriptionPlaceholder": "Tempel deskripsi pekerjaan di sini...",
+    "promptLabel": "Intensitas penyesuaian",
+    "promptDescription": "Pilih seberapa kuat resume Anda diselaraskan dengan deskripsi pekerjaan.",
+    "promptOptions": {
+      "nudge": {
+        "label": "Penyesuaian ringan",
+        "description": "Edit minimal untuk menyelaraskan pengalaman yang ada dengan lebih baik."
+      },
+      "keywords": {
+        "label": "Tambah kata kunci",
+        "description": "Sisipkan kata kunci relevan tanpa mengubah peran atau cakupan."
+      },
+      "full": {
+        "label": "Penyesuaian penuh",
+        "description": "Penyesuaian komprehensif menggunakan deskripsi pekerjaan."
+      }
+    },
+    "analyzeJob": "Analisis Pekerjaan",
+    "generateTailored": "Hasilkan Resume yang Disesuaikan",
+    "setupRequiredTitle": "[ PENGATURAN DIPERLUKAN ]",
+    "noApiKeyMessage": "> Kunci API belum dikonfigurasi. Penyesuaian resume membutuhkan penyedia LLM.",
+    "configureApiKey": "Konfigurasikan Kunci API",
+    "configureApiKeyFirst": "Konfigurasikan Kunci API Terlebih Dahulu",
+    "charactersCount": "{count} karakter",
+    "matchScore": "Skor Kecocokan",
+    "suggestions": "Saran",
+    "keywords": "Kata Kunci yang Perlu Disertakan",
+    "footerTagline": "MESIN OPTIMASI BERTENAGA AI",
+    "diffModal": {
+      "title": "Tinjau Hasil Penyesuaian AI",
+      "subtitle": "Tinjau perubahan dengan cermat untuk memastikan tidak ada informasi yang tidak akurat",
+      "summary": "Ringkasan Perubahan",
+      "skillsAdded": "Keahlian Ditambahkan",
+      "skillsRemoved": "Keahlian Dihapus",
+      "descriptionsModified": "Deskripsi Diubah",
+      "certificationsAdded": "Sertifikasi Ditambahkan",
+      "highRiskChanges": "Perubahan Berisiko Tinggi",
+      "warningTitle": "Terdeteksi {count} penambahan berisiko tinggi",
+      "warningMessage": "Konfirmasikan bahwa penambahan ini ada dalam resume asli Anda atau telah tercermin dalam deskripsi Anda",
+      "summaryChanges": "Perubahan Ringkasan",
+      "skillChanges": "Perubahan Keahlian",
+      "descriptionChanges": "Perubahan Deskripsi Pengalaman",
+      "experienceChanges": "Perubahan Entri Pengalaman",
+      "educationChanges": "Perubahan Pendidikan",
+      "projectChanges": "Perubahan Proyek",
+      "certificationChanges": "Perubahan Sertifikasi",
+      "rejectButton": "Tolak & Hasilkan Ulang",
+      "confirmButton": "Konfirmasi & Simpan"
+    },
+    "regenerateDialog": {
+      "title": "Hasilkan ulang resume yang disesuaikan?",
+      "description": "Ini akan membuang pratinjau saat ini dan meminta hasil penyesuaian AI yang baru.",
+      "confirmLabel": "Hasilkan Ulang"
+    },
+    "missingDiffDialog": {
+      "title": "Tidak dapat menghitung perubahan",
+      "description": "Kami tidak dapat menghitung perbandingan untuk resume ini. Ini mungkin terjadi pada resume lama tanpa data terstruktur. Anda dapat melanjutkan untuk menyimpan resume yang disesuaikan atau batalkan untuk ditinjau nanti.",
+      "confirmLabel": "Lanjutkan tanpa perbandingan"
+    },
+    "errors": {
+      "jobDescriptionTooShort": "Deskripsi pekerjaan terlalu singkat. Berikan informasi yang lebih lengkap.",
+      "apiKeyError": "Kesalahan kunci API. Periksa konfigurasi LLM Anda di Pengaturan.",
+      "rateLimit": "Batas permintaan tercapai. Tunggu sebentar dan coba lagi.",
+      "failedToGenerate": "Gagal menghasilkan resume. Periksa pengaturan Anda dan coba lagi.",
+      "failedToPreview": "Gagal mempratinjau resume. Periksa pengaturan Anda dan coba lagi.",
+      "failedToConfirm": "Gagal mengonfirmasi resume. Silakan coba lagi."
+    }
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "subtitle": "Konfigurasi preferensi Anda",
+    "aiProvider": "Penyedia AI",
+    "aiProviderDescription": "Pilih penyedia AI yang Anda inginkan untuk analisis resume",
+    "apiKey": "Kunci API",
+    "apiKeyPlaceholder": "Masukkan kunci API Anda",
+    "saveApiKey": "Simpan Kunci API",
+    "contentLanguage": "Bahasa Konten",
+    "contentLanguageDescription": "Bahasa untuk konten yang dihasilkan (resume, surat lamaran)",
+    "uiLanguage": "Bahasa Antarmuka",
+    "uiLanguageDescription": "Bahasa untuk antarmuka pengguna",
+    "theme": "Tema",
+    "themeDescription": "Pilih tema warna yang Anda inginkan",
+    "lightMode": "Terang",
+    "darkMode": "Gelap",
+    "systemMode": "Sistem",
+    "dangerZone": "Zona Berbahaya",
+    "clearApiKeys": "Hapus Kunci API",
+    "clearApiKeysDescription": "Menghapus semua kunci API tersimpan dari konfigurasi. Tindakan ini tidak dapat dibatalkan.",
+    "resetDatabase": "Reset Database",
+    "resetDatabaseDescription": "Menghapus SEMUA data termasuk resume, pekerjaan, dan konten yang dihasilkan. Tindakan ini tidak dapat dibatalkan.",
+    "llmConfigurationTitle": "Konfigurasi LLM",
+    "providerLabel": "Penyedia",
+    "statusCards": {
+      "llm": "LLM",
+      "database": "Database",
+      "resumes": "Resume",
+      "jobs": "Pekerjaan",
+      "improvements": "Peningkatan",
+      "masterResume": "Resume Utama"
+    },
+    "statusValues": {
+      "healthy": "Sehat",
+      "offline": "Offline",
+      "connected": "Terhubung",
+      "configured": "Dikonfigurasi",
+      "notSet": "Belum diatur"
+    },
+    "apiKeyMenu": {
+      "buttonLabel": "API LLM",
+      "title": "Kunci API OpenAI",
+      "description": "Berikan kunci Anda untuk mengaktifkan model OpenAI yang dihosting.",
+      "savedMessage": "Kunci API disimpan.",
+      "loadError": "Tidak dapat memuat kunci API",
+      "updateError": "Tidak dapat memperbarui kunci API"
+    },
+    "setupRequired": {
+      "title": "[ PENGATURAN DIPERLUKAN ]",
+      "description": "> Kunci API belum dikonfigurasi. Tambahkan kunci API penyedia LLM Anda di bawah untuk mengaktifkan penyesuaian resume."
+    },
+    "systemStatus": {
+      "title": "Status Sistem",
+      "refresh": "Perbarui",
+      "unableToConnect": "Tidak dapat terhubung ke backend",
+      "expectedAt": "Diharapkan di: {apiUrl}",
+      "lastFetched": {
+        "never": "Belum pernah",
+        "justNow": "Baru saja",
+        "minutesAgo": "{minutes} mnt lalu",
+        "hoursAgo": "{hours} jam lalu"
+      }
+    },
+    "llmConfiguration": {
+      "selectedProvider": "DIPILIH: {provider}",
+      "modelLabel": "Model",
+      "defaultModel": "DEFAULT: {model}",
+      "apiKeyLabel": "Kunci API",
+      "apiKeyOptionalForOllama": "(Opsional untuk Ollama)",
+      "apiKeyPlaceholder": "sk-...",
+      "apiKeyNotRequiredPlaceholder": "Tidak diperlukan untuk model lokal",
+      "leaveBlankToKeepExistingKey": "KOSONGKAN UNTUK MEMPERTAHANKAN KUNCI YANG SUDAH ADA",
+      "baseUrlLabel": "URL Dasar (opsional)",
+      "baseUrlPlaceholder": "mis. https://api.openai.com/v1",
+      "baseUrlDescription": "Ganti URL API dasar untuk menggunakan endpoint proxy/aggregator. Kosongkan untuk menggunakan default penyedia.",
+      "ollamaServerUrl": "URL Server Ollama",
+      "ollamaServerUrlPlaceholder": "http://localhost:11434",
+      "testConnection": "Uji Koneksi",
+      "errorPrefix": "KESALAHAN: {error}",
+      "connectionSuccessful": "KONEKSI BERHASIL",
+      "connectionFailed": "KONEKSI GAGAL",
+      "connectionDetails": "Penyedia: {provider} | Model: {model}",
+      "testPromptLabel": "PROMPT UJI",
+      "modelOutputLabel": "OUTPUT MODEL",
+      "errorDetailLabel": "DETAIL KESALAHAN",
+      "healthErrors": {
+        "api_key_missing": "Kunci API belum dikonfigurasi. Tambahkan kunci di Pengaturan.",
+        "health_check_failed": "Pemeriksaan kesehatan gagal.",
+        "duplicate_v1_path": "Pemeriksaan kesehatan gagal. URL Dasar mungkin mengandung jalur /v1 duplikat.",
+        "not_found_404": "Pemeriksaan kesehatan gagal. 404 Tidak Ditemukan - pastikan URL Dasar sesuai dengan penyedia.",
+        "html_response": "Pemeriksaan kesehatan gagal. URL Dasar mengembalikan HTML; mungkin URL konsol atau jalur gateway yang tidak didukung."
+      },
+      "healthWarnings": {
+        "empty_content": "LLM mengembalikan konten kosong untuk pemeriksaan kesehatan."
+      }
+    },
+    "contentGeneration": {
+      "title": "Pembuatan Konten",
+      "description": "Aktifkan pembuatan konten tambahan selama penyesuaian resume. Jika diaktifkan, dokumen-dokumen ini akan dibuat secara otomatis bersama resume yang disesuaikan.",
+      "coverLetter": {
+        "label": "Surat Lamaran",
+        "description": "Hasilkan surat lamaran yang disesuaikan bersama resume Anda"
+      },
+      "outreachMessage": {
+        "label": "Pesan Jaringan",
+        "description": "Hasilkan pesan jaringan untuk LinkedIn atau email"
+      }
+    },
+    "promptSettings": {
+      "title": "Pengaturan Prompt",
+      "description": "Pilih prompt default yang digunakan untuk penyesuaian resume.",
+      "defaultLabel": "Prompt penyesuaian default"
+    },
+    "footer": {
+      "status": {
+        "checking": "Memeriksa...",
+        "ready": "STATUS: SIAP",
+        "setupRequired": "STATUS: PENGATURAN DIPERLUKAN",
+        "offline": "STATUS: OFFLINE"
+      }
+    },
+    "errors": {
+      "unableToConnectBackend": "Tidak dapat terhubung ke backend. Apakah server berjalan?",
+      "apiKeyRequired": "Kunci API diperlukan untuk penyedia yang dipilih.",
+      "unknownProvider": "Penyedia tidak dikenal dikembalikan dari backend: {provider}",
+      "unableToSaveConfiguration": "Tidak dapat menyimpan konfigurasi",
+      "failedToClearApiKeys": "Gagal menghapus kunci API. Silakan coba lagi.",
+      "failedToResetDatabase": "Gagal mereset database. Silakan coba lagi."
+    }
+  },
+  "resumeViewer": {
+    "resumeNotFound": "Resume tidak ditemukan",
+    "loading": "Memuat Resume...",
+    "useTailorFeature": "Gunakan Fitur Penyesuaian",
+    "retryProcessing": "Coba Proses Ulang",
+    "deleteAndStartOver": "Hapus & Mulai Ulang",
+    "returnToDashboard": "Kembali ke Dasbor",
+    "enhanceResume": "Tingkatkan Resume",
+    "downloadResume": "Unduh Resume",
+    "deletedTitle": "Resume Dihapus",
+    "deletedDescriptionMaster": "Resume utama Anda telah dihapus secara permanen dari sistem.",
+    "deletedDescriptionRegular": "Resume telah dihapus secara permanen dari sistem.",
+    "deleteFailedTitle": "Penghapusan Gagal",
+    "errors": {
+      "processingFailed": "Pemrosesan resume gagal. Layanan AI tidak dapat mengekstrak data terstruktur dari resume Anda. Anda dapat mencoba ulang atau menghapus dan mengunggah ulang.",
+      "stillProcessing": "Resume masih diproses. Tunggu sebentar dan segarkan halaman.",
+      "notProcessedYet": "Resume belum diproses. Gunakan fitur Penyesuaian untuk menghasilkan resume terstruktur.",
+      "noDataAvailable": "Tidak ada data resume yang tersedia.",
+      "failedToLoad": "Gagal memuat data resume.",
+      "failedToDelete": "Gagal menghapus resume. Silakan coba lagi."
+    },
+    "titlePlaceholder": "Masukkan judul resume..."
+  },
+  "preview": {
+    "margins": "Margin",
+    "calculating": "Menghitung...",
+    "pageBreak": "Pemisah Halaman",
+    "pageCountSingular": "{count} halaman",
+    "pageCountPlural": "{count} halaman"
+  },
+  "resume": {
+    "personalInfo": {
+      "name": "Nama Lengkap",
+      "title": "Jabatan",
+      "email": "Email",
+      "phone": "Telepon",
+      "location": "Lokasi",
+      "website": "Situs Web",
+      "linkedin": "LinkedIn",
+      "github": "GitHub"
+    },
+    "sections": {
+      "personalInfo": "Informasi Pribadi",
+      "summary": "Ringkasan Profesional",
+      "experience": "Pengalaman Kerja",
+      "education": "Pendidikan",
+      "projects": "Proyek",
+      "skills": "Keahlian & Penghargaan",
+      "skillsOnly": "Keahlian",
+      "certifications": "Pelatihan & Sertifikasi",
+      "languages": "Bahasa",
+      "awards": "Penghargaan",
+      "links": "Tautan"
+    },
+    "defaults": {
+      "name": "Nama Anda"
+    },
+    "additional": {
+      "technicalSkills": "Keahlian Teknis"
+    },
+    "additionalLabels": {
+      "technicalSkills": "Keahlian Teknis:",
+      "languages": "Bahasa:",
+      "certifications": "Sertifikasi:",
+      "awards": "Penghargaan:"
+    }
+  },
+  "coverLetter": {
+    "title": "Surat Lamaran",
+    "generate": "Hasilkan Surat Lamaran",
+    "regenerate": "Hasilkan Ulang",
+    "copyToClipboard": "Salin ke Clipboard",
+    "copied": "Disalin!",
+    "editor": {
+      "placeholder": "Surat lamaran Anda akan muncul di sini setelah menyesuaikan resume dengan pembuatan surat lamaran diaktifkan...",
+      "tip": "TIPS: Surat lamaran yang baik biasanya 300-400 kata. Edit sesuai kebutuhan untuk personalisasi."
+    },
+    "preview": {
+      "defaultName": "Nama Anda",
+      "emptyTitle": "Belum ada konten surat lamaran.",
+      "emptyDescription": "Aktifkan pembuatan surat lamaran di Pengaturan, lalu sesuaikan resume."
+    },
+    "print": {
+      "emptyContent": "Tidak ada konten surat lamaran yang tersedia."
+    }
+  },
+  "outreach": {
+    "title": "Pesan Jaringan",
+    "generate": "Hasilkan Pesan Jaringan",
+    "regenerate": "Hasilkan Ulang",
+    "copy": "Salin",
+    "copyToClipboard": "Salin ke Clipboard",
+    "copied": "Disalin!",
+    "editor": {
+      "placeholder": "Pesan jaringan Anda akan muncul di sini setelah menyesuaikan resume dengan pembuatan pesan jaringan diaktifkan...",
+      "tip": "TIPS: Jaga pesan jaringan tetap singkat (100-150 kata). Salin dan tempel ke LinkedIn atau email."
+    },
+    "preview": {
+      "channels": {
+        "linkedin": "LinkedIn",
+        "email": "Email"
+      },
+      "howToUseTitle": "Cara penggunaan:",
+      "steps": {
+        "step1": "1. Salin pesan menggunakan tombol di atas",
+        "step2": "2. Buka LinkedIn atau klien email Anda",
+        "step3": "3. Tempel dan personalisasi sesuai kebutuhan",
+        "step4": "4. Kirim ke rekruter atau manajer perekrutan"
+      },
+      "emptyTitle": "Belum ada pesan jaringan.",
+      "emptyDescription": "Aktifkan pembuatan pesan jaringan di Pengaturan, lalu sesuaikan resume."
+    }
+  },
+  "errors": {
+    "generic": "Terjadi kesalahan. Silakan coba lagi.",
+    "networkError": "Kesalahan jaringan. Periksa koneksi Anda.",
+    "unauthorized": "Silakan masuk untuk melanjutkan.",
+    "notFound": "Sumber daya yang diminta tidak ditemukan.",
+    "validationError": "Periksa input Anda dan coba lagi.",
+    "boundary": {
+      "title": "Terjadi Kesalahan",
+      "description": "Terjadi kesalahan yang tidak terduga. Hal ini telah dicatat untuk ditinjau.",
+      "tryAgain": "Coba Lagi",
+      "reloadPage": "Muat Ulang Halaman"
+    }
+  },
+  "confirmations": {
+    "deleteResume": "Apakah Anda yakin ingin menghapus resume ini?",
+    "deleteResumeDescription": "Tindakan ini tidak dapat dibatalkan.",
+    "deleteMasterResumeTitle": "Hapus Resume Utama",
+    "deleteMasterResumeDescription": "Tindakan ini tidak dapat dibatalkan. Resume utama Anda akan dihapus secara permanen dari sistem.",
+    "deleteResumeFromSystemDescription": "Tindakan ini tidak dapat dibatalkan. Resume akan dihapus secara permanen dari sistem.",
+    "deleteResumeConfirmLabel": "Hapus Resume",
+    "keepResumeCancelLabel": "Pertahankan Resume",
+    "discardChanges": "Apakah Anda yakin ingin membuang perubahan Anda?",
+    "discardChangesDescription": "Semua perubahan yang belum disimpan akan hilang.",
+    "clearApiKeys": "Hapus Semua Kunci API?",
+    "clearApiKeysDescription": "Apakah Anda yakin ingin menghapus semua kunci API? Anda perlu memasukkannya kembali untuk menggunakan fitur AI.",
+    "resetDatabase": "Reset Database dan Hapus Semua Data?",
+    "resetDatabaseDescription": "Ini akan menghapus secara permanen SEMUA resume, deskripsi pekerjaan, dan konten yang dihasilkan. Tindakan ini tidak dapat dipulihkan."
+  }
+}

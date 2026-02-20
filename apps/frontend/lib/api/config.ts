@@ -109,8 +109,10 @@ export async function testLlmConnection(config?: LLMConfigUpdate): Promise<LLMHe
 }
 
 // Fetch system status
-export async function fetchSystemStatus(): Promise<SystemStatus> {
-  const res = await apiFetch('/status', { credentials: 'include' });
+// By default skips the live LLM health check (fast). Pass includeLlmHealth=true for a full check.
+export async function fetchSystemStatus(includeLlmHealth = false): Promise<SystemStatus> {
+  const url = includeLlmHealth ? '/status?include_llm_health=true' : '/status';
+  const res = await apiFetch(url, { credentials: 'include' });
 
   if (!res.ok) {
     throw new Error(`Failed to fetch system status (status ${res.status}).`);
@@ -176,7 +178,7 @@ export async function updateFeatureConfig(config: FeatureConfigUpdate): Promise<
 }
 
 // Language configuration types
-export type SupportedLanguage = 'en' | 'es' | 'zh' | 'ja' | 'pt';
+export type SupportedLanguage = 'en' | 'es' | 'zh' | 'ja' | 'pt' | 'id';
 
 export interface LanguageConfig {
   ui_language: SupportedLanguage;
