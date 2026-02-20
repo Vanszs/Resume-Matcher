@@ -13,11 +13,15 @@ import {
   updatePromptConfig,
   clearAllApiKeys,
   resetDatabase,
+  fetchUserLLMConfigs,
+  setDefaultProvider,
+  upsertUserLLMConfig,
   PROVIDER_INFO,
   type LLMConfig,
   type LLMProvider,
   type LLMHealthCheck,
   type PromptOption,
+  type UserLLMConfig,
 } from '@/lib/api/config';
 import { API_URL, logout } from '@/lib/api/client';
 import { getVersionString } from '@/lib/config/version';
@@ -28,7 +32,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Dropdown } from '@/components/ui/dropdown';
-import { MultiProviderConfig } from '@/components/settings/multi-provider-config';
 import {
   Dialog,
   DialogContent,
@@ -117,6 +120,8 @@ export default function SettingsPage() {
   // Remember what was last saved to restore hasStoredApiKey when user switches back
   const [savedProvider, setSavedProvider] = useState<LLMProvider>('openai');
   const [savedHasStoredApiKey, setSavedHasStoredApiKey] = useState(false);
+  const [userProviderConfigs, setUserProviderConfigs] = useState<UserLLMConfig[]>([]);
+  const [providerSummaryLoading, setProviderSummaryLoading] = useState(false);
 
   // Use cached system status (loaded on app start, refreshes every 30 min)
   const {
@@ -244,6 +249,18 @@ export default function SettingsPage() {
       healthCheck.warning
     );
   }, [healthCheck, t]);
+  const activeUserProvider = useMemo(
+    () => userProviderConfigs.find((config) => config.is_default)?.provider as LLMProvider | undefined,
+    [userProviderConfigs]
+  );
+  const configuredProviderCount = useMemo(
+    () =>
+      PROVIDERS.filter((providerId) => {
+        const config = userProviderConfigs.find((item) => item.provider === providerId);
+        return Boolean(config?.api_key_masked) || PROVIDER_INFO[providerId].requiresKey === false;
+      }).length,
+    [userProviderConfigs]
+  );
 
   // Load LLM config and feature config on mount
   useEffect(() => {
@@ -251,10 +268,11 @@ export default function SettingsPage() {
 
     async function loadConfig() {
       try {
-        const [llmConfig, featureConfig, promptConfig] = await Promise.all([
+        const [llmConfig, featureConfig, promptConfig, userConfigs] = await Promise.all([
           fetchLlmConfig().catch(() => null),
           fetchFeatureConfig().catch(() => null),
           fetchPromptConfig().catch(() => null),
+          fetchUserLLMConfigs().catch(() => null),
         ]);
 
         if (cancelled) return;
@@ -289,6 +307,10 @@ export default function SettingsPage() {
         if (promptConfig) {
           setPromptOptions(promptConfig.prompt_options || []);
           setDefaultPromptId(promptConfig.default_prompt_id || 'keywords');
+        }
+
+        if (userConfigs) {
+          setUserProviderConfigs(userConfigs);
         }
 
         setStatus('idle');
@@ -329,6 +351,55 @@ export default function SettingsPage() {
     setApiKey('');
   };
 
+  const refreshUserProviderConfigs = async () => {
+    setProviderSummaryLoading(true);
+    try {
+      const configs = await fetchUserLLMConfigs();
+      setUserProviderConfigs(configs);
+    } catch (err) {
+      console.error('Failed to load provider summary', err);
+    } finally {
+      setProviderSummaryLoading(false);
+    }
+  };
+
+  const handleSetActiveProvider = async (targetProvider: LLMProvider) => {
+    setProviderSummaryLoading(true);
+    setError(null);
+
+    try {
+      const existingConfig = userProviderConfigs.find((item) => item.provider === targetProvider);
+
+      if (!existingConfig) {
+        await upsertUserLLMConfig({
+          provider: targetProvider,
+          model: PROVIDER_INFO[targetProvider].defaultModel,
+          base_url: targetProvider === 'ollama' ? 'http://localhost:11434' : undefined,
+          is_default: true,
+        });
+      } else {
+        await setDefaultProvider(targetProvider);
+      }
+
+      const selectedConfig = userProviderConfigs.find((item) => item.provider === targetProvider);
+      handleProviderChange(targetProvider);
+      if (selectedConfig?.model) {
+        setModel(selectedConfig.model);
+      }
+      if (selectedConfig?.base_url !== undefined && selectedConfig?.base_url !== null) {
+        setApiBase(selectedConfig.base_url);
+      }
+
+      await refreshUserProviderConfigs();
+      await refreshStatus(true);
+    } catch (err) {
+      console.error('Failed to set active provider', err);
+      setError((err as Error).message || t('settings.errors.failedToSetDefault'));
+    } finally {
+      setProviderSummaryLoading(false);
+    }
+  };
+
   // Save configuration
   const handleSave = async () => {
     setStatus('saving');
@@ -359,6 +430,16 @@ export default function SettingsPage() {
       }
 
       await updateLlmConfig(config);
+
+      await upsertUserLLMConfig({
+        provider,
+        model: model.trim() || undefined,
+        base_url: apiBase.trim() || undefined,
+        api_key: trimmedKey || undefined,
+        is_default: true,
+      }).catch((err) => {
+        console.warn('Failed to sync user provider config', err);
+      });
 
       // Re-fetch the full config from backend so the form always reflects what
       // was actually persisted (e.g. api_base might have been coerced or cleared).
@@ -391,6 +472,7 @@ export default function SettingsPage() {
 
       // Refresh cached system status after save (fast path is fine here)
       await refreshStatus();
+      await refreshUserProviderConfigs();
 
       setStatus('saved');
       setTimeout(() => setStatus('idle'), 2000);
@@ -775,9 +857,6 @@ export default function SettingsPage() {
             )}
           </section>
 
-          {/* Multi-Provider LLM Configuration */}
-          <MultiProviderConfig onConfigChange={() => refreshStatus(true)} />
-
           {/* LLM Configuration */}
           <section className="space-y-6">
             <div className="flex items-center gap-2 border-b border-black/10 pb-2">
@@ -803,6 +882,43 @@ export default function SettingsPage() {
                       {PROVIDER_INFO[p].name.split(' ')[0]}
                     </button>
                   ))}
+                </div>
+                <div className="border border-black bg-white p-3 space-y-3">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono text-gray-700">
+                    <span>
+                      CONFIGURED: {configuredProviderCount} / {PROVIDERS.length}
+                    </span>
+                    <span>
+                      ACTIVE: {activeUserProvider ? PROVIDER_INFO[activeUserProvider].name : '-'}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {PROVIDERS.map((providerId) => {
+                      const config = userProviderConfigs.find((item) => item.provider === providerId);
+                      const isConfigured =
+                        Boolean(config?.api_key_masked) || PROVIDER_INFO[providerId].requiresKey === false;
+                      const isActive = activeUserProvider === providerId;
+
+                      return (
+                        <button
+                          key={`active-${providerId}`}
+                          type="button"
+                          onClick={() => handleSetActiveProvider(providerId)}
+                          disabled={providerSummaryLoading || (!isConfigured && providerId !== 'ollama')}
+                          className={`px-2 py-1 text-[10px] uppercase ${SEGMENTED_BUTTON_BASE} ${
+                            isActive
+                              ? SEGMENTED_BUTTON_ACTIVE
+                              : isConfigured
+                                ? SEGMENTED_BUTTON_INACTIVE
+                                : 'bg-gray-100 text-gray-400 border-gray-300 shadow-none'
+                          }`}
+                        >
+                          {PROVIDER_INFO[providerId].name.split(' ')[0]}
+                          {isActive ? ' • ACTIVE' : isConfigured ? ' • SET' : ' • EMPTY'}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="text-xs text-gray-500 font-mono">

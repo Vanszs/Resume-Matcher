@@ -29,6 +29,11 @@ from app.database import db
 from app.dependencies import get_current_user, get_current_admin
 
 router = APIRouter(prefix="/config", tags=["Configuration"])
+SUPPORTED_LLM_PROVIDERS = {"openai", "anthropic", "openrouter", "gemini", "deepseek", "ollama"}
+
+
+def _is_valid_provider(provider: str | None) -> bool:
+    return bool(provider) and provider in SUPPORTED_LLM_PROVIDERS
 
 
 def _get_config_path(user_id: str | None = None) -> Path:
@@ -50,13 +55,21 @@ def _load_config(user_id: str | None = None) -> dict:
     """Load config from file."""
     path = _get_config_path(user_id)
     if path.exists():
-        return json.loads(path.read_text())
+        try:
+            return json.loads(path.read_text())
+        except (json.JSONDecodeError, OSError):
+            logging.exception("Failed to parse config file: %s", path)
+            return {}
     # For per-user configs fall back to global defaults so existing
     # environment-variable / shared config still applies as a baseline.
     if user_id:
         global_path = _get_config_path()
         if global_path.exists():
-            return json.loads(global_path.read_text())
+            try:
+                return json.loads(global_path.read_text())
+            except (json.JSONDecodeError, OSError):
+                logging.exception("Failed to parse global config file: %s", global_path)
+                return {}
     return {}
 
 
@@ -101,9 +114,12 @@ async def _log_llm_health_check(config: LLMConfig) -> None:
 async def get_llm_config_endpoint(user=Depends(get_current_user)) -> LLMConfigResponse:
     """Get current LLM configuration (API key masked, per-user)."""
     stored = _load_config(user.id)
+    provider = stored.get("provider", settings.llm_provider)
+    if not _is_valid_provider(provider):
+        provider = settings.llm_provider if _is_valid_provider(settings.llm_provider) else "openai"
 
     return LLMConfigResponse(
-        provider=stored.get("provider", settings.llm_provider),
+        provider=provider,
         model=stored.get("model", settings.llm_model),
         api_key=_mask_api_key(stored.get("api_key", settings.llm_api_key)),
         api_base=stored.get("api_base", settings.llm_api_base),
@@ -126,6 +142,16 @@ async def update_llm_config(
     `/config/llm-test` and the System Status panel.
     """
     stored = _load_config(user.id)
+
+    if "provider" in request.model_fields_set and request.provider is not None:
+        if not _is_valid_provider(request.provider):
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Unsupported provider: "
+                    f"{request.provider}. Supported: {sorted(SUPPORTED_LLM_PROVIDERS)}"
+                ),
+            )
 
     # Update only provided fields.
     # Use `model_fields_set` to distinguish "field not sent" from "field explicitly set
@@ -173,6 +199,15 @@ async def test_llm_connection(request: LLMConfigRequest | None = None, user=Depe
     """
     stored = _load_config(user.id)
 
+    if request and request.provider and not _is_valid_provider(request.provider):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Unsupported provider: "
+                f"{request.provider}. Supported: {sorted(SUPPORTED_LLM_PROVIDERS)}"
+            ),
+        )
+
     # Build config: use request values if provided, otherwise fall back to stored/default
     config = LLMConfig(
         provider=(
@@ -198,6 +233,9 @@ async def test_llm_connection(request: LLMConfigRequest | None = None, user=Depe
             else stored.get("api_base", settings.llm_api_base)
         ),
     )
+
+    if not _is_valid_provider(config.provider):
+        config.provider = settings.llm_provider if _is_valid_provider(settings.llm_provider) else "openai"
 
     test_prompt = "Hi"
     return await check_llm_health(config, include_details=True, test_prompt=test_prompt)
