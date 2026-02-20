@@ -124,19 +124,56 @@ export async function fetchSystemStatus(includeLlmHealth = false): Promise<Syste
 // Provider display names and default models
 export const PROVIDER_INFO: Record<
   LLMProvider,
-  { name: string; defaultModel: string; requiresKey: boolean; supportsCustomBase: boolean }
+  {
+    name: string;
+    defaultModel: string;
+    requiresKey: boolean;
+    supportsCustomBase: boolean;
+    // Human-readable hint shown under the Base URL field when filled
+    customBaseHint?: string;
+    // Placeholder for the model field when a custom base URL is active
+    customBaseModelPlaceholder?: string;
+  }
 > = {
-  openai: { name: 'OpenAI', defaultModel: 'gpt-5-nano-2025-08-07', requiresKey: true, supportsCustomBase: false },
-  anthropic: { name: 'Anthropic', defaultModel: 'claude-haiku-4-5-20251001', requiresKey: true, supportsCustomBase: false },
+  openai: {
+    name: 'OpenAI',
+    defaultModel: 'gpt-5-nano-2025-08-07',
+    requiresKey: true,
+    supportsCustomBase: false,
+  },
+  anthropic: {
+    name: 'Anthropic',
+    defaultModel: 'claude-haiku-4-5-20251001',
+    requiresKey: true,
+    supportsCustomBase: false,
+  },
   openrouter: {
     name: 'OpenRouter',
     defaultModel: 'deepseek/deepseek-chat',
     requiresKey: true,
     supportsCustomBase: true,
+    customBaseHint: 'Custom endpoint mode — model name is sent as-is to your endpoint (e.g. deepseek/deepseek-v3.2, openai/gpt-oss-120b)',
+    customBaseModelPlaceholder: 'e.g. deepseek/deepseek-v3.2',
   },
-  gemini: { name: 'Google Gemini', defaultModel: 'gemini-3-flash-preview', requiresKey: true, supportsCustomBase: false },
-  deepseek: { name: 'DeepSeek', defaultModel: 'deepseek-chat', requiresKey: true, supportsCustomBase: false },
-  ollama: { name: 'Ollama (Local)', defaultModel: 'gemma3:4b', requiresKey: false, supportsCustomBase: true },
+  gemini: {
+    name: 'Google Gemini',
+    defaultModel: 'gemini-3-flash-preview',
+    requiresKey: true,
+    supportsCustomBase: false,
+  },
+  deepseek: {
+    name: 'DeepSeek',
+    defaultModel: 'deepseek-chat',
+    requiresKey: true,
+    supportsCustomBase: false,
+  },
+  ollama: {
+    name: 'Ollama (Local)',
+    defaultModel: 'gemma3:4b',
+    requiresKey: false,
+    supportsCustomBase: true,
+    customBaseHint: 'Ollama server URL (default: http://localhost:11434)',
+  },
 };
 
 // Feature configuration types

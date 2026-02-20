@@ -800,11 +800,26 @@ export default function SettingsPage() {
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500 font-mono">
-                  {t('settings.llmConfiguration.selectedProvider', {
-                    provider: providerInfo.name,
-                  })}
-                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-xs text-gray-500 font-mono">
+                    {t('settings.llmConfiguration.selectedProvider', {
+                      provider: providerInfo.name,
+                    })}
+                  </p>
+                  {/* Dynamic badge: shows when OpenRouter is in custom-endpoint mode */}
+                  {provider === 'openrouter' && apiBase.trim() && !apiBase.includes('openrouter.ai') && (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-blue-700 bg-blue-50 font-mono text-[10px] uppercase tracking-wider text-blue-700">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-700 inline-block" />
+                      Custom Endpoint
+                    </span>
+                  )}
+                  {provider === 'openrouter' && (!apiBase.trim() || apiBase.includes('openrouter.ai')) && (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-gray-400 bg-white font-mono text-[10px] uppercase tracking-wider text-gray-500">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block" />
+                      OpenRouter Gateway
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Model Input */}
@@ -814,7 +829,11 @@ export default function SettingsPage() {
                   id="model"
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
-                  placeholder={providerInfo.defaultModel}
+                  placeholder={
+                    provider === 'openrouter' && apiBase.trim() && !apiBase.includes('openrouter.ai')
+                      ? (providerInfo.customBaseModelPlaceholder ?? providerInfo.defaultModel)
+                      : providerInfo.defaultModel
+                  }
                   className="font-mono"
                 />
                 <p className="text-xs text-gray-500 font-mono">
@@ -865,12 +884,23 @@ export default function SettingsPage() {
                     id="apiBase"
                     value={apiBase}
                     onChange={(e) => setApiBase(e.target.value)}
-                    placeholder={t('settings.llmConfiguration.baseUrlPlaceholder')}
+                    placeholder={
+                      provider === 'ollama'
+                        ? 'http://localhost:11434'
+                        : 'https://openrouter.ai/api/v1'
+                    }
                     className="font-mono"
                   />
-                  <p className="text-xs text-gray-500 font-mono">
-                    {t('settings.llmConfiguration.baseUrlDescription')}
-                  </p>
+                  {/* Dynamic description based on mode */}
+                  {provider === 'openrouter' && apiBase.trim() && !apiBase.includes('openrouter.ai') && providerInfo.customBaseHint ? (
+                    <p className="text-xs text-blue-700 font-mono border-l-2 border-blue-700 pl-2">
+                      {providerInfo.customBaseHint}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-500 font-mono">
+                      {t('settings.llmConfiguration.baseUrlDescription')}
+                    </p>
+                  )}
                 </div>
               )}
 

@@ -61,6 +61,20 @@ class LLMConfig(BaseModel):
     api_base: str | None = None
 
 
+def _is_custom_openai_compatible_endpoint(provider: str, api_base: str | None) -> bool:
+    """Return True when OpenRouter is configured with a non-openrouter.ai base URL.
+
+    In this mode the endpoint is treated as a generic OpenAI-compatible service
+    (e.g. Novita AI, Together AI, any self-hosted OpenAI-compatible server).
+    The routing logic in get_model_name and _normalize_api_base both rely on this.
+    """
+    if provider != "openrouter":
+        return False
+    if not api_base:
+        return False
+    return "openrouter.ai" not in api_base
+
+
 def _normalize_api_base(provider: str, api_base: str | None) -> str | None:
     """Normalize api_base for LiteLLM provider-specific expectations.
 
@@ -86,6 +100,12 @@ def _normalize_api_base(provider: str, api_base: str | None) -> str | None:
     # Gemini handler appends '/v1/models/...'. If base already ends with '/v1',
     # strip it to avoid '/v1/v1/models/...'.
     if provider == "gemini" and base.endswith("/v1"):
+        base = base[: -len("/v1")].rstrip("/")
+
+    # OpenAI-compatible custom endpoints (OpenRouter with non-openrouter.ai base):
+    # LiteLLM's OpenAI handler appends '/v1/chat/completions'. If the user already
+    # included '/v1', strip it to avoid '/v1/v1/chat/completions'.
+    if _is_custom_openai_compatible_endpoint(provider, api_base) and base.endswith("/v1"):
         base = base[: -len("/v1")].rstrip("/")
 
     return base or None
@@ -162,7 +182,26 @@ def _extract_message_text(message: Any) -> str | None:
     elif isinstance(message, dict):
         content = message.get("content")
 
-    return _join_text_parts(_extract_text_parts(content))
+    text = _join_text_parts(_extract_text_parts(content))
+    if text:
+        return text
+
+    # Reasoning models (e.g. openai/o-series, deepseek-r1, gpt-oss-120b) may return
+    # empty `content` but populate `reasoning_content` / `reasoning` instead.
+    # Accept either as a sign that the model is alive and responding.
+    for attr in ("reasoning_content", "reasoning"):
+        if hasattr(message, attr):
+            rc = getattr(message, attr)
+        elif isinstance(message, dict):
+            rc = message.get(attr)
+        else:
+            rc = None
+        if rc:
+            reasoning_text = _join_text_parts(_extract_text_parts(rc))
+            if reasoning_text:
+                return reasoning_text
+
+    return None
 
 
 def _extract_choice_text(choice: Any) -> str | None:
@@ -242,15 +281,31 @@ def _load_stored_config(user_id: str | None = None) -> dict:
 def get_llm_config(user_id: str | None = None) -> LLMConfig:
     """Get current LLM configuration.
 
-    Priority: config.json file > environment variables/settings
+    Priority (per-provider):
+      1. provider_configs[active_provider] values
+      2. Legacy top-level api_key / api_base fields
+      3. Environment variables / settings defaults
     """
     stored = _load_stored_config(user_id)
 
+    active_provider = stored.get("provider", settings.llm_provider)
+
+    # Per-provider config (if it exists) takes priority over the legacy single
+    # top-level api_key / api_base so that each provider can carry its own key.
+    pconf: dict = stored.get("provider_configs", {}).get(active_provider, {})
+
+    api_key = pconf.get("api_key") or stored.get("api_key", settings.llm_api_key)
+    model = pconf.get("model") or stored.get("model", settings.llm_model)
+    api_base = (
+        pconf["api_base"] if "api_base" in pconf
+        else stored.get("api_base", settings.llm_api_base)
+    )
+
     return LLMConfig(
-        provider=stored.get("provider", settings.llm_provider),
-        model=stored.get("model", settings.llm_model),
-        api_key=stored.get("api_key", settings.llm_api_key),
-        api_base=stored.get("api_base", settings.llm_api_base),
+        provider=active_provider,
+        model=model,
+        api_key=api_key,
+        api_base=api_base,
     )
 
 
@@ -272,16 +327,35 @@ def get_model_name(config: LLMConfig) -> str:
 
     prefix = provider_prefixes.get(config.provider, "")
 
-    # OpenRouter is special: always add openrouter/ prefix unless already present
-    # OpenRouter models use nested format: openrouter/anthropic/claude-3.5-sonnet
-    # Exception: if a custom api_base is set that isn't openrouter.ai, treat as a
-    # generic OpenAI-compatible endpoint (don't add openrouter/ prefix, use model as-is).
+    # OpenRouter: two routing modes depending on api_base.
+    #
+    # MODE A — Standard OpenRouter gateway (api_base is openrouter.ai or not set):
+    #   LiteLLM uses the dedicated 'openrouter' handler.
+    #   Models use nested format:  openrouter/anthropic/claude-3.5-sonnet
+    #
+    # MODE B — Custom OpenAI-compatible endpoint (api_base is NOT openrouter.ai):
+    #   Examples: Novita AI, Together AI, any self-hosted OpenAI-compatible server.
+    #   LiteLLM must use the 'openai' handler so it calls /v1/chat/completions.
+    #   The OpenAI handler ALWAYS strips the leading "openai/" prefix before sending
+    #   the model name. We therefore wrap the raw model with an extra "openai/" so the
+    #   value received by the endpoint is exactly what the user typed:
+    #
+    #     user model               LiteLLM input                sent to endpoint
+    #     deepseek/deepseek-v3.2   openai/deepseek/deepseek-v3.2  deepseek/deepseek-v3.2  ✓
+    #     openai/gpt-oss-120b      openai/openai/gpt-oss-120b     openai/gpt-oss-120b     ✓
+    #     llama3                   openai/llama3                  llama3                  ✓
     if config.provider == "openrouter":
-        if config.api_base and "openrouter.ai" not in config.api_base:
-            # Custom base URL (e.g. Novita AI) — behave like openai-compatible
+        if _is_custom_openai_compatible_endpoint(config.provider, config.api_base):
+            # Guard against double-wrapping on repeated calls.
             if config.model.startswith("openai/"):
-                return config.model[len("openai/"):]
-            return config.model
+                # Already has one openai/ layer — ensure exactly one wrap.
+                inner = config.model[len("openai/"):]
+                if inner.startswith("openai/"):
+                    # Already correctly double-wrapped.
+                    return config.model
+                return f"openai/{config.model}"
+            return f"openai/{config.model}"
+        # MODE A: standard OpenRouter gateway.
         if config.model.startswith("openrouter/"):
             return config.model
         return f"openrouter/{config.model}"
@@ -315,15 +389,23 @@ def _supports_temperature(provider: str, model: str) -> bool:
     return True
 
 
-def _get_reasoning_effort(provider: str, model: str) -> str | None:
+def _get_reasoning_effort(provider: str, model: str, api_base: str | None = None) -> str | None:
     """Return a default reasoning_effort for models that require it.
 
-    Some OpenAI gpt-5 models may return empty message.content unless a supported
-    `reasoning_effort` is explicitly set. This keeps downstream JSON parsing reliable.
+    Some OpenAI gpt-5 models and reasoning models (o-series) may return empty
+    message.content unless a supported `reasoning_effort` is explicitly set.
+    This keeps downstream JSON parsing reliable.
+
+    Note: Only apply to *native* OpenAI endpoints — custom OpenAI-compatible
+    endpoints (e.g. Novita AI) may not support this parameter.
     """
-    _ = provider
+    # Skip for custom OpenAI-compatible endpoints — they may reject unknown params.
+    if _is_custom_openai_compatible_endpoint(provider, api_base):
+        return None
+
     model_lower = model.lower()
-    if "gpt-5" in model_lower:
+    # gpt-5 family on native OpenAI
+    if provider == "openai" and "gpt-5" in model_lower:
         return "minimal"
     return None
 
@@ -362,7 +444,7 @@ async def check_llm_health(
             "api_base": _normalize_api_base(config.provider, config.api_base),
             "timeout": LLM_TIMEOUT_HEALTH_CHECK,
         }
-        reasoning_effort = _get_reasoning_effort(config.provider, model_name)
+        reasoning_effort = _get_reasoning_effort(config.provider, model_name, config.api_base)
         if reasoning_effort:
             kwargs["reasoning_effort"] = reasoning_effort
 
@@ -457,7 +539,7 @@ async def complete(
         }
         if _supports_temperature(config.provider, model_name):
             kwargs["temperature"] = temperature
-        reasoning_effort = _get_reasoning_effort(config.provider, model_name)
+        reasoning_effort = _get_reasoning_effort(config.provider, model_name, config.api_base)
         if reasoning_effort:
             kwargs["reasoning_effort"] = reasoning_effort
 
@@ -682,7 +764,7 @@ async def complete_json(
             if _supports_temperature(config.provider, model_name):
                 # LLM-002: Increase temperature on retry for variation
                 kwargs["temperature"] = _get_retry_temperature(attempt)
-            reasoning_effort = _get_reasoning_effort(config.provider, model_name)
+            reasoning_effort = _get_reasoning_effort(config.provider, model_name, config.api_base)
             if reasoning_effort:
                 kwargs["reasoning_effort"] = reasoning_effort
 
