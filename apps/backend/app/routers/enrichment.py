@@ -38,20 +38,62 @@ from app.schemas.enrichment import (
 
 logger = logging.getLogger(__name__)
 
+
+def _llm_error_detail(e: Exception, fallback: str) -> str:
+    """Convert an LLM exception to an actionable user-facing error message.
+
+    Inspects the exception string to classify common LLM provider errors
+    (bad model name, wrong API key, rate limits, timeouts, connection issues)
+    so users know exactly what to fix in Settings rather than seeing a generic
+    'please try again' message.
+    """
+    s = str(e).lower()
+    if any(t in s for t in ("not found", "notfounderror", "model not found", "no such model")):
+        return (
+            "AI model not found. Check the model name in Settings → LLM Configuration."
+        )
+    if any(t in s for t in ("auth", "api key", "unauthorized", "invalid_api_key", "401", "403")):
+        return (
+            "API authentication failed. Check your API key in Settings → LLM Configuration."
+        )
+    if any(t in s for t in ("rate limit", "ratelimit", "429", "too many requests")):
+        return "Rate limit reached. Please wait a moment and try again."
+    if any(t in s for t in ("timeout", "timed out", "read timeout")):
+        return "The AI request timed out. Please try again."
+    if any(t in s for t in ("connection", "connect", "network", "unreachable", "refused")):
+        return (
+            "Could not connect to the AI provider. "
+            "Check the Base URL in Settings → LLM Configuration."
+        )
+    return fallback
+
 router = APIRouter(prefix="/enrichment", tags=["Enrichment"], dependencies=[Depends(get_current_user)])
 
 
-def _get_content_language() -> str:
-    """Get content language from stored config."""
-    config_path = settings.config_path
+def _get_content_language(user_id: str | None = None) -> str:
+    """Get content language from stored config.
+
+    When user_id is provided, reads from the per-user config file first,
+    falling back to the global config for missing fields.
+    """
+    base: dict = {}
+    global_path = settings.config_path
     try:
-        if config_path.exists():
-            config = json.loads(config_path.read_text())
-            # Use content_language, fall back to legacy 'language' field, then default to 'en'
-            return config.get("content_language", config.get("language", "en"))
+        if global_path.exists():
+            base = json.loads(global_path.read_text())
     except (OSError, json.JSONDecodeError) as e:
-        logger.warning(f"Failed to read content language from config: {e}")
-    return "en"
+        logger.warning(f"Failed to read global config: {e}")
+
+    if user_id:
+        user_path = global_path.parent / "user_configs" / f"{user_id}.json"
+        try:
+            if user_path.exists():
+                user_cfg = json.loads(user_path.read_text())
+                base = {**base, **user_cfg}
+        except (OSError, json.JSONDecodeError) as e:
+            logger.warning(f"Failed to read user config: {e}")
+
+    return base.get("content_language", base.get("language", "en"))
 
 
 @router.post("/analyze/{resume_id}", response_model=AnalysisResponse)
@@ -79,7 +121,7 @@ async def analyze_resume(
 
     # Build prompt with content language
     resume_json = json.dumps(processed_data, indent=2)
-    language = _get_content_language()
+    language = _get_content_language(user_id=user.id)
     output_language = get_language_name(language)
     prompt = ANALYZE_RESUME_PROMPT.format(
         resume_json=resume_json,
@@ -123,7 +165,7 @@ async def analyze_resume(
         logger.error(f"Resume analysis failed: {e}")
         raise HTTPException(
             status_code=500,
-            detail="Failed to analyze resume. Please try again.",
+            detail=_llm_error_detail(e, "Failed to analyze resume. Please try again."),
         )
 
 
@@ -157,7 +199,7 @@ async def generate_enhancements(
     # Actually, let's parse the answers differently - the frontend should include item context
     # For now, we'll get the analysis to build the mapping
     resume_json = json.dumps(processed_data, indent=2)
-    language = _get_content_language()
+    language = _get_content_language(user_id=user.id)
     output_language = get_language_name(language)
     analysis_prompt = ANALYZE_RESUME_PROMPT.format(
         resume_json=resume_json,
@@ -174,7 +216,7 @@ async def generate_enhancements(
         logger.error(f"Failed to re-analyze resume: {e}")
         raise HTTPException(
             status_code=500,
-            detail="Failed to process enhancements. Please try again.",
+            detail=_llm_error_detail(e, "Failed to process enhancements. Please try again."),
         )
 
     # Build question_id -> item_id mapping
@@ -228,7 +270,7 @@ async def generate_enhancements(
         current_desc = item.get("current_description", [])
         current_desc_text = "\n".join(f"- {d}" for d in current_desc) if current_desc else "(No description)"
         
-        language = _get_content_language()
+        language = _get_content_language(user_id=user.id)
         output_language = get_language_name(language)
 
         prompt = ENHANCE_DESCRIPTION_PROMPT.format(

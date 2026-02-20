@@ -397,7 +397,7 @@ def _clear_api_keys_for_all_users() -> None:
             logging.exception("Failed to clear API keys in %s", config_file)
 
 
-@router.get("/api-keys", response_model=ApiKeyStatusResponse, dependencies=[Depends(get_current_user)])
+@router.get("/api-keys", response_model=ApiKeyStatusResponse)
 async def get_api_keys_status(user=Depends(get_current_user)) -> ApiKeyStatusResponse:
     """Get status of all configured API keys (masked).
 
@@ -420,7 +420,7 @@ async def get_api_keys_status(user=Depends(get_current_user)) -> ApiKeyStatusRes
     return ApiKeyStatusResponse(providers=providers)
 
 
-@router.post("/api-keys", response_model=ApiKeysUpdateResponse, dependencies=[Depends(get_current_user)])
+@router.post("/api-keys", response_model=ApiKeysUpdateResponse)
 async def update_api_keys(request: ApiKeysUpdateRequest, user=Depends(get_current_user)) -> ApiKeysUpdateResponse:
     """Update API keys for one or more providers.
 
@@ -510,7 +510,7 @@ async def delete_all_api_keys(
     return {"message": "Your API keys have been cleared"}
 
 
-@router.delete("/api-keys/{provider}", dependencies=[Depends(get_current_user)])
+@router.delete("/api-keys/{provider}")
 async def delete_api_key(provider: str, user=Depends(get_current_user)) -> dict:
     """Delete API key for a specific provider.
 

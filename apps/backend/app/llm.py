@@ -279,6 +279,13 @@ def get_model_name(config: LLMConfig) -> str:
             return config.model
         return f"openrouter/{config.model}"
 
+    # For native OpenAI provider (including custom base URLs like Novita AI),
+    # strip the redundant "openai/" prefix. LiteLLM's openai handler sends the
+    # model name as-is to the API, so "openai/gpt-oss-120b" would fail on any
+    # endpoint that only knows "gpt-oss-120b".
+    if config.provider == "openai" and config.model.startswith("openai/"):
+        return config.model[len("openai/"):]
+
     # For other providers, don't add prefix if model already has a known prefix
     known_prefixes = ["openrouter/", "anthropic/", "gemini/", "deepseek/", "ollama/"]
     if any(config.model.startswith(p) for p in known_prefixes):

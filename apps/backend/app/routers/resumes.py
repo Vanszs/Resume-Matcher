@@ -58,26 +58,43 @@ from app.services.cover_letter import (
 from app.prompts import DEFAULT_IMPROVE_PROMPT_ID, IMPROVE_PROMPT_OPTIONS
 
 
-def _load_config() -> dict:
-    """Load configuration from config file."""
-    config_path = settings.config_path
-    if not config_path.exists():
-        return {}
+def _load_config(user_id: str | None = None) -> dict:
+    """Load configuration from config file.
+
+    When user_id is provided, reads from the per-user config file first,
+    falling back to the global config for missing fields.
+    """
+    global_path = settings.config_path
+    base: dict = {}
+    if global_path.exists():
+        try:
+            base = json.loads(global_path.read_text())
+        except (json.JSONDecodeError, OSError) as e:
+            logger.error("Failed to load global config: %s", e)
+
+    if not user_id:
+        return base
+
+    user_path = global_path.parent / "user_configs" / f"{user_id}.json"
+    if not user_path.exists():
+        return base
     try:
-        return json.loads(config_path.read_text())
+        user_cfg = json.loads(user_path.read_text())
+        # Per-user values override globals
+        return {**base, **user_cfg}
     except (json.JSONDecodeError, OSError) as e:
-        logger.error("Failed to load config: %s", e)
-        return {}
+        logger.error("Failed to load user config for %s: %s", user_id, e)
+        return base
 
 
-def _load_feature_config() -> dict:
+def _load_feature_config(user_id: str | None = None) -> dict:
     """Load feature configuration from config file."""
-    return _load_config()
+    return _load_config(user_id)
 
 
-def _get_content_language() -> str:
+def _get_content_language(user_id: str | None = None) -> str:
     """Get configured content language from config file."""
-    config = _load_config()
+    config = _load_config(user_id)
     # Use content_language, fall back to legacy 'language' field, then default to 'en'
     return config.get("content_language", config.get("language", "en"))
 
@@ -541,7 +558,7 @@ async def improve_resume_preview_endpoint(
     if not job:
         raise HTTPException(status_code=404, detail="Job description not found")
 
-    language = _get_content_language()
+    language = _get_content_language(user_id=user.id)
     prompt_id = request.prompt_id or _get_default_prompt_id()
 
     stage = "load_job_keywords"
@@ -731,7 +748,7 @@ async def improve_resume_confirm_endpoint(
     feature_config = _load_feature_config()
     enable_cover_letter = feature_config.get("enable_cover_letter", False)
     enable_outreach = feature_config.get("enable_outreach_message", False)
-    language = _get_content_language()
+    language = _get_content_language(user_id=user.id)
 
     stage = "serialize_improved_data"
     detail = "Failed to confirm resume. Please try again."
@@ -879,7 +896,7 @@ async def improve_resume_endpoint(
     feature_config = _load_feature_config()
     enable_cover_letter = feature_config.get("enable_cover_letter", False)
     enable_outreach = feature_config.get("enable_outreach_message", False)
-    language = _get_content_language()
+    language = _get_content_language(user_id=user.id)
 
     try:
         # Extract keywords from job description
@@ -1349,7 +1366,7 @@ async def generate_cover_letter_endpoint(
         )
 
     # Get language setting
-    language = _get_content_language()
+    language = _get_content_language(user_id=user.id)
 
     # Generate cover letter
     try:
@@ -1426,7 +1443,7 @@ async def generate_outreach_endpoint(
         )
 
     # Get language setting
-    language = _get_content_language()
+    language = _get_content_language(user_id=user.id)
 
     # Generate outreach message
     try:

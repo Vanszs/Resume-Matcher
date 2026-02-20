@@ -423,11 +423,11 @@ export default function DashboardPage() {
                   {t('dashboard.statusLine', { status: getStatusDisplay().text })}
                 </div>
                 {processingStatus === 'failed' && (
-                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7 rounded-none border-black"
+                      className="text-xs h-7 rounded-none border-black whitespace-nowrap"
                       onClick={handleRetryProcessing}
                       disabled={isRetrying}
                     >
@@ -438,7 +438,7 @@ export default function DashboardPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7 rounded-none border-red-600 text-red-600 hover:bg-red-50"
+                      className="text-xs h-7 rounded-none border-red-600 text-red-600 hover:bg-red-50 whitespace-nowrap"
                       onClick={handleDeleteAndReupload}
                     >
                       {t('dashboard.deleteAndReupload')}
