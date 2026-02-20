@@ -34,7 +34,7 @@ from app.config import (
 from app.database import db
 from app.dependencies import get_current_user, get_current_admin
 
-router = APIRouter(prefix="/config", tags=["Configuration"], dependencies=[Depends(get_current_user)])
+router = APIRouter(prefix="/config", tags=["Configuration"])
 
 
 def _get_config_path() -> Path:
@@ -87,7 +87,7 @@ async def _log_llm_health_check(config: LLMConfig) -> None:
         )
 
 
-@router.get("/llm-api-key", response_model=LLMConfigResponse)
+@router.get("/llm-api-key", response_model=LLMConfigResponse, dependencies=[Depends(get_current_user)])
 async def get_llm_config_endpoint() -> LLMConfigResponse:
     """Get current LLM configuration (API key masked)."""
     stored = _load_config()
@@ -100,7 +100,7 @@ async def get_llm_config_endpoint() -> LLMConfigResponse:
     )
 
 
-@router.put("/llm-api-key", response_model=LLMConfigResponse)
+@router.put("/llm-api-key", response_model=LLMConfigResponse, dependencies=[Depends(get_current_user)])
 async def update_llm_config(
     request: LLMConfigRequest,
     background_tasks: BackgroundTasks,
@@ -148,7 +148,7 @@ async def update_llm_config(
     )
 
 
-@router.post("/llm-test")
+@router.post("/llm-test", dependencies=[Depends(get_current_user)])
 async def test_llm_connection(request: LLMConfigRequest | None = None) -> dict:
     """Test LLM connection with provided or stored configuration.
 
@@ -196,7 +196,7 @@ async def get_feature_config() -> FeatureConfigResponse:
     )
 
 
-@router.put("/features", response_model=FeatureConfigResponse)
+@router.put("/features", response_model=FeatureConfigResponse, dependencies=[Depends(get_current_user)])
 async def update_feature_config(request: FeatureConfigRequest) -> FeatureConfigResponse:
     """Update feature configuration."""
     stored = _load_config()
@@ -235,7 +235,7 @@ async def get_language_config() -> LanguageConfigResponse:
     )
 
 
-@router.put("/language", response_model=LanguageConfigResponse)
+@router.put("/language", response_model=LanguageConfigResponse, dependencies=[Depends(get_current_user)])
 async def update_language_config(
     request: LanguageConfigRequest,
 ) -> LanguageConfigResponse:
@@ -289,7 +289,7 @@ async def get_prompt_config() -> PromptConfigResponse:
     )
 
 
-@router.put("/prompts", response_model=PromptConfigResponse)
+@router.put("/prompts", response_model=PromptConfigResponse, dependencies=[Depends(get_current_user)])
 async def update_prompt_config(
     request: PromptConfigRequest,
 ) -> PromptConfigResponse:
@@ -334,7 +334,7 @@ def _mask_key_short(key: str | None) -> str | None:
     return "..." + key[-4:]
 
 
-@router.get("/api-keys", response_model=ApiKeyStatusResponse)
+@router.get("/api-keys", response_model=ApiKeyStatusResponse, dependencies=[Depends(get_current_user)])
 async def get_api_keys_status() -> ApiKeyStatusResponse:
     """Get status of all configured API keys (masked).
 
@@ -357,7 +357,7 @@ async def get_api_keys_status() -> ApiKeyStatusResponse:
     return ApiKeyStatusResponse(providers=providers)
 
 
-@router.post("/api-keys", response_model=ApiKeysUpdateResponse)
+@router.post("/api-keys", response_model=ApiKeysUpdateResponse, dependencies=[Depends(get_current_user)])
 async def update_api_keys(request: ApiKeysUpdateRequest) -> ApiKeysUpdateResponse:
     """Update API keys for one or more providers.
 
@@ -436,7 +436,7 @@ async def delete_all_api_keys(confirm: str | None = None, _admin=Depends(get_cur
     return {"message": "All API keys have been cleared"}
 
 
-@router.delete("/api-keys/{provider}")
+@router.delete("/api-keys/{provider}", dependencies=[Depends(get_current_user)])
 async def delete_api_key(provider: str) -> dict:
     """Delete API key for a specific provider.
 
