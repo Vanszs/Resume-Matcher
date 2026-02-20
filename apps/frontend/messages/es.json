@@ -698,6 +698,14 @@
       "unableToSaveConfiguration": "No se pudo guardar la configuración",
       "failedToClearApiKeys": "No se pudieron borrar las claves API. Inténtalo de nuevo.",
       "failedToResetDatabase": "No se pudo restablecer la base de datos. Inténtalo de nuevo."
+    },
+    "scopeDialogs": {
+      "clearApiKeysDescription": "Elige el alcance: borra solo tus claves API, o borra las claves de todos los usuarios.",
+      "clearMyKeysOnly": "Borrar solo mis claves",
+      "clearAllUsersKeys": "Borrar claves de todos",
+      "resetDatabaseDescription": "Elige el alcance: restablece solo tus datos, o restablece los datos de todos los usuarios.",
+      "resetMyDataOnly": "Restablecer solo mis datos",
+      "resetAllUsersData": "Restablecer datos de todos"
     }
   },
   "resumeViewer": {

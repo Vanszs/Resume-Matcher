@@ -698,6 +698,14 @@
       "unableToSaveConfiguration": "Tidak dapat menyimpan konfigurasi",
       "failedToClearApiKeys": "Gagal menghapus kunci API. Silakan coba lagi.",
       "failedToResetDatabase": "Gagal mereset database. Silakan coba lagi."
+    },
+    "scopeDialogs": {
+      "clearApiKeysDescription": "Pilih cakupan: hapus hanya kunci API Anda, atau hapus kunci API semua pengguna.",
+      "clearMyKeysOnly": "Hapus Kunci Saya Saja",
+      "clearAllUsersKeys": "Hapus Kunci Semua Pengguna",
+      "resetDatabaseDescription": "Pilih cakupan: reset hanya data Anda, atau reset data semua pengguna.",
+      "resetMyDataOnly": "Reset Data Saya Saja",
+      "resetAllUsersData": "Reset Data Semua Pengguna"
     }
   },
   "resumeViewer": {

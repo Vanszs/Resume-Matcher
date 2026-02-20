@@ -698,6 +698,14 @@
       "unableToSaveConfiguration": "設定を保存できません",
       "failedToClearApiKeys": "API キーの消去に失敗しました。もう一度お試しください。",
       "failedToResetDatabase": "データベースのリセットに失敗しました。もう一度お試しください。"
+    },
+    "scopeDialogs": {
+      "clearApiKeysDescription": "範囲を選択: 自分のAPIキーのみを消去、または全ユーザーのAPIキーを消去。",
+      "clearMyKeysOnly": "自分のキーのみ消去",
+      "clearAllUsersKeys": "全ユーザーのキーを消去",
+      "resetDatabaseDescription": "範囲を選択: 自分のデータのみリセット、または全ユーザーのデータをリセット。",
+      "resetMyDataOnly": "自分のデータのみリセット",
+      "resetAllUsersData": "全ユーザーのデータをリセット"
     }
   },
   "resumeViewer": {

@@ -698,6 +698,14 @@
       "unableToSaveConfiguration": "Não foi possível salvar a configuração",
       "failedToClearApiKeys": "Falha ao limpar chaves de API. Por favor, tente novamente.",
       "failedToResetDatabase": "Falha ao redefinir banco de dados. Por favor, tente novamente."
+    },
+    "scopeDialogs": {
+      "clearApiKeysDescription": "Escolha o escopo: limpar apenas suas chaves de API, ou limpar as chaves de todos os usuários.",
+      "clearMyKeysOnly": "Limpar apenas minhas chaves",
+      "clearAllUsersKeys": "Limpar chaves de todos",
+      "resetDatabaseDescription": "Escolha o escopo: redefinir apenas seus dados, ou redefinir os dados de todos os usuários.",
+      "resetMyDataOnly": "Redefinir apenas meus dados",
+      "resetAllUsersData": "Redefinir dados de todos"
     }
   },
   "resumeViewer": {

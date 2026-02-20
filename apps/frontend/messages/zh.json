@@ -698,6 +698,14 @@
       "unableToSaveConfiguration": "无法保存配置",
       "failedToClearApiKeys": "清除 API 密钥失败，请重试。",
       "failedToResetDatabase": "重置数据库失败，请重试。"
+    },
+    "scopeDialogs": {
+      "clearApiKeysDescription": "选择范围：仅清除您的API密钥，或清除所有用户的API密钥。",
+      "clearMyKeysOnly": "仅清除我的密钥",
+      "clearAllUsersKeys": "清除所有用户的密钥",
+      "resetDatabaseDescription": "选择范围：仅重置您的数据，或重置所有用户的数据。",
+      "resetMyDataOnly": "仅重置我的数据",
+      "resetAllUsersData": "重置所有用户的数据"
     }
   },
   "resumeViewer": {

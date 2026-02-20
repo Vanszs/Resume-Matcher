@@ -590,7 +590,7 @@ export default function SettingsPage() {
             className="flex items-center gap-1.5 border border-black bg-[#DC2626] text-white px-3 py-1.5 font-mono text-xs uppercase tracking-wider shadow-[2px_2px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
           >
             <LogOut className="w-3.5 h-3.5" />
-            Logout
+            {t('nav.logout')}
           </button>
         </div>
 
@@ -1217,26 +1217,28 @@ export default function SettingsPage() {
           <DialogHeader>
             <DialogTitle>{t('settings.clearApiKeys')}</DialogTitle>
             <DialogDescription>
-              Choose scope: clear only your API keys, or clear API keys for all users.
+              {t('settings.scopeDialogs.clearApiKeysDescription')}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black gap-2">
-            <Button variant="outline" onClick={() => setShowClearApiKeysScopeDialog(false)}>
+          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setShowClearApiKeysScopeDialog(false)} className="w-full sm:w-auto">
               {t('common.cancel')}
             </Button>
             <Button
               variant="warning"
               onClick={() => handleClearApiKeysWithScope('self')}
               disabled={isResetting}
+              className="w-full sm:w-auto"
             >
-              Clear Only My Keys
+              {t('settings.scopeDialogs.clearMyKeysOnly')}
             </Button>
             <Button
               variant="destructive"
               onClick={() => handleClearApiKeysWithScope('all')}
               disabled={isResetting}
+              className="w-full sm:w-auto"
             >
-              Clear All Users Keys
+              {t('settings.scopeDialogs.clearAllUsersKeys')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1247,26 +1249,28 @@ export default function SettingsPage() {
           <DialogHeader>
             <DialogTitle>{t('settings.resetDatabase')}</DialogTitle>
             <DialogDescription>
-              Choose scope: reset only your data, or reset all users data.
+              {t('settings.scopeDialogs.resetDatabaseDescription')}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black gap-2">
-            <Button variant="outline" onClick={() => setShowResetDatabaseScopeDialog(false)}>
+          <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setShowResetDatabaseScopeDialog(false)} className="w-full sm:w-auto">
               {t('common.cancel')}
             </Button>
             <Button
               variant="warning"
               onClick={() => handleResetDatabaseWithScope('self')}
               disabled={isResetting}
+              className="w-full sm:w-auto"
             >
-              Reset Only My Data
+              {t('settings.scopeDialogs.resetMyDataOnly')}
             </Button>
             <Button
               variant="destructive"
               onClick={() => handleResetDatabaseWithScope('all')}
               disabled={isResetting}
+              className="w-full sm:w-auto"
             >
-              Reset All Users Data
+              {t('settings.scopeDialogs.resetAllUsersData')}
             </Button>
           </DialogFooter>
         </DialogContent>

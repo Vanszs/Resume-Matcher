@@ -698,6 +698,14 @@
       "unableToSaveConfiguration": "Unable to save configuration",
       "failedToClearApiKeys": "Failed to clear API keys. Please try again.",
       "failedToResetDatabase": "Failed to reset database. Please try again."
+    },
+    "scopeDialogs": {
+      "clearApiKeysDescription": "Choose scope: clear only your API keys, or clear all users' API keys.",
+      "clearMyKeysOnly": "Clear My Keys Only",
+      "clearAllUsersKeys": "Clear All Users' Keys",
+      "resetDatabaseDescription": "Choose scope: reset only your data, or reset all users' data.",
+      "resetMyDataOnly": "Reset My Data Only",
+      "resetAllUsersData": "Reset All Users' Data"
     }
   },
   "resumeViewer": {
