@@ -44,7 +44,8 @@
     "tailor": "定制简历",
     "settings": "设置",
     "backToDashboard": "返回仪表板",
-    "goToSettings": "前往设置"
+    "goToSettings": "前往设置",
+    "admin": "管理面板"
   },
   "dashboard": {
     "title": "仪表板",

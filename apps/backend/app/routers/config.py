@@ -37,22 +37,38 @@ from app.dependencies import get_current_user, get_current_admin
 router = APIRouter(prefix="/config", tags=["Configuration"])
 
 
-def _get_config_path() -> Path:
-    """Get path to config storage file."""
+def _get_config_path(user_id: str | None = None) -> Path:
+    """Get path to config storage file.
+
+    If user_id is provided, returns the per-user config path so that each
+    user has an isolated settings file.  Falls back to the global config
+    path for backward-compatibility (e.g. public endpoints that don't have
+    a user context).
+    """
+    if user_id:
+        user_config_dir = settings.config_path.parent / "user_configs"
+        user_config_dir.mkdir(parents=True, exist_ok=True)
+        return user_config_dir / f"{user_id}.json"
     return settings.config_path
 
 
-def _load_config() -> dict:
+def _load_config(user_id: str | None = None) -> dict:
     """Load config from file."""
-    path = _get_config_path()
+    path = _get_config_path(user_id)
     if path.exists():
         return json.loads(path.read_text())
+    # For per-user configs fall back to global defaults so existing
+    # environment-variable / shared config still applies as a baseline.
+    if user_id:
+        global_path = _get_config_path()
+        if global_path.exists():
+            return json.loads(global_path.read_text())
     return {}
 
 
-def _save_config(config: dict) -> None:
+def _save_config(config: dict, user_id: str | None = None) -> None:
     """Save config to file."""
-    path = _get_config_path()
+    path = _get_config_path(user_id)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(config, indent=2))
 
@@ -87,10 +103,10 @@ async def _log_llm_health_check(config: LLMConfig) -> None:
         )
 
 
-@router.get("/llm-api-key", response_model=LLMConfigResponse, dependencies=[Depends(get_current_user)])
-async def get_llm_config_endpoint() -> LLMConfigResponse:
-    """Get current LLM configuration (API key masked)."""
-    stored = _load_config()
+@router.get("/llm-api-key", response_model=LLMConfigResponse)
+async def get_llm_config_endpoint(user=Depends(get_current_user)) -> LLMConfigResponse:
+    """Get current LLM configuration (API key masked, per-user)."""
+    stored = _load_config(user.id)
 
     return LLMConfigResponse(
         provider=stored.get("provider", settings.llm_provider),
@@ -100,12 +116,13 @@ async def get_llm_config_endpoint() -> LLMConfigResponse:
     )
 
 
-@router.put("/llm-api-key", response_model=LLMConfigResponse, dependencies=[Depends(get_current_user)])
+@router.put("/llm-api-key", response_model=LLMConfigResponse)
 async def update_llm_config(
     request: LLMConfigRequest,
     background_tasks: BackgroundTasks,
+    user=Depends(get_current_user),
 ) -> LLMConfigResponse:
-    """Update LLM configuration.
+    """Update LLM configuration (per-user).
 
     Saves the configuration and returns it (API key masked).
 
@@ -114,7 +131,7 @@ async def update_llm_config(
     still need to persist the configuration. Connectivity can be verified via
     `/config/llm-test` and the System Status panel.
     """
-    stored = _load_config()
+    stored = _load_config(user.id)
 
     # Update only provided fields
     if request.provider is not None:
@@ -135,7 +152,7 @@ async def update_llm_config(
     )
 
     # Save config regardless of health check outcome (see docstring).
-    _save_config(stored)
+    _save_config(stored, user.id)
 
     # Best-effort health check for server-side logs/diagnostics (do not block response).
     background_tasks.add_task(_log_llm_health_check, test_config)
@@ -148,14 +165,14 @@ async def update_llm_config(
     )
 
 
-@router.post("/llm-test", dependencies=[Depends(get_current_user)])
-async def test_llm_connection(request: LLMConfigRequest | None = None) -> dict:
-    """Test LLM connection with provided or stored configuration.
+@router.post("/llm-test")
+async def test_llm_connection(request: LLMConfigRequest | None = None, user=Depends(get_current_user)) -> dict:
+    """Test LLM connection with provided or stored configuration (per-user).
 
     If request body is provided, tests with those values (for pre-save testing).
     Otherwise, tests with the currently saved configuration.
     """
-    stored = _load_config()
+    stored = _load_config(user.id)
 
     # Build config: use request values if provided, otherwise fall back to stored/default
     config = LLMConfig(
@@ -186,9 +203,9 @@ async def test_llm_connection(request: LLMConfigRequest | None = None) -> dict:
 
 
 @router.get("/features", response_model=FeatureConfigResponse)
-async def get_feature_config() -> FeatureConfigResponse:
-    """Get current feature configuration."""
-    stored = _load_config()
+async def get_feature_config(user=Depends(get_current_user)) -> FeatureConfigResponse:
+    """Get current feature configuration (per-user)."""
+    stored = _load_config(user.id)
 
     return FeatureConfigResponse(
         enable_cover_letter=stored.get("enable_cover_letter", False),
@@ -196,10 +213,10 @@ async def get_feature_config() -> FeatureConfigResponse:
     )
 
 
-@router.put("/features", response_model=FeatureConfigResponse, dependencies=[Depends(get_current_user)])
-async def update_feature_config(request: FeatureConfigRequest) -> FeatureConfigResponse:
-    """Update feature configuration."""
-    stored = _load_config()
+@router.put("/features", response_model=FeatureConfigResponse)
+async def update_feature_config(request: FeatureConfigRequest, user=Depends(get_current_user)) -> FeatureConfigResponse:
+    """Update feature configuration (per-user)."""
+    stored = _load_config(user.id)
 
     # Update only provided fields
     if request.enable_cover_letter is not None:
@@ -208,7 +225,7 @@ async def update_feature_config(request: FeatureConfigRequest) -> FeatureConfigR
         stored["enable_outreach_message"] = request.enable_outreach_message
 
     # Save config
-    _save_config(stored)
+    _save_config(stored, user.id)
 
     return FeatureConfigResponse(
         enable_cover_letter=stored.get("enable_cover_letter", False),
@@ -221,9 +238,9 @@ SUPPORTED_LANGUAGES = ["en", "es", "zh", "ja", "pt"]
 
 
 @router.get("/language", response_model=LanguageConfigResponse)
-async def get_language_config() -> LanguageConfigResponse:
-    """Get current language configuration."""
-    stored = _load_config()
+async def get_language_config(user=Depends(get_current_user)) -> LanguageConfigResponse:
+    """Get current language configuration (per-user)."""
+    stored = _load_config(user.id)
 
     # Support legacy single 'language' field migration
     legacy_language = stored.get("language", "en")
@@ -235,12 +252,13 @@ async def get_language_config() -> LanguageConfigResponse:
     )
 
 
-@router.put("/language", response_model=LanguageConfigResponse, dependencies=[Depends(get_current_user)])
+@router.put("/language", response_model=LanguageConfigResponse)
 async def update_language_config(
     request: LanguageConfigRequest,
+    user=Depends(get_current_user),
 ) -> LanguageConfigResponse:
-    """Update language configuration."""
-    stored = _load_config()
+    """Update language configuration (per-user)."""
+    stored = _load_config(user.id)
 
     # Validate and update UI language
     if request.ui_language is not None:
@@ -261,7 +279,7 @@ async def update_language_config(
         stored["content_language"] = request.content_language
 
     # Save config
-    _save_config(stored)
+    _save_config(stored, user.id)
 
     # Support legacy single 'language' field migration
     legacy_language = stored.get("language", "en")
@@ -274,9 +292,9 @@ async def update_language_config(
 
 
 @router.get("/prompts", response_model=PromptConfigResponse)
-async def get_prompt_config() -> PromptConfigResponse:
-    """Get current prompt configuration for resume tailoring."""
-    stored = _load_config()
+async def get_prompt_config(user=Depends(get_current_user)) -> PromptConfigResponse:
+    """Get current prompt configuration for resume tailoring (per-user)."""
+    stored = _load_config(user.id)
     options = _get_prompt_options()
     option_ids = {option.id for option in options}
     default_prompt_id = stored.get("default_prompt_id", DEFAULT_IMPROVE_PROMPT_ID)
@@ -289,12 +307,13 @@ async def get_prompt_config() -> PromptConfigResponse:
     )
 
 
-@router.put("/prompts", response_model=PromptConfigResponse, dependencies=[Depends(get_current_user)])
+@router.put("/prompts", response_model=PromptConfigResponse)
 async def update_prompt_config(
     request: PromptConfigRequest,
+    user=Depends(get_current_user),
 ) -> PromptConfigResponse:
-    """Update prompt configuration for resume tailoring."""
-    stored = _load_config()
+    """Update prompt configuration for resume tailoring (per-user)."""
+    stored = _load_config(user.id)
     options = _get_prompt_options()
     option_ids = {option.id for option in options}
 
@@ -309,7 +328,7 @@ async def update_prompt_config(
             )
         stored["default_prompt_id"] = request.default_prompt_id
 
-    _save_config(stored)
+    _save_config(stored, user.id)
 
     default_prompt_id = stored.get("default_prompt_id", DEFAULT_IMPROVE_PROMPT_ID)
     if default_prompt_id not in option_ids:

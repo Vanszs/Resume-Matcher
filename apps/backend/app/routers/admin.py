@@ -9,6 +9,7 @@ from pydantic import BaseModel, EmailStr, field_validator
 from app.dependencies import get_current_admin
 from app.prisma_db import prisma
 from app.services.auth import get_password_hash
+from app.config import load_config_file, save_config_file
 
 logger = logging.getLogger(__name__)
 
@@ -297,3 +298,34 @@ async def list_roles() -> list[RoleResponse]:
         logger.error("Failed to list roles: %s", e)
         raise HTTPException(status_code=500, detail="Failed to retrieve roles.")
 
+
+# --- App-level settings ---
+
+class AppSettingsResponse(BaseModel):
+    register_enabled: bool
+
+
+class AppSettingsUpdate(BaseModel):
+    register_enabled: bool
+
+
+@router.get("/app-settings", response_model=AppSettingsResponse)
+async def get_app_settings(_admin=Depends(get_current_admin)) -> AppSettingsResponse:
+    """Get global application settings (admin only)."""
+    cfg = load_config_file()
+    return AppSettingsResponse(register_enabled=bool(cfg.get("register_enabled", False)))
+
+
+@router.patch("/app-settings", response_model=AppSettingsResponse)
+async def update_app_settings(
+    request: AppSettingsUpdate,
+    admin=Depends(get_current_admin),
+) -> AppSettingsResponse:
+    """Update global application settings (admin only)."""
+    cfg = load_config_file()
+    cfg["register_enabled"] = request.register_enabled
+    save_config_file(cfg)
+    logger.info(
+        "Admin %s set register_enabled=%s", admin.email, request.register_enabled
+    )
+    return AppSettingsResponse(register_enabled=request.register_enabled)

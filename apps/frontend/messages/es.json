@@ -44,7 +44,8 @@
     "tailor": "Personalizar CV",
     "settings": "Configuración",
     "backToDashboard": "Volver al Panel",
-    "goToSettings": "Ir a Configuración"
+    "goToSettings": "Ir a Configuración",
+    "admin": "Panel de Admin"
   },
   "dashboard": {
     "title": "Panel",

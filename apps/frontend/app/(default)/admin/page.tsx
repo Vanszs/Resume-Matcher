@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { apiFetch, apiPost, apiDelete } from '@/lib/api/client';
 import {
     ArrowLeft,
@@ -51,6 +52,10 @@ export default function AdminPage() {
     const [newRoleId, setNewRoleId] = useState('');
     const [addingUser, setAddingUser] = useState(false);
 
+    // App settings
+    const [registerEnabled, setRegisterEnabled] = useState(false);
+    const [togglingRegister, setTogglingRegister] = useState(false);
+
     // Feedback
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -62,9 +67,10 @@ export default function AdminPage() {
         setStatus('loading');
         setError(null);
         try {
-            const [usersRes, rolesRes] = await Promise.all([
+            const [usersRes, rolesRes, appSettingsRes] = await Promise.all([
                 apiFetch('/admin/users'),
                 apiFetch('/admin/roles'),
+                apiFetch('/admin/app-settings'),
             ]);
 
             if (usersRes.status === 403) {
@@ -84,6 +90,10 @@ export default function AdminPage() {
             setRoles(rolesData);
             if (rolesData.length > 0 && !newRoleId) {
                 setNewRoleId(rolesData[0].id);
+            }
+            if (appSettingsRes.ok) {
+                const appSettings = await appSettingsRes.json();
+                setRegisterEnabled(Boolean(appSettings.register_enabled));
             }
             setStatus('idle');
         } catch (err) {
@@ -151,6 +161,30 @@ export default function AdminPage() {
             await loadData();
         } catch (err: any) {
             setFeedback({ type: 'error', message: err.message || 'Failed to delete user' });
+        }
+    }
+
+    async function handleToggleRegister(enabled: boolean) {
+        setTogglingRegister(true);
+        try {
+            const res = await apiFetch('/admin/app-settings', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ register_enabled: enabled }),
+            });
+            if (!res.ok) throw new Error('Failed to update setting');
+            const data = await res.json();
+            setRegisterEnabled(data.register_enabled);
+            setFeedback({
+                type: 'success',
+                message: data.register_enabled
+                    ? 'Public registration is now ENABLED'
+                    : 'Public registration is now DISABLED',
+            });
+        } catch (err: any) {
+            setFeedback({ type: 'error', message: err.message || 'Failed to update setting' });
+        } finally {
+            setTogglingRegister(false);
         }
     }
 
@@ -246,6 +280,25 @@ export default function AdminPage() {
                                 </span>
                             </div>
                         </div>
+                    )}
+
+                    {/* App Settings */}
+                    {status !== 'error' && (
+                        <section className="space-y-4">
+                            <div className="flex items-center gap-2 border-b border-black/10 pb-2">
+                                <ToggleLeft className="w-4 h-4" />
+                                <h2 className="font-mono text-sm font-bold uppercase tracking-wider">
+                                    App Settings
+                                </h2>
+                            </div>
+                            <ToggleSwitch
+                                checked={registerEnabled}
+                                onCheckedChange={handleToggleRegister}
+                                disabled={togglingRegister}
+                                label="Public Registration"
+                                description="Allow anyone to create an account from the login page. New accounts are assigned the 'user' role."
+                            />
+                        </section>
                     )}
 
                     {/* User Management */}

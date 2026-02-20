@@ -44,7 +44,8 @@
     "tailor": "Tailor Resume",
     "settings": "Settings",
     "backToDashboard": "Back to Dashboard",
-    "goToSettings": "Go to Settings"
+    "goToSettings": "Go to Settings",
+    "admin": "Admin Panel"
   },
   "dashboard": {
     "title": "Dashboard",

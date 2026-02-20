@@ -44,7 +44,8 @@
     "tailor": "履歴書をカスタマイズ",
     "settings": "設定",
     "backToDashboard": "ダッシュボードに戻る",
-    "goToSettings": "設定へ"
+    "goToSettings": "設定へ",
+    "admin": "管理パネル"
   },
   "dashboard": {
     "title": "ダッシュボード",

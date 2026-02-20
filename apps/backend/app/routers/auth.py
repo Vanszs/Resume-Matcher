@@ -8,13 +8,95 @@ from slowapi.util import get_remote_address
 
 from app.prisma_db import prisma
 from app.schemas.auth import LoginRequest, TokenResponse
-from app.services.auth import create_access_token, verify_password
+from app.services.auth import create_access_token, get_password_hash, verify_password
+from app.config import load_config_file
 
 logger = logging.getLogger(__name__)
 
 limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(tags=["Authentication"])
+
+
+@router.get("/auth/register-status")
+async def get_register_status() -> dict:
+    """Public endpoint: returns whether self-registration is currently enabled."""
+    cfg = load_config_file()
+    return {"enabled": bool(cfg.get("register_enabled", False))}
+
+
+@router.post("/auth/register", response_model=TokenResponse)
+@limiter.limit("5/minute")
+async def register(request: Request, body: LoginRequest) -> TokenResponse:
+    """Self-register a new account.
+
+    Only works when the admin has enabled registration via the admin panel.
+    New accounts are assigned the default 'user' role automatically.
+    """
+    cfg = load_config_file()
+    if not cfg.get("register_enabled", False):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Registration is currently disabled. Contact an administrator.",
+        )
+
+    # Derive a username from the email local-part
+    username_base = body.email.split("@")[0].replace(".", "_").replace("+", "_")
+
+    try:
+        # Check email uniqueness
+        existing = await prisma.user.find_unique(where={"email": body.email})
+        if existing:
+            raise HTTPException(status_code=409, detail="An account with this email already exists.")
+
+        # Resolve the 'user' role (must exist, seeded at startup)
+        user_role = await prisma.role.find_unique(where={"name": "user"})
+        if not user_role:
+            # Fallback: create the role on-the-fly
+            user_role = await prisma.role.create(
+                data={"name": "user", "permissions": "[]"}
+            )
+
+        # Ensure username is unique (append counter if needed)
+        username = username_base
+        counter = 1
+        while await prisma.user.find_first(where={"username": username}):
+            username = f"{username_base}_{counter}"
+            counter += 1
+
+        hashed_password = get_password_hash(body.password)
+        new_user = await prisma.user.create(
+            data={
+                "email": body.email,
+                "username": username,
+                "passwordHash": hashed_password,
+                "roleId": user_role.id,
+                "isActive": True,
+            },
+            include={"role": True},
+        )
+
+        access_token = create_access_token(
+            data={"sub": new_user.id, "email": new_user.email, "role": new_user.role.name}
+        )
+
+        logger.info("New user registered: %s", new_user.email)
+
+        return TokenResponse(
+            access_token=access_token,
+            token_type="bearer",
+            user_id=new_user.id,
+            email=new_user.email,
+            role=new_user.role.name,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Registration failed for %s: %s", body.email, e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Registration failed. Please try again.",
+        )
 
 
 @router.post("/auth/login", response_model=TokenResponse)

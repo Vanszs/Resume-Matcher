@@ -44,7 +44,8 @@
     "tailor": "Personalizar Currículo",
     "settings": "Configurações",
     "backToDashboard": "Voltar ao Painel",
-    "goToSettings": "Ir para Configurações"
+    "goToSettings": "Ir para Configurações",
+    "admin": "Painel Admin"
   },
   "dashboard": {
     "title": "Painel",
