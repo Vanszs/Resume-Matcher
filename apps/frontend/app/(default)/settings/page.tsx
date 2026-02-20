@@ -28,6 +28,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Dropdown } from '@/components/ui/dropdown';
+import { MultiProviderConfig } from '@/components/settings/multi-provider-config';
 import {
   Dialog,
   DialogContent,
@@ -139,8 +140,8 @@ export default function SettingsPage() {
   // Danger Zone state
   const [showClearApiKeysDialog, setShowClearApiKeysDialog] = useState(false);
   const [showResetDatabaseDialog, setShowResetDatabaseDialog] = useState(false);
-    const [showClearApiKeysScopeDialog, setShowClearApiKeysScopeDialog] = useState(false);
-    const [showResetDatabaseScopeDialog, setShowResetDatabaseScopeDialog] = useState(false);
+  const [showClearApiKeysScopeDialog, setShowClearApiKeysScopeDialog] = useState(false);
+  const [showResetDatabaseScopeDialog, setShowResetDatabaseScopeDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessage, setSuccessDialogMessage] = useState({ title: '', description: '' });
   const [isResetting, setIsResetting] = useState(false);
@@ -508,7 +509,8 @@ export default function SettingsPage() {
       setError(null);
       setSuccessDialogMessage({
         title: t('common.success'),
-        description: scope === 'all' ? 'All users API keys have been cleared.' : t('common.keysCleared'),
+        description:
+          scope === 'all' ? 'All users API keys have been cleared.' : t('common.keysCleared'),
       });
       setShowSuccessDialog(true);
     } catch (err) {
@@ -537,8 +539,7 @@ export default function SettingsPage() {
       setError(null);
       setSuccessDialogMessage({
         title: t('common.success'),
-        description:
-          scope === 'all' ? 'All users data has been reset.' : t('common.databaseReset'),
+        description: scope === 'all' ? 'All users data has been reset.' : t('common.databaseReset'),
       });
       setShowSuccessDialog(true);
     } catch (err) {
@@ -774,6 +775,9 @@ export default function SettingsPage() {
             )}
           </section>
 
+          {/* Multi-Provider LLM Configuration */}
+          <MultiProviderConfig onConfigChange={() => refreshStatus(true)} />
+
           {/* LLM Configuration */}
           <section className="space-y-6">
             <div className="flex items-center gap-2 border-b border-black/10 pb-2">
@@ -807,18 +811,21 @@ export default function SettingsPage() {
                     })}
                   </p>
                   {/* Dynamic badge: shows when OpenRouter is in custom-endpoint mode */}
-                  {provider === 'openrouter' && apiBase.trim() && !apiBase.includes('openrouter.ai') && (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-blue-700 bg-blue-50 font-mono text-[10px] uppercase tracking-wider text-blue-700">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-700 inline-block" />
-                      Custom Endpoint
-                    </span>
-                  )}
-                  {provider === 'openrouter' && (!apiBase.trim() || apiBase.includes('openrouter.ai')) && (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-gray-400 bg-white font-mono text-[10px] uppercase tracking-wider text-gray-500">
-                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block" />
-                      OpenRouter Gateway
-                    </span>
-                  )}
+                  {provider === 'openrouter' &&
+                    apiBase.trim() &&
+                    !apiBase.includes('openrouter.ai') && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-blue-700 bg-blue-50 font-mono text-[10px] uppercase tracking-wider text-blue-700">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-700 inline-block" />
+                        Custom Endpoint
+                      </span>
+                    )}
+                  {provider === 'openrouter' &&
+                    (!apiBase.trim() || apiBase.includes('openrouter.ai')) && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-gray-400 bg-white font-mono text-[10px] uppercase tracking-wider text-gray-500">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-400 inline-block" />
+                        OpenRouter Gateway
+                      </span>
+                    )}
                 </div>
               </div>
 
@@ -830,7 +837,9 @@ export default function SettingsPage() {
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                   placeholder={
-                    provider === 'openrouter' && apiBase.trim() && !apiBase.includes('openrouter.ai')
+                    provider === 'openrouter' &&
+                    apiBase.trim() &&
+                    !apiBase.includes('openrouter.ai')
                       ? (providerInfo.customBaseModelPlaceholder ?? providerInfo.defaultModel)
                       : providerInfo.defaultModel
                   }
@@ -892,7 +901,10 @@ export default function SettingsPage() {
                     className="font-mono"
                   />
                   {/* Dynamic description based on mode */}
-                  {provider === 'openrouter' && apiBase.trim() && !apiBase.includes('openrouter.ai') && providerInfo.customBaseHint ? (
+                  {provider === 'openrouter' &&
+                  apiBase.trim() &&
+                  !apiBase.includes('openrouter.ai') &&
+                  providerInfo.customBaseHint ? (
                     <p className="text-xs text-blue-700 font-mono border-l-2 border-blue-700 pl-2">
                       {providerInfo.customBaseHint}
                     </p>
@@ -1157,7 +1169,9 @@ export default function SettingsPage() {
                   variant="destructive"
                   className="w-full"
                   onClick={() =>
-                    isAdmin ? setShowResetDatabaseScopeDialog(true) : setShowResetDatabaseDialog(true)
+                    isAdmin
+                      ? setShowResetDatabaseScopeDialog(true)
+                      : setShowResetDatabaseDialog(true)
                   }
                   disabled={isResetting}
                 >

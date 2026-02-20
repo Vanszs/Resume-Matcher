@@ -152,7 +152,8 @@ export const PROVIDER_INFO: Record<
     defaultModel: 'deepseek/deepseek-chat',
     requiresKey: true,
     supportsCustomBase: true,
-    customBaseHint: 'Custom endpoint mode — model name is sent as-is to your endpoint (e.g. deepseek/deepseek-v3.2, openai/gpt-oss-120b)',
+    customBaseHint:
+      'Custom endpoint mode — model name is sent as-is to your endpoint (e.g. deepseek/deepseek-v3.2, openai/gpt-oss-120b)',
     customBaseModelPlaceholder: 'e.g. deepseek/deepseek-v3.2',
   },
   gemini: {
@@ -402,5 +403,80 @@ export async function resetDatabase(scope: 'self' | 'all' = 'self'): Promise<voi
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.detail || `Failed to reset database (status ${res.status}).`);
+  }
+}
+
+// =============================================
+// Multi-Provider LLM Configuration (User-Level)
+// =============================================
+
+export interface UserLLMConfig {
+  id: string;
+  provider: LLMProvider;
+  api_key_masked: string | null;
+  model: string | null;
+  base_url: string | null;
+  is_default: boolean;
+}
+
+export interface UserLLMConfigInput {
+  provider: LLMProvider;
+  api_key?: string | null;
+  model?: string | null;
+  base_url?: string | null;
+  is_default?: boolean;
+}
+
+// Fetch all LLM configurations for current user
+export async function fetchUserLLMConfigs(): Promise<UserLLMConfig[]> {
+  const res = await apiFetch('/user/llm-config', { credentials: 'include' });
+
+  if (!res.ok) {
+    throw new Error(`Failed to load LLM configs (status ${res.status}).`);
+  }
+
+  return res.json();
+}
+
+// Create or update LLM config for a provider
+export async function upsertUserLLMConfig(config: UserLLMConfigInput): Promise<UserLLMConfig> {
+  const res = await apiFetch('/user/llm-config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(config),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || `Failed to save LLM config (status ${res.status}).`);
+  }
+
+  return res.json();
+}
+
+// Set a provider as default
+export async function setDefaultProvider(provider: LLMProvider): Promise<void> {
+  const res = await apiFetch(`/user/llm-config/${provider}/set-default`, {
+    method: 'PUT',
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || `Failed to set default provider (status ${res.status}).`);
+  }
+}
+
+// Delete LLM config for a provider
+export async function deleteUserLLMConfig(provider: LLMProvider): Promise<void> {
+  const res = await apiFetch(`/user/llm-config/${provider}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.detail || `Failed to delete LLM config (status ${res.status}).`);
   }
 }

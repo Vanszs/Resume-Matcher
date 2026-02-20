@@ -1,6 +1,7 @@
 {
   "common": {
     "save": "Save",
+    "saved": "Saved",
     "saving": "Saving...",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -16,6 +17,7 @@
     "confirm": "Confirm",
     "back": "Back",
     "retry": "Retry",
+    "refresh": "Refresh",
     "next": "Next",
     "continue": "Continue",
     "finish": "Finish",
@@ -639,6 +641,7 @@
       "defaultModel": "DEFAULT: {model}",
       "apiKeyLabel": "API Key",
       "apiKeyOptionalForOllama": "(Optional for Ollama)",
+      "optional": "optional",
       "apiKeyPlaceholder": "sk-...",
       "apiKeyNotRequiredPlaceholder": "Not required for local models",
       "leaveBlankToKeepExistingKey": "LEAVE BLANK TO KEEP EXISTING KEY",
@@ -697,7 +700,32 @@
       "unknownProvider": "Unknown provider returned from backend: {provider}",
       "unableToSaveConfiguration": "Unable to save configuration",
       "failedToClearApiKeys": "Failed to clear API keys. Please try again.",
-      "failedToResetDatabase": "Failed to reset database. Please try again."
+      "failedToResetDatabase": "Failed to reset database. Please try again.",
+      "failedToSave": "Failed to save configuration.",
+      "failedToSetDefault": "Failed to set default provider.",
+      "failedToLoadConfigs": "Failed to load configurations."
+    },
+    "scopeDialog": {
+      "clearKeysDescription": "Choose which API keys to clear. This action cannot be undone.",
+      "resetDatabaseDescription": "Choose which data to reset. This action cannot be undone.",
+      "myDataOnly": "My Data Only",
+      "myKeysOnlyDesc": "Clear only your personal API keys",
+      "myDataOnlyDesc": "Reset only your resumes, jobs, and settings",
+      "allUsers": "All Users Data",
+      "allUsersKeysDesc": "Clear API keys for ALL users (Admin only)",
+      "allUsersDataDesc": "Reset ALL users data (Admin only)"
+    },
+    "multiProvider": {
+      "title": "LLM Provider Configuration",
+      "description": "Configure multiple AI providers. Set one as active to use for resume tailoring.",
+      "configuredProviders": "Configured",
+      "activeProvider": "Active",
+      "noneSet": "None",
+      "configured": "Configured",
+      "notConfigured": "Not configured",
+      "useAsActive": "Use This Provider",
+      "currentlyActive": "Currently active provider",
+      "keyStored": "API key stored (leave blank to keep)"
     }
   },
   "resumeViewer": {

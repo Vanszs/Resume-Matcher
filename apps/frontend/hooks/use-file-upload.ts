@@ -375,13 +375,13 @@ export const useFileUpload = (
           !multiple && state.files.length > 0
             ? false // In single mode, we already cleared
             : state.files.some(
-              (existingFwp) =>
-                existingFwp.file.name === file.name &&
-                existingFwp.file.size === file.size &&
-                (existingFwp.file instanceof File
-                  ? existingFwp.file.lastModified === file.lastModified
-                  : true)
-            );
+                (existingFwp) =>
+                  existingFwp.file.name === file.name &&
+                  existingFwp.file.size === file.size &&
+                  (existingFwp.file instanceof File
+                    ? existingFwp.file.lastModified === file.lastModified
+                    : true)
+              );
         if (isDuplicate) continue;
 
         const validationError = validateFile(file);
