@@ -20,6 +20,49 @@ is_port_in_use() {
     ss -ltn 2>/dev/null | grep -qE "[\[\:]$port([[:space:]]|$)"
 }
 
+# Wait until a TCP port starts listening, with timeout (seconds).
+wait_for_port() {
+    local port=$1
+    local name=$2
+    local timeout_seconds=${3:-30}
+    local elapsed=0
+
+    while [ "$elapsed" -lt "$timeout_seconds" ]; do
+        if is_port_in_use "$port"; then
+            echo "$name is listening on port $port"
+            return 0
+        fi
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+
+    echo "ERROR: Timed out waiting for $name on port $port"
+    return 1
+}
+
+# Wait for an HTTP endpoint to return an expected status code.
+wait_for_http_status() {
+    local url=$1
+    local expected_status=$2
+    local label=$3
+    local timeout_seconds=${4:-30}
+    local elapsed=0
+    local status=""
+
+    while [ "$elapsed" -lt "$timeout_seconds" ]; do
+        status="$(curl -sS -o /dev/null -w "%{http_code}" "$url" || true)"
+        if [ "$status" = "$expected_status" ]; then
+            echo "$label is ready ($status)"
+            return 0
+        fi
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+
+    echo "ERROR: Timed out waiting for $label (last status: ${status:-n/a})"
+    return 1
+}
+
 # Get listener PIDs for a TCP port (newline-separated).
 port_listener_pids() {
     local port=$1
@@ -175,6 +218,11 @@ echo "Starting frontend from: $STANDALONE_SERVER_DIR"
 screen -dmS resume-frontend bash -c "cd '$STANDALONE_SERVER_DIR' && PORT=$FRONTEND_PORT '$NODE_BIN' server.js"
 cd ../..
 
+# Wait for frontend to be up and serving critical SEO endpoints
+wait_for_port "$FRONTEND_PORT" "Frontend" 30
+wait_for_http_status "http://127.0.0.1:$FRONTEND_PORT/sitemap.xml" "200" "Frontend sitemap" 30
+wait_for_http_status "http://127.0.0.1:$FRONTEND_PORT/robots.txt" "200" "Frontend robots" 30
+
 # Restart or Start Backend Screen
 echo "Restarting Backend (resume-backend)..."
 screen -S resume-backend -X quit || true
@@ -187,5 +235,8 @@ free_port $BACKEND_PORT "Backend"
 source venv/bin/activate
 screen -dmS resume-backend python -m uvicorn app.main:app --host 127.0.0.1 --port $BACKEND_PORT
 cd ../..
+
+# Wait for backend port to be up
+wait_for_port "$BACKEND_PORT" "Backend" 30
 
 echo "Deployment completed successfully! Both apps are running in background screen sessions."

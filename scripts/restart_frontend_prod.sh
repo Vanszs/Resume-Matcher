@@ -7,6 +7,28 @@ PORT="${FRONTEND_PORT:-3000}"
 
 cd "$FRONTEND_DIR"
 
+wait_for_http_status() {
+  local url="$1"
+  local expected_status="$2"
+  local label="$3"
+  local timeout_seconds="${4:-30}"
+  local elapsed=0
+  local status=""
+
+  while [ "$elapsed" -lt "$timeout_seconds" ]; do
+    status="$(curl -sS -o /dev/null -w "%{http_code}" "$url" || true)"
+    if [ "$status" = "$expected_status" ]; then
+      echo "$label is ready ($status)"
+      return 0
+    fi
+    sleep 1
+    elapsed=$((elapsed + 1))
+  done
+
+  echo "ERROR: Timed out waiting for $label (last status: ${status:-n/a})"
+  return 1
+}
+
 echo "[1/5] Building frontend..."
 npm run build
 
@@ -44,5 +66,5 @@ echo "[5/5] Starting frontend from $SERVER_DIR on port $PORT..."
 screen -dmS resume-frontend-prod bash -lc "cd '$SERVER_DIR' && PORT=$PORT '$NODE_BIN' server.js"
 
 echo "Done. Verifying endpoints..."
-curl -sS -o /dev/null -w "sitemap: %{http_code}\n" "http://127.0.0.1:$PORT/sitemap.xml"
-curl -sS -o /dev/null -w "robots: %{http_code}\n" "http://127.0.0.1:$PORT/robots.txt"
+wait_for_http_status "http://127.0.0.1:$PORT/sitemap.xml" "200" "sitemap" 30
+wait_for_http_status "http://127.0.0.1:$PORT/robots.txt" "200" "robots" 30
