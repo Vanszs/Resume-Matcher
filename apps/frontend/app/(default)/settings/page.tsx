@@ -1218,7 +1218,7 @@ export default function SettingsPage() {
         onConfirm={() => setShowSuccessDialog(false)}
       />
 
-      <Dialog open={showClearApiKeysScopeDialog} onOpenChange={setShowClearApiKeysScopeDialog}>
+      <Dialog open={showClearApiKeysScopeDialog} onOpenChange={(open) => !isResetting && setShowClearApiKeysScopeDialog(open)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('settings.clearApiKeys')}</DialogTitle>
@@ -1227,7 +1227,7 @@ export default function SettingsPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 border-t border-black bg-[#E5E5E0] p-4">
-            <Button variant="outline" onClick={() => setShowClearApiKeysScopeDialog(false)} className="w-full sm:w-auto">
+            <Button variant="outline" onClick={() => setShowClearApiKeysScopeDialog(false)} disabled={isResetting} className="w-full sm:w-auto">
               {t('common.cancel')}
             </Button>
             <Button
@@ -1236,6 +1236,7 @@ export default function SettingsPage() {
               disabled={isResetting}
               className="w-full sm:w-auto"
             >
+              {isResetting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
               {t('settings.scopeDialogs.clearMyKeysOnly')}
             </Button>
             <Button
@@ -1244,13 +1245,14 @@ export default function SettingsPage() {
               disabled={isResetting}
               className="w-full sm:w-auto"
             >
+              {isResetting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
               {t('settings.scopeDialogs.clearAllUsersKeys')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showResetDatabaseScopeDialog} onOpenChange={setShowResetDatabaseScopeDialog}>
+      <Dialog open={showResetDatabaseScopeDialog} onOpenChange={(open) => !isResetting && setShowResetDatabaseScopeDialog(open)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('settings.resetDatabase')}</DialogTitle>
@@ -1259,7 +1261,7 @@ export default function SettingsPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 border-t border-black bg-[#E5E5E0] p-4">
-            <Button variant="outline" onClick={() => setShowResetDatabaseScopeDialog(false)} className="w-full sm:w-auto">
+            <Button variant="outline" onClick={() => setShowResetDatabaseScopeDialog(false)} disabled={isResetting} className="w-full sm:w-auto">
               {t('common.cancel')}
             </Button>
             <Button
@@ -1268,6 +1270,7 @@ export default function SettingsPage() {
               disabled={isResetting}
               className="w-full sm:w-auto"
             >
+              {isResetting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
               {t('settings.scopeDialogs.resetMyDataOnly')}
             </Button>
             <Button
@@ -1276,6 +1279,7 @@ export default function SettingsPage() {
               disabled={isResetting}
               className="w-full sm:w-auto"
             >
+              {isResetting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
               {t('settings.scopeDialogs.resetAllUsersData')}
             </Button>
           </DialogFooter>
