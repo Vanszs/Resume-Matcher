@@ -112,7 +112,9 @@ free_port() {
         pids="$(port_listener_pids "$port")"
         if [ -n "$pids" ]; then
             echo "$pids" | xargs -r kill -TERM >/dev/null 2>&1 || true
-        elif command -v sudo >/dev/null 2>&1; then
+        fi
+        # Always try sudo fuser as fallback to handle root-owned processes
+        if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
             sudo -n fuser -k "${port}/tcp" >/dev/null 2>&1 || true
         fi
 
@@ -218,6 +220,7 @@ echo "=== Screen Session Management ==="
 # Restart or Start Frontend Screen
 echo "Restarting Frontend (resume-frontend)..."
 screen -S resume-frontend -X quit || true
+screen -S resume-frontend-prod -X quit || true
 cd apps/frontend
 # Give it a moment to properly quit
 sleep 2

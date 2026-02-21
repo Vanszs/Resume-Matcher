@@ -1,4 +1,7 @@
 #!/bin/bash
+# WARNING: Do NOT run this script with sudo. Running as root creates a root-owned
+# screen session that the deploy user cannot kill, causing EADDRINUSE on next deploy.
+# Correct usage: bash scripts/restart_frontend_prod.sh
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
