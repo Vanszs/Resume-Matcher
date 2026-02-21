@@ -150,6 +150,8 @@ echo "=== Frontend Setup ==="
 cd apps/frontend
 echo "Installing Node dependencies..."
 npm install
+echo "Cleaning previous build artifacts..."
+rm -rf .next || true
 echo "Building Next.js app..."
 npm run build
 
