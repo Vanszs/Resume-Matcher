@@ -30,6 +30,21 @@ import { useStatusCache } from '@/lib/context/status-cache';
 import { API_BASE } from '@/lib/api/client';
 
 type ProcessingStatus = 'pending' | 'processing' | 'ready' | 'failed' | 'loading';
+type ResumeProcessingStatus = ResumeListItem['processing_status'];
+
+const VALID_RESUME_PROCESSING_STATUSES: readonly ResumeProcessingStatus[] = [
+  'pending',
+  'processing',
+  'ready',
+  'failed',
+];
+
+function asResumeProcessingStatus(value: unknown): ResumeProcessingStatus | null {
+  return typeof value === 'string' &&
+    (VALID_RESUME_PROCESSING_STATUSES as readonly string[]).includes(value)
+    ? (value as ResumeProcessingStatus)
+    : null;
+}
 
 const RESUME_LIST_CACHE_KEY = 'rm_dashboard_cache';
 
@@ -295,7 +310,14 @@ export default function DashboardPage() {
 
     es.onmessage = (event) => {
       try {
-        const updates: Record<string, string> = JSON.parse(event.data);
+        const rawUpdates = JSON.parse(event.data) as Record<string, unknown>;
+        const updates: Record<string, ResumeProcessingStatus> = {};
+        for (const [id, status] of Object.entries(rawUpdates)) {
+          const parsedStatus = asResumeProcessingStatus(status);
+          if (parsedStatus) {
+            updates[id] = parsedStatus;
+          }
+        }
 
         // Update master status silently (no loading flash)
         if (masterResumeId && updates[masterResumeId]) {
