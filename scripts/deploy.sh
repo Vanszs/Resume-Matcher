@@ -1,8 +1,18 @@
 #!/bin/bash
 # Deployment script for Resume Matcher on resume.bevansatria.my.id
 # This script manages pulling code, installing dependencies, building Next.js, and handling screen sessions.
+#
+# WARNING: Do NOT run with sudo. All processes must be owned by the deploy user.
+# Running with sudo creates root-owned screen sessions that cannot be killed on next deploy.
 
 set -e
+
+# Refuse to run as root/sudo - prevents root-owned screen sessions
+if [ "$(id -u)" -eq 0 ]; then
+    echo "ERROR: Do NOT run this script as root or with sudo."
+    echo "Run as your normal deploy user: bash scripts/deploy.sh"
+    exit 1
+fi
 
 # Define default ports or use environment variables
 FRONTEND_PORT="${FRONTEND_PORT:-3000}"
@@ -96,6 +106,8 @@ check_port() {
 }
 
 # Try to free a TCP port by terminating processes bound to it.
+# NOTE: This only kills user-owned processes. If a root-owned process holds the port,
+# manual intervention is required (sudo fuser -k <port>/tcp).
 free_port() {
     local port=$1
     local name=$2
@@ -108,36 +120,46 @@ free_port() {
 
     echo "$name port $port is in use. Attempting to stop existing process..."
 
+    # Try graceful termination first (SIGTERM)
     for attempt in 1 2 3; do
         pids="$(port_listener_pids "$port")"
         if [ -n "$pids" ]; then
-            echo "$pids" | xargs -r kill -TERM >/dev/null 2>&1 || true
+            echo "Sending SIGTERM to PIDs: $pids"
+            echo "$pids" | xargs -r kill -TERM 2>/dev/null || true
         fi
-        # Always try sudo fuser as fallback to handle root-owned processes
-        if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
-            sudo -n fuser -k "${port}/tcp" >/dev/null 2>&1 || true
-        fi
+        # Also try fuser (user-level, no sudo)
+        fuser -k "${port}/tcp" 2>/dev/null || true
 
         sleep 1
         if ! is_port_in_use "$port"; then
-            break
+            echo "$name port $port is now free."
+            return 0
         fi
     done
 
+    # Force kill (SIGKILL) as last resort
     if is_port_in_use "$port"; then
         pids="$(port_listener_pids "$port")"
         if [ -n "$pids" ]; then
-            echo "$pids" | xargs -r kill -KILL >/dev/null 2>&1 || true
+            echo "Sending SIGKILL to PIDs: $pids"
+            echo "$pids" | xargs -r kill -KILL 2>/dev/null || true
         fi
-
-        if is_port_in_use "$port" && command -v sudo >/dev/null 2>&1; then
-            sudo -n fuser -k -9 "${port}/tcp" >/dev/null 2>&1 || true
-        fi
-
+        fuser -k -9 "${port}/tcp" 2>/dev/null || true
         sleep 1
     fi
 
-    check_port "$port" "$name"
+    # Final check - if still in use, it's likely a root-owned process
+    if is_port_in_use "$port"; then
+        echo "ERROR: Port $port is still in use and cannot be freed."
+        echo "This usually means a root-owned process is holding the port."
+        echo "Run manually on server: sudo fuser -k ${port}/tcp"
+        if command -v lsof >/dev/null 2>&1; then
+            echo "Port owner info:"
+            lsof -nP -iTCP:"$port" -sTCP:LISTEN 2>/dev/null || true
+        fi
+        exit 1
+    fi
+
     echo "$name port $port is now free."
 }
 
@@ -156,6 +178,7 @@ echo "Cleaning previous build artifacts..."
 if [ -d ".next" ]; then
     rm -rf .next 2>/dev/null || true
 
+    # If rm failed, try moving to quarantine
     if [ -d ".next" ]; then
         stale_next_dir=".next.stale.$(date +%Y%m%d%H%M%S)"
         if mv .next "$stale_next_dir" 2>/dev/null; then
@@ -163,14 +186,13 @@ if [ -d ".next" ]; then
         fi
     fi
 
-    if [ -d ".next" ] && command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
-        echo "Detected protected .next files; removing with sudo..."
-        sudo -n rm -rf .next || true
-    fi
-
+    # If still exists, ownership is wrong - give clear manual fix instruction
     if [ -d ".next" ]; then
         echo "ERROR: Unable to clean apps/frontend/.next due to permissions."
-        echo "Fix ownership once on server: sudo chown -R \"$(id -u):$(id -g)\" apps/frontend/.next"
+        echo "This happens when .next was created by a different user (e.g., root)."
+        echo "Fix ownership once on server:"
+        echo "  sudo chown -R \$(id -u):\$(id -g) apps/frontend/.next"
+        echo "  rm -rf apps/frontend/.next"
         exit 1
     fi
 fi

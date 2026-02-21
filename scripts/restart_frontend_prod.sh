@@ -1,8 +1,20 @@
 #!/bin/bash
-# WARNING: Do NOT run this script with sudo. Running as root creates a root-owned
+# Restart frontend in production without full deploy.
+# Use this for quick restarts after manual changes.
+#
+# WARNING: Do NOT run with sudo. Running as root creates a root-owned
 # screen session that the deploy user cannot kill, causing EADDRINUSE on next deploy.
+#
 # Correct usage: bash scripts/restart_frontend_prod.sh
+
 set -euo pipefail
+
+# Refuse to run as root/sudo
+if [ "$(id -u)" -eq 0 ]; then
+    echo "ERROR: Do NOT run this script as root or with sudo."
+    echo "Run as your normal deploy user: bash scripts/restart_frontend_prod.sh"
+    exit 1
+fi
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 FRONTEND_DIR="$REPO_ROOT/apps/frontend"
@@ -57,16 +69,28 @@ fi
 NODE_BIN="$(command -v node)"
 
 echo "[3/5] Stopping previous frontend screen sessions..."
-screen -S resume-frontend-prod -X quit || true
-screen -S resume-frontend -X quit || true
+# Kill both session names for legacy cleanup
+screen -S resume-frontend -X quit 2>/dev/null || true
+screen -S resume-frontend-prod -X quit 2>/dev/null || true
 sleep 1
 
 echo "[4/5] Freeing port $PORT..."
+# Try to free port (user-level only, no sudo)
 fuser -k "$PORT"/tcp 2>/dev/null || true
 sleep 1
 
+# Verify port is free
+if lsof -nP -iTCP:"$PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+    echo "ERROR: Port $PORT is still in use and cannot be freed."
+    echo "This usually means a root-owned process is holding the port."
+    echo "Run manually: sudo fuser -k ${PORT}/tcp"
+    lsof -nP -iTCP:"$PORT" -sTCP:LISTEN 2>/dev/null || true
+    exit 1
+fi
+
 echo "[5/5] Starting frontend from $SERVER_DIR on port $PORT..."
-screen -dmS resume-frontend-prod bash -lc "cd '$SERVER_DIR' && PORT=$PORT '$NODE_BIN' server.js"
+# Use unified session name 'resume-frontend' to match deploy.sh
+screen -dmS resume-frontend bash -lc "cd '$SERVER_DIR' && PORT=$PORT HOSTNAME=127.0.0.1 '$NODE_BIN' server.js"
 
 echo "Done. Verifying endpoints..."
 wait_for_http_status "http://127.0.0.1:$PORT/sitemap.xml" "200" "sitemap" 30
