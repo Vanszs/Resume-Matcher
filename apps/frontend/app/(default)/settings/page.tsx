@@ -1228,27 +1228,29 @@ export default function SettingsPage() {
               {t('settings.scopeDialogs.clearApiKeysDescription')}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="border-t border-black bg-[#E5E5E0]">
-            <Button variant="outline" onClick={() => setShowClearApiKeysScopeDialog(false)} disabled={isResetting} className="w-full sm:w-auto">
+          <DialogFooter className="border-t border-black bg-[#E5E5E0] !flex-col gap-3">
+            <div className="flex gap-2 w-full">
+              <Button
+                variant="warning"
+                onClick={() => handleClearApiKeysWithScope('self')}
+                disabled={isResetting}
+                className="flex-1"
+              >
+                {isResetting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                {t('settings.scopeDialogs.clearMyKeysOnly')}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => handleClearApiKeysWithScope('all')}
+                disabled={isResetting}
+                className="flex-1"
+              >
+                {isResetting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                {t('settings.scopeDialogs.clearAllUsersKeys')}
+              </Button>
+            </div>
+            <Button variant="outline" onClick={() => setShowClearApiKeysScopeDialog(false)} disabled={isResetting} className="w-full">
               {t('common.cancel')}
-            </Button>
-            <Button
-              variant="warning"
-              onClick={() => handleClearApiKeysWithScope('self')}
-              disabled={isResetting}
-              className="w-full sm:w-auto"
-            >
-              {isResetting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-              {t('settings.scopeDialogs.clearMyKeysOnly')}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleClearApiKeysWithScope('all')}
-              disabled={isResetting}
-              className="w-full sm:w-auto"
-            >
-              {isResetting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-              {t('settings.scopeDialogs.clearAllUsersKeys')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1262,27 +1264,29 @@ export default function SettingsPage() {
               {t('settings.scopeDialogs.resetDatabaseDescription')}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="border-t border-black bg-[#E5E5E0]">
-            <Button variant="outline" onClick={() => setShowResetDatabaseScopeDialog(false)} disabled={isResetting} className="w-full sm:w-auto">
+          <DialogFooter className="border-t border-black bg-[#E5E5E0] !flex-col gap-3">
+            <div className="flex gap-2 w-full">
+              <Button
+                variant="warning"
+                onClick={() => handleResetDatabaseWithScope('self')}
+                disabled={isResetting}
+                className="flex-1"
+              >
+                {isResetting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                {t('settings.scopeDialogs.resetMyDataOnly')}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => handleResetDatabaseWithScope('all')}
+                disabled={isResetting}
+                className="flex-1"
+              >
+                {isResetting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                {t('settings.scopeDialogs.resetAllUsersData')}
+              </Button>
+            </div>
+            <Button variant="outline" onClick={() => setShowResetDatabaseScopeDialog(false)} disabled={isResetting} className="w-full">
               {t('common.cancel')}
-            </Button>
-            <Button
-              variant="warning"
-              onClick={() => handleResetDatabaseWithScope('self')}
-              disabled={isResetting}
-              className="w-full sm:w-auto"
-            >
-              {isResetting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-              {t('settings.scopeDialogs.resetMyDataOnly')}
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => handleResetDatabaseWithScope('all')}
-              disabled={isResetting}
-              className="w-full sm:w-auto"
-            >
-              {isResetting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-              {t('settings.scopeDialogs.resetAllUsersData')}
             </Button>
           </DialogFooter>
         </DialogContent>
