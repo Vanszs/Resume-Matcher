@@ -578,20 +578,22 @@ export default function SettingsPage() {
               {t('settings.subtitle')}
             </p>
           </div>
-          <Link href="/dashboard">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="w-4 h-4" />
-              {t('common.back')}
-            </Button>
-          </Link>
-          <button
-            type="button"
-            onClick={() => logout()}
-            className="flex items-center gap-1.5 border border-black bg-[#DC2626] text-white px-3 py-1.5 font-mono text-xs uppercase tracking-wider shadow-[2px_2px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            {t('nav.logout')}
-          </button>
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard">
+              <Button variant="outline" size="sm">
+                <ArrowLeft className="w-4 h-4" />
+                {t('common.back')}
+              </Button>
+            </Link>
+            <button
+              type="button"
+              onClick={() => logout()}
+              className="flex items-center gap-1.5 border border-black bg-[#DC2626] text-white px-3 py-1.5 font-mono text-xs uppercase tracking-wider shadow-[2px_2px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              {t('nav.logout')}
+            </button>
+          </div>
         </div>
 
         <div className="p-8 space-y-10">
