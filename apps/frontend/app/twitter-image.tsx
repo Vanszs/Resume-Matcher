@@ -1,2 +1,8 @@
-// Twitter card image — re-uses the same generated OG image
-export { default, alt, size, contentType, runtime } from './opengraph-image';
+import OgImage from './opengraph-image';
+
+export const runtime = 'edge';
+export const alt = 'Resume Matcher — Free AI Resume Tailoring Tool';
+export const size = { width: 1200, height: 630 };
+export const contentType = 'image/png';
+
+export default OgImage;
