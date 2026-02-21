@@ -19,14 +19,30 @@ FRONTEND_PORT="${FRONTEND_PORT:-3000}"
 BACKEND_PORT="${BACKEND_PORT:-8000}"
 
 # Return success when there is a LISTEN socket on the given TCP port.
+# Uses actual connection test (nc/curl) first, since lsof often can't see
+# sockets from screen daemon processes without elevated permissions.
 is_port_in_use() {
     local port=$1
 
+    # Method 1: Try actual TCP connection with nc (most reliable)
+    if command -v nc >/dev/null 2>&1; then
+        nc -z 127.0.0.1 "$port" >/dev/null 2>&1
+        return $?
+    fi
+
+    # Method 2: Try curl connection test
+    if command -v curl >/dev/null 2>&1; then
+        curl -s --connect-timeout 1 "http://127.0.0.1:$port/" -o /dev/null 2>&1
+        return $?
+    fi
+
+    # Method 3: Fallback to lsof (may not work for screen processes)
     if command -v lsof >/dev/null 2>&1; then
         lsof -nP -iTCP:"$port" -sTCP:LISTEN >/dev/null 2>&1
         return $?
     fi
 
+    # Method 4: Last resort - ss
     ss -ltn 2>/dev/null | grep -qE "[\[\:]$port([[:space:]]|$)"
 }
 
