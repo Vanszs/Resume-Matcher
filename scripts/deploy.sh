@@ -154,6 +154,13 @@ echo "Cleaning previous build artifacts..."
 if [ -d ".next" ]; then
     rm -rf .next 2>/dev/null || true
 
+    if [ -d ".next" ]; then
+        stale_next_dir=".next.stale.$(date +%Y%m%d%H%M%S)"
+        if mv .next "$stale_next_dir" 2>/dev/null; then
+            echo "Moved protected .next to $stale_next_dir"
+        fi
+    fi
+
     if [ -d ".next" ] && command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
         echo "Detected protected .next files; removing with sudo..."
         sudo -n rm -rf .next || true
