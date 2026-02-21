@@ -237,11 +237,40 @@ else
     exit 1
 fi
 echo "Starting frontend from: $STANDALONE_SERVER_DIR"
-screen -dmS resume-frontend bash -c "cd '$STANDALONE_SERVER_DIR' && PORT=$FRONTEND_PORT '$NODE_BIN' server.js"
+FRONTEND_LOG="$(pwd)/frontend-screen.log"
+start_frontend_screen() {
+    : > "$FRONTEND_LOG"
+    screen -dmS resume-frontend bash -c "cd '$STANDALONE_SERVER_DIR' && HOSTNAME=127.0.0.1 PORT=$FRONTEND_PORT '$NODE_BIN' server.js >> '$FRONTEND_LOG' 2>&1"
+}
+
+start_frontend_screen
 cd ../..
 
 # Wait for frontend to be up and serving critical SEO endpoints
-wait_for_port "$FRONTEND_PORT" "Frontend" 30
+if ! wait_for_port "$FRONTEND_PORT" "Frontend" 30; then
+    echo "Frontend failed to listen on first attempt. Retrying once..."
+    if [ -f "apps/frontend/frontend-screen.log" ]; then
+        echo "--- Frontend log (first attempt) ---"
+        tail -n 120 "apps/frontend/frontend-screen.log" || true
+        echo "--- End frontend log ---"
+    fi
+
+    screen -S resume-frontend -X quit || true
+    cd apps/frontend
+    free_port $FRONTEND_PORT "Frontend"
+    start_frontend_screen
+    cd ../..
+
+    if ! wait_for_port "$FRONTEND_PORT" "Frontend" 30; then
+        echo "ERROR: Frontend still failed to listen after retry."
+        if [ -f "apps/frontend/frontend-screen.log" ]; then
+            echo "--- Frontend log (second attempt) ---"
+            tail -n 120 "apps/frontend/frontend-screen.log" || true
+            echo "--- End frontend log ---"
+        fi
+        exit 1
+    fi
+fi
 wait_for_http_status "http://127.0.0.1:$FRONTEND_PORT/sitemap.xml" "200" "Frontend sitemap" 30
 wait_for_http_status "http://127.0.0.1:$FRONTEND_PORT/robots.txt" "200" "Frontend robots" 30
 
