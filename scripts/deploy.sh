@@ -151,7 +151,20 @@ cd apps/frontend
 echo "Installing Node dependencies..."
 npm install
 echo "Cleaning previous build artifacts..."
-rm -rf .next || true
+if [ -d ".next" ]; then
+    rm -rf .next 2>/dev/null || true
+
+    if [ -d ".next" ] && command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+        echo "Detected protected .next files; removing with sudo..."
+        sudo -n rm -rf .next || true
+    fi
+
+    if [ -d ".next" ]; then
+        echo "ERROR: Unable to clean apps/frontend/.next due to permissions."
+        echo "Fix ownership once on server: sudo chown -R \"$(id -u):$(id -g)\" apps/frontend/.next"
+        exit 1
+    fi
+fi
 echo "Building Next.js app..."
 npm run build
 
