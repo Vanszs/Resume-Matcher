@@ -1226,7 +1226,7 @@ export default function SettingsPage() {
               {t('settings.scopeDialogs.clearApiKeysDescription')}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 border-t border-black bg-[#E5E5E0] p-4">
+          <DialogFooter className="border-t border-black bg-[#E5E5E0]">
             <Button variant="outline" onClick={() => setShowClearApiKeysScopeDialog(false)} disabled={isResetting} className="w-full sm:w-auto">
               {t('common.cancel')}
             </Button>
@@ -1260,7 +1260,7 @@ export default function SettingsPage() {
               {t('settings.scopeDialogs.resetDatabaseDescription')}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 border-t border-black bg-[#E5E5E0] p-4">
+          <DialogFooter className="border-t border-black bg-[#E5E5E0]">
             <Button variant="outline" onClick={() => setShowResetDatabaseScopeDialog(false)} disabled={isResetting} className="w-full sm:w-auto">
               {t('common.cancel')}
             </Button>

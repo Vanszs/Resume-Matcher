@@ -135,7 +135,7 @@ const DialogContent: React.FC<DialogContentProps> = ({ children, className }) =>
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <div
           className={cn(
-            'relative w-full max-w-lg',
+            'relative w-full max-w-lg overflow-hidden',
             'border border-black bg-[#F0F0E8] shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)]',
             'rounded-none',
             'animate-in fade-in-0 zoom-in-95 duration-200',
@@ -176,7 +176,7 @@ interface DialogFooterProps {
 
 const DialogFooter: React.FC<DialogFooterProps> = ({ className, children, ...props }) => (
   <div
-    className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 p-6 pt-0', className)}
+    className={cn('flex flex-col-reverse sm:flex-row sm:flex-wrap sm:justify-end gap-2 p-4', className)}
     {...props}
   >
     {children}

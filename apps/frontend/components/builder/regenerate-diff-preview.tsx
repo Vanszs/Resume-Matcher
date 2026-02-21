@@ -254,7 +254,7 @@ export const RegenerateDiffPreview: React.FC<RegenerateDiffPreviewProps> = ({
           ))}
         </div>
 
-        <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black flex-row justify-between gap-3">
+        <DialogFooter className="bg-[#E5E5E0] border-t border-black flex-row justify-between gap-3">
           <Button
             variant="outline"
             onClick={onReject}

@@ -201,7 +201,7 @@ export const RegenerateDialog: React.FC<RegenerateDialogProps> = ({
           )}
         </div>
 
-        <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black flex-row justify-end gap-3">
+        <DialogFooter className="bg-[#E5E5E0] border-t border-black flex-row justify-end gap-3">
           <DialogClose asChild>
             <Button variant="outline" className="rounded-none border-black">
               {t('common.cancel')}

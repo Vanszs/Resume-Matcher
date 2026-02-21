@@ -152,7 +152,7 @@ export const AddSectionDialog: React.FC<AddSectionDialogProps> = ({
           </div>
         </div>
 
-        <DialogFooter className="p-4 bg-[#F0F0E8] border-t border-black flex-row justify-end gap-3">
+        <DialogFooter className="bg-[#F0F0E8] border-t border-black flex-row justify-end gap-3">
           <DialogClose asChild>
             <Button variant="outline" className="rounded-none border-black">
               {t('common.cancel')}
