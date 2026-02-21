@@ -19,7 +19,7 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [checkingSession, setCheckingSession] = useState(true);
 
-    // On mount: verify existing token with the backend
+    // On mount: verify existing token with the backend (5 s timeout)
     useEffect(() => {
         const token = localStorage.getItem('auth_token');
         if (!token) {
@@ -27,12 +27,23 @@ export default function LoginPage() {
             return;
         }
 
+        let cancelled = false;
+        const timeoutId = setTimeout(() => {
+            if (!cancelled) setCheckingSession(false);
+        }, 5000);
+
         apiFetch('/auth/me')
             .then((res) => {
+                if (cancelled) return;
+                clearTimeout(timeoutId);
                 if (res.ok) {
                     // Valid session — redirect to dashboard (or ?from= destination)
-                    const params = new URLSearchParams(window.location.search);
-                    router.replace(params.get('from') || '/dashboard');
+                    const rawFrom = new URLSearchParams(window.location.search).get('from') || '/dashboard';
+                    const destination =
+                        rawFrom.startsWith('/') && !rawFrom.startsWith('//')
+                            ? rawFrom
+                            : '/dashboard';
+                    router.replace(destination);
                 } else {
                     // Token invalid/expired — clear stale credentials
                     localStorage.removeItem('auth_token');
@@ -44,8 +55,16 @@ export default function LoginPage() {
                 }
             })
             .catch(() => {
-                setCheckingSession(false);
+                if (!cancelled) {
+                    clearTimeout(timeoutId);
+                    setCheckingSession(false);
+                }
             });
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timeoutId);
+        };
     }, [router]);
 
     // Check if registration is enabled (public endpoint, no token needed)
@@ -94,8 +113,12 @@ export default function LoginPage() {
             // Flush the Next.js router cache so middleware re-evaluates cookies
             router.refresh();
 
-            const params = new URLSearchParams(window.location.search);
-            router.push(params.get('from') || '/dashboard');
+            const rawFrom = new URLSearchParams(window.location.search).get('from') || '/dashboard';
+            const destination =
+                rawFrom.startsWith('/') && !rawFrom.startsWith('//')
+                    ? rawFrom
+                    : '/dashboard';
+            router.push(destination);
         } catch (err: any) {
             setError(err.message || 'An unexpected error occurred.');
         } finally {

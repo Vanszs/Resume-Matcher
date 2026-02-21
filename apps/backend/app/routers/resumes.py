@@ -11,8 +11,9 @@ from pathlib import Path
 from typing import Any, NoReturn
 from uuid import uuid4
 
+import jwt as pyjwt
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 
 from app.database import db
 from app.dependencies import get_current_user
@@ -439,6 +440,101 @@ async def upload_resume(
         resume_id=resume["resume_id"],
         processing_status=resume["processing_status"],
         is_master=resume.get("is_master", False),
+    )
+
+
+# ---------------------------------------------------------------------------
+# SSE: real-time processing status stream
+# ---------------------------------------------------------------------------
+
+TERMINAL_STATES = frozenset({"ready", "failed"})
+_SSE_POLL_INTERVAL = 1.5  # seconds between DB checks
+_SSE_HEARTBEAT = 15.0    # seconds between keep-alive comments
+_SSE_MAX_DURATION = 600  # give up after 10 minutes
+_SSE_MAX_IDS = 20        # cap to prevent DB abuse
+
+
+@router.get("/status-stream")
+async def resume_status_stream(
+    ids: str = Query(..., description="Comma-separated resume IDs to watch"),
+    token: str = Query(..., description="JWT Bearer token (EventSource cannot set headers)"),
+) -> StreamingResponse:
+    """Server-Sent Events endpoint that pushes processing-status updates.
+
+    The client passes ``token`` as a query parameter because the browser
+    EventSource API does not support custom request headers.
+
+    Events emitted:
+    - ``data: JSON``      — periodic status snapshot for every watched ID.
+    - ``event: done``     — all IDs have reached a terminal state; stream closes.
+    - ``: heartbeat``     — SSE comment to keep the connection alive through proxies.
+    """
+    # --- Auth: validate JWT from query param ---
+    from app.config import settings as app_settings  # avoid circular at module level
+    from app.prisma_db import prisma
+
+    try:
+        payload = pyjwt.decode(
+            token, app_settings.jwt_secret_key, algorithms=[app_settings.jwt_algorithm]
+        )
+        user_id: str | None = payload.get("sub")
+        if not user_id:
+            raise ValueError("missing sub")
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    user = await prisma.user.find_unique(where={"id": user_id})
+    if not user or not user.isActive:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    resume_ids = [rid.strip() for rid in ids.split(",") if rid.strip()]
+    if not resume_ids:
+        raise HTTPException(status_code=400, detail="No resume IDs provided")
+    if len(resume_ids) > _SSE_MAX_IDS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Too many resume IDs (max {_SSE_MAX_IDS})",
+        )
+
+    async def event_generator():
+        elapsed = 0.0
+        since_heartbeat = 0.0
+        pending_ids = set(resume_ids)
+
+        while pending_ids and elapsed < _SSE_MAX_DURATION:
+            statuses: dict[str, str] = {}
+            for rid in list(pending_ids):
+                resume = db.get_resume(rid, user_id=user_id)
+                if resume:
+                    s = resume.get("processing_status", "pending")
+                    statuses[rid] = s
+                    if s in TERMINAL_STATES:
+                        pending_ids.discard(rid)
+
+            payload_str = json.dumps(statuses)
+            yield f"data: {payload_str}\n\n"
+
+            if not pending_ids:
+                yield "event: done\ndata: {}\n\n"
+                return
+
+            await asyncio.sleep(_SSE_POLL_INTERVAL)
+            elapsed += _SSE_POLL_INTERVAL
+            since_heartbeat += _SSE_POLL_INTERVAL
+            if since_heartbeat >= _SSE_HEARTBEAT:
+                yield ": heartbeat\n\n"
+                since_heartbeat = 0.0
+
+        # Timed out — send a final snapshot and close
+        yield "event: done\ndata: {}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",  # disable nginx buffering
+        },
     )
 
 

@@ -20,8 +20,12 @@ export function middleware(request: NextRequest) {
         // If the user already has an auth token, redirect to dashboard
         const token = request.cookies.get('auth_token')?.value;
         if (token) {
-            const params = new URL(request.url).searchParams;
-            const destination = params.get('from') || '/dashboard';
+            const rawDestination = new URL(request.url).searchParams.get('from') || '/dashboard';
+            // Guard against open-redirect: only allow relative paths (not //evil.com or https://...)
+            const destination =
+                rawDestination.startsWith('/') && !rawDestination.startsWith('//')
+                    ? rawDestination
+                    : '/dashboard';
             const response = NextResponse.redirect(new URL(destination, request.url));
             response.headers.set('X-Robots-Tag', noIndexValue);
             return response;

@@ -27,15 +27,69 @@ import {
   type ResumeListItem,
 } from '@/lib/api/resume';
 import { useStatusCache } from '@/lib/context/status-cache';
+import { API_BASE } from '@/lib/api/client';
 
 type ProcessingStatus = 'pending' | 'processing' | 'ready' | 'failed' | 'loading';
 
+const RESUME_LIST_CACHE_KEY = 'rm_dashboard_cache';
+
+interface ResumeListCache {
+  masterId: string | null;
+  tailored: ResumeListItem[];
+}
+
+function readResumeCache(): ResumeListCache | null {
+  try {
+    const raw = typeof window !== 'undefined' ? sessionStorage.getItem(RESUME_LIST_CACHE_KEY) : null;
+    if (!raw) return null;
+    return JSON.parse(raw) as ResumeListCache;
+  } catch {
+    return null;
+  }
+}
+
+const TRANSIENT_STATES = new Set(['processing', 'pending']);
+
+function writeResumeCache(data: ResumeListCache, masterProcessingStatus?: string): void {
+  try {
+    // Don't cache while anything is still being processed —
+    // on next back-navigation we want a fresh fetch instead of
+    // a stale "processing" label frozen in storage.
+    const masterTransient = masterProcessingStatus
+      ? TRANSIENT_STATES.has(masterProcessingStatus)
+      : false;
+    const tailoredTransient = data.tailored.some((r) =>
+      TRANSIENT_STATES.has(r.processing_status ?? '')
+    );
+    if (masterTransient || tailoredTransient) {
+      sessionStorage.removeItem(RESUME_LIST_CACHE_KEY);
+      return;
+    }
+    sessionStorage.setItem(RESUME_LIST_CACHE_KEY, JSON.stringify(data));
+  } catch {
+    // sessionStorage unavailable (private browsing / quota exceeded) — silent fail
+  }
+}
+
 export default function DashboardPage() {
   const { t, locale } = useTranslations();
-  const [masterResumeId, setMasterResumeId] = useState<string | null>(null);
+  // Lazy-initialize from cache/localStorage so first render already has data
+  const [masterResumeId, setMasterResumeId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const cached = readResumeCache();
+    return cached?.masterId ?? localStorage.getItem('master_resume_id');
+  });
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>('loading');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [tailoredResumes, setTailoredResumes] = useState<ResumeListItem[]>([]);
+  const [tailoredResumes, setTailoredResumes] = useState<ResumeListItem[]>(() => {
+    if (typeof window === 'undefined') return [];
+    return readResumeCache()?.tailored ?? [];
+  });
+  // isListLoading = true only when there is NO cache at all (genuine first-ever load)
+  const [isListLoading, setIsListLoading] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    return readResumeCache() === null;
+  });
   const [isRetrying, setIsRetrying] = useState(false);
   const [isDeletingMaster, setIsDeletingMaster] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
@@ -54,6 +108,11 @@ export default function DashboardPage() {
   const loadRequestIdRef = useRef(0);
   // Lightweight in-memory cache for job snippets to avoid N+1 refetches
   const jobSnippetCacheRef = useRef<Record<string, string>>({});
+  // Track latest master processing status for use inside loadTailoredResumes callback
+  const masterProcessingStatusRef = useRef<string>(processingStatus);
+  useEffect(() => {
+    masterProcessingStatusRef.current = processingStatus;
+  }, [processingStatus]);
 
   // Check if LLM is configured (API key is set)
   const isLlmConfigured = !statusLoading && systemStatus?.llm_configured;
@@ -94,13 +153,29 @@ export default function DashboardPage() {
     }
   }, []);
 
-  useEffect(() => {
-    const storedId = localStorage.getItem('master_resume_id');
-    if (storedId) {
-      setMasterResumeId(storedId);
-      checkResumeStatus(storedId);
+  // Silent version — used by polling and background refreshes.
+  // Does NOT set status to 'loading' first so there’s no spinner flash.
+  const silentCheckMasterStatus = useCallback(async (resumeId: string) => {
+    try {
+      const data = await fetchResume(resumeId);
+      const status = data.raw_resume?.processing_status || 'pending';
+      setProcessingStatus(status as ProcessingStatus);
+    } catch (err: unknown) {
+      // On 404, clear stale id — same as the non-silent version
+      if (err instanceof Error && err.message.includes('404')) {
+        localStorage.removeItem('master_resume_id');
+        setMasterResumeId(null);
+      }
     }
-  }, [checkResumeStatus]);
+  }, []);
+
+  // On mount, kick off a status check for the lazily-initialized master resume
+  useEffect(() => {
+    if (masterResumeId) {
+      checkResumeStatus(masterResumeId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally omit deps — runs once with the lazy-init value
 
   const loadTailoredResumes = useCallback(async () => {
     try {
@@ -112,7 +187,9 @@ export default function DashboardPage() {
       if (resolvedMasterId) {
         localStorage.setItem('master_resume_id', resolvedMasterId);
         setMasterResumeId(resolvedMasterId);
-        checkResumeStatus(resolvedMasterId);
+        // Use silent refresh inside loadTailoredResumes so polling
+        // doesn’t briefly flash a loading spinner on the master card.
+        silentCheckMasterStatus(resolvedMasterId);
       } else {
         localStorage.removeItem('master_resume_id');
         setMasterResumeId(null);
@@ -154,18 +231,114 @@ export default function DashboardPage() {
 
       // Only apply results if this invocation is the latest (prevents stale overwrite)
       if (requestId === loadRequestIdRef.current) {
-        setTailoredResumes((prev) =>
-          prev.map((r) => ({ ...r, jobSnippet: jobSnippets[r.resume_id] || '' }))
+        const updated = filtered.map((r) => ({ ...r, jobSnippet: jobSnippets[r.resume_id] || '' }));
+        setTailoredResumes(updated);
+        // Persist to sessionStorage so next render (back navigation) gets instant data.
+        // Pass the current master processing status so transient states are not cached.
+        writeResumeCache(
+          { masterId: resolvedMasterId ?? null, tailored: updated },
+          masterProcessingStatusRef.current,
         );
       }
+      setIsListLoading(false);
     } catch (err) {
       console.error('Failed to load tailored resumes:', err);
+      setIsListLoading(false);
     }
-  }, [checkResumeStatus]);
+  }, [checkResumeStatus, silentCheckMasterStatus]);
 
   useEffect(() => {
     loadTailoredResumes();
   }, [loadTailoredResumes]);
+
+  // ---------------------------------------------------------------
+  // Real-time status: SSE stream while any resume is transient.
+  // Opens ONE EventSource connection per transient batch.
+  // Closes automatically once all IDs reach a terminal state.
+  // ---------------------------------------------------------------
+  const masterIsTransient = TRANSIENT_STATES.has(processingStatus);
+  const tailoredTransientIds = tailoredResumes
+    .filter((r) => TRANSIENT_STATES.has(r.processing_status ?? ''))
+    .map((r) => r.resume_id);
+  const tailoredIsTransient = tailoredTransientIds.length > 0;
+  const hasAnyTransient = masterIsTransient || tailoredIsTransient;
+
+  const sseRef = useRef<EventSource | null>(null);
+
+  useEffect(() => {
+    if (!hasAnyTransient) {
+      if (sseRef.current) {
+        sseRef.current.close();
+        sseRef.current = null;
+      }
+      return;
+    }
+
+    // Build the list of IDs to watch
+    const watchIds: string[] = [];
+    if (masterIsTransient && masterResumeId) watchIds.push(masterResumeId);
+    tailoredTransientIds.forEach((id) => watchIds.push(id));
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token || watchIds.length === 0) return;
+
+    const params = new URLSearchParams({ ids: watchIds.join(','), token });
+    const url = `${API_BASE}/resumes/status-stream?${params.toString()}`;
+
+    // Close any existing connection before opening a new one
+    if (sseRef.current) {
+      sseRef.current.close();
+      sseRef.current = null;
+    }
+
+    const es = new EventSource(url);
+    sseRef.current = es;
+
+    es.onmessage = (event) => {
+      try {
+        const updates: Record<string, string> = JSON.parse(event.data);
+
+        // Update master status silently (no loading flash)
+        if (masterResumeId && updates[masterResumeId]) {
+          setProcessingStatus(updates[masterResumeId] as ProcessingStatus);
+        }
+
+        // Update tailored resume statuses in-place
+        if (Object.keys(updates).some((id) => id !== masterResumeId)) {
+          setTailoredResumes((prev) =>
+            prev.map((r) =>
+              updates[r.resume_id]
+                ? { ...r, processing_status: updates[r.resume_id] }
+                : r
+            )
+          );
+        }
+      } catch {
+        // malformed event — ignore
+      }
+    };
+
+    es.addEventListener('done', () => {
+      es.close();
+      sseRef.current = null;
+      // Final full refresh to pick up completed data (title, snippets, etc.)
+      loadTailoredResumes();
+    });
+
+    es.onerror = () => {
+      // SSE error (network issue, token expired, etc.) — fall back to one manual refresh
+      es.close();
+      sseRef.current = null;
+    };
+
+    return () => {
+      es.close();
+      sseRef.current = null;
+    };
+    // Intentionally track only stable primitives to avoid reconnect on every render.
+    // The `hasAnyTransient` boolean is the correct gate.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasAnyTransient, masterResumeId, tailoredTransientIds.join(',')]);
 
   // Refresh list when window gains focus (e.g., returning from viewer after delete)
   useEffect(() => {
@@ -223,6 +396,8 @@ export default function DashboardPage() {
       decrementResumes();
       setHasMasterResume(false);
       localStorage.removeItem('master_resume_id');
+      // Invalidate sessionStorage cache so stale data isn’t shown after delete
+      try { sessionStorage.removeItem(RESUME_LIST_CACHE_KEY); } catch {};
       setMasterResumeId(null);
       setProcessingStatus('loading');
       setIsUploadDialogOpen(true);
@@ -455,8 +630,23 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        {/* 2. Tailored Resumes */}
-        {tailoredResumes.map((resume) => {
+        {/* 2. Tailored Resumes - show skeletons on first-ever load when cache is empty */}
+        {isListLoading && tailoredResumes.length === 0 ? (
+          Array.from({ length: 2 }).map((_, i) => (
+            <Card
+              key={`skeleton-${i}`}
+              variant="default"
+              className="aspect-square h-full bg-canvas animate-pulse"
+            >
+              <div className="flex-1 flex flex-col">
+                <div className="w-12 h-12 bg-gray-300 mb-6" />
+                <div className="h-3 bg-gray-200 w-3/4 mb-2 rounded-none" />
+                <div className="h-3 bg-gray-200 w-1/2 rounded-none" />
+              </div>
+            </Card>
+          ))
+        ) : (
+          tailoredResumes.map((resume) => {
           const title =
             resume.title || resume.jobSnippet || resume.filename || t('dashboard.tailoredResume');
           const color = cardPalette[hashTitle(title) % cardPalette.length];
@@ -492,9 +682,8 @@ export default function DashboardPage() {
               </div>
             </Card>
           );
-        })}
-
-        {/* 3. Create Tailored Resume */}
+          })
+        )}
         <Card className="aspect-square h-full" variant="default">
           <div className="flex-1 flex flex-col items-center justify-center text-center h-full">
             <Button
