@@ -279,10 +279,9 @@ export default function DashboardPage() {
     if (masterIsTransient && masterResumeId) watchIds.push(masterResumeId);
     tailoredTransientIds.forEach((id) => watchIds.push(id));
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-    if (!token || watchIds.length === 0) return;
+    if (watchIds.length === 0) return;
 
-    const params = new URLSearchParams({ ids: watchIds.join(','), token });
+    const params = new URLSearchParams({ ids: watchIds.join(',') });
     const url = `${API_BASE}/resumes/status-stream?${params.toString()}`;
 
     // Close any existing connection before opening a new one

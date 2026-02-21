@@ -6,13 +6,13 @@ import hashlib
 import json
 import logging
 import unicodedata
-from collections.abc import Awaitable
+from collections.abc import AsyncGenerator, Awaitable
 from pathlib import Path
 from typing import Any, NoReturn
 from uuid import uuid4
 
 import jwt as pyjwt
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import Response, StreamingResponse
 
 from app.database import db
@@ -456,26 +456,31 @@ _SSE_MAX_IDS = 20        # cap to prevent DB abuse
 
 @router.get("/status-stream")
 async def resume_status_stream(
+    request: Request,
     ids: str = Query(..., description="Comma-separated resume IDs to watch"),
-    token: str = Query(..., description="JWT Bearer token (EventSource cannot set headers)"),
 ) -> StreamingResponse:
     """Server-Sent Events endpoint that pushes processing-status updates.
 
-    The client passes ``token`` as a query parameter because the browser
-    EventSource API does not support custom request headers.
+    Auth uses the ``auth_token`` cookie.
 
     Events emitted:
     - ``data: JSON``      — periodic status snapshot for every watched ID.
     - ``event: done``     — all IDs have reached a terminal state; stream closes.
     - ``: heartbeat``     — SSE comment to keep the connection alive through proxies.
     """
-    # --- Auth: validate JWT from query param ---
+    # --- Auth: validate JWT from cookie ---
     from app.config import settings as app_settings  # avoid circular at module level
     from app.prisma_db import prisma
 
+    auth_token = request.cookies.get("auth_token")
+    if not auth_token:
+        raise HTTPException(status_code=401, detail="Missing authentication token")
+
     try:
         payload = pyjwt.decode(
-            token, app_settings.jwt_secret_key, algorithms=[app_settings.jwt_algorithm]
+            auth_token,
+            app_settings.jwt_secret_key,
+            algorithms=[app_settings.jwt_algorithm],
         )
         user_id: str | None = payload.get("sub")
         if not user_id:
@@ -496,7 +501,7 @@ async def resume_status_stream(
             detail=f"Too many resume IDs (max {_SSE_MAX_IDS})",
         )
 
-    async def event_generator():
+    async def event_generator() -> AsyncGenerator[str, None]:
         elapsed = 0.0
         since_heartbeat = 0.0
         pending_ids = set(resume_ids)
