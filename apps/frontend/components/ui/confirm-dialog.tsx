@@ -11,6 +11,7 @@ import {
 } from './dialog';
 import { Button } from './button';
 import { useTranslations } from '@/lib/i18n';
+import { Loader2 } from 'lucide-react';
 
 /**
  * Swiss International Style Confirm Dialog Component
@@ -30,6 +31,7 @@ export interface ConfirmDialogProps {
   errorMessage?: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  confirmLoading?: boolean;
   confirmDisabled?: boolean;
   variant?: 'danger' | 'warning' | 'success' | 'default';
   closeOnConfirm?: boolean;
@@ -46,6 +48,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   errorMessage,
   confirmLabel,
   cancelLabel,
+  confirmLoading = false,
   confirmDisabled = false,
   variant = 'default',
   closeOnConfirm = true,
@@ -58,7 +61,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const finalCancelLabel = cancelLabel ?? t('common.cancel');
 
   const handleConfirm = () => {
-    if (confirmDisabled) return;
+    if (confirmDisabled || confirmLoading) return;
     onConfirm();
     if (closeOnConfirm) {
       onOpenChange(false);
@@ -132,7 +135,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         )}
         <DialogFooter className="p-4 bg-[#E5E5E0] border-t border-black flex-row justify-end gap-3">
           {showCancelButton && (
-            <Button variant="outline" onClick={handleCancel} className="rounded-none border-black">
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              className="rounded-none border-black"
+              disabled={confirmLoading}
+            >
               {finalCancelLabel}
             </Button>
           )}
@@ -140,9 +148,16 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             variant={buttonVariant}
             onClick={handleConfirm}
             className="rounded-none"
-            disabled={confirmDisabled}
+            disabled={confirmDisabled || confirmLoading}
           >
-            {finalConfirmLabel}
+            {confirmLoading ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {t('common.processing')}
+              </span>
+            ) : (
+              finalConfirmLabel
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

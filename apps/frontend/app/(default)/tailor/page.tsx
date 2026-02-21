@@ -32,6 +32,8 @@ export default function TailorPage() {
   const [promptLoading, setPromptLoading] = useState(false);
   const hasUserSelectedPrompt = useRef(false);
   const missingDiffConfirmInFlight = useRef(false);
+  const confirmInFlight = useRef(false);
+  const navigationInProgress = useRef(false);
 
   // Diff preview modal state
   const [showDiffModal, setShowDiffModal] = useState(false);
@@ -131,6 +133,7 @@ export default function TailorPage() {
     setImprovedData(confirmed);
 
     const newResumeId = confirmed?.data?.resume_id;
+    navigationInProgress.current = true;
     if (newResumeId) {
       router.push(`/resumes/${newResumeId}`);
     } else {
@@ -221,8 +224,9 @@ export default function TailorPage() {
   // User confirms changes
   const handleConfirmChanges = async () => {
     // Guard against double-clicks - isLoading already tracks confirm in progress
-    if (!pendingResult || isLoading) return;
+    if (!pendingResult || isLoading || confirmInFlight.current) return;
 
+    confirmInFlight.current = true;
     setIsLoading(true);
     setError(null);
     setDiffConfirmError(null);
@@ -237,7 +241,10 @@ export default function TailorPage() {
       setError(errorMessage);
       setDiffConfirmError(errorMessage);
     } finally {
-      setIsLoading(false);
+      confirmInFlight.current = false;
+      if (!navigationInProgress.current) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -256,6 +263,7 @@ export default function TailorPage() {
   };
 
   const handleCloseMissingDiffDialog = () => {
+    if (isLoading) return;
     setShowMissingDiffDialog(false);
     setMissingDiffResult(null);
     setMissingDiffError(null);
@@ -278,7 +286,9 @@ export default function TailorPage() {
       setMissingDiffError(errorMessage);
     } finally {
       missingDiffConfirmInFlight.current = false;
-      setIsLoading(false);
+      if (!navigationInProgress.current) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -442,6 +452,7 @@ export default function TailorPage() {
           onClose={handleCloseDiffModal}
           onReject={handleRejectChanges}
           onConfirm={handleConfirmChanges}
+          isSubmitting={isLoading}
           diffSummary={pendingResult?.data?.diff_summary}
           detailedChanges={pendingResult?.data?.detailed_changes}
           errorMessage={diffConfirmError ?? undefined}
@@ -462,7 +473,7 @@ export default function TailorPage() {
       <ConfirmDialog
         open={showMissingDiffDialog}
         onOpenChange={(open) => {
-          if (!open) {
+          if (!open && !isLoading) {
             handleCloseMissingDiffDialog();
           }
         }}
@@ -474,6 +485,7 @@ export default function TailorPage() {
         closeOnConfirm={false}
         onConfirm={handleMissingDiffConfirm}
         onCancel={handleCloseMissingDiffDialog}
+        confirmLoading={isLoading}
         confirmDisabled={isLoading || !missingDiffResult}
         errorMessage={missingDiffError ?? undefined}
       />

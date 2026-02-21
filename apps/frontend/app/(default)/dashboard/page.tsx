@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [tailoredResumes, setTailoredResumes] = useState<ResumeListItem[]>([]);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [isDeletingMaster, setIsDeletingMaster] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const router = useRouter();
 
@@ -215,7 +216,8 @@ export default function DashboardPage() {
   };
 
   const confirmDeleteAndReupload = async () => {
-    if (!masterResumeId) return;
+    if (!masterResumeId || isDeletingMaster) return;
+    setIsDeletingMaster(true);
     try {
       await deleteResume(masterResumeId);
       decrementResumes();
@@ -224,9 +226,12 @@ export default function DashboardPage() {
       setMasterResumeId(null);
       setProcessingStatus('loading');
       setIsUploadDialogOpen(true);
+      setShowDeleteDialog(false);
       await loadTailoredResumes();
     } catch (err) {
       console.error('Failed to delete resume:', err);
+    } finally {
+      setIsDeletingMaster(false);
     }
   };
 
@@ -531,8 +536,11 @@ export default function DashboardPage() {
           description={t('confirmations.deleteMasterResumeDescription')}
           confirmLabel={t('dashboard.deleteAndReupload')}
           cancelLabel={t('confirmations.keepResumeCancelLabel')}
+          confirmLoading={isDeletingMaster}
+          confirmDisabled={isDeletingMaster}
           onConfirm={confirmDeleteAndReupload}
           variant="danger"
+          closeOnConfirm={false}
         />
       </SwissGrid>
     </div>

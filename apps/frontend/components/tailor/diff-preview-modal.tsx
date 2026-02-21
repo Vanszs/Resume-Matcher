@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, CheckCircle, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { AlertTriangle, CheckCircle, X, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTranslations } from '@/lib/i18n';
@@ -15,6 +15,7 @@ interface DiffPreviewModalProps {
   onClose: () => void;
   onReject: () => void;
   onConfirm: () => void;
+  isSubmitting?: boolean;
   diffSummary?: ResumeDiffSummary;
   detailedChanges?: ResumeFieldDiff[];
   errorMessage?: string;
@@ -25,6 +26,7 @@ export function DiffPreviewModal({
   onClose,
   onReject,
   onConfirm,
+  isSubmitting = false,
   diffSummary,
   detailedChanges,
   errorMessage,
@@ -39,7 +41,7 @@ export function DiffPreviewModal({
       <Dialog
         open={isOpen}
         onOpenChange={(open) => {
-          if (!open) {
+          if (!open && !isSubmitting) {
             onClose();
           }
         }}
@@ -60,11 +62,18 @@ export function DiffPreviewModal({
           </div>
 
           <div className="flex justify-end items-center gap-3 pt-4 border-t-2 border-black bg-white -mx-6 -mb-6 px-6 py-4">
-            <Button variant="outline" onClick={onClose} className="gap-2">
+            <Button variant="outline" onClick={onClose} className="gap-2" disabled={isSubmitting}>
               {t('common.cancel')}
             </Button>
-            <Button variant="warning" onClick={onConfirm} className="gap-2">
-              {t('tailor.missingDiffDialog.confirmLabel')}
+            <Button variant="warning" onClick={onConfirm} className="gap-2" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  {t('common.processing')}
+                </>
+              ) : (
+                t('tailor.missingDiffDialog.confirmLabel')
+              )}
             </Button>
           </div>
         </DialogContent>
@@ -95,7 +104,7 @@ export function DiffPreviewModal({
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open) {
+        if (!open && !isSubmitting) {
           onClose();
         }
       }}
@@ -274,13 +283,17 @@ export function DiffPreviewModal({
 
         {/* Action buttons */}
         <div className="flex justify-between items-center pt-4 border-t-2 border-black bg-white -mx-6 -mb-6 px-6 py-4">
-          <Button variant="outline" onClick={onReject} className="gap-2">
+          <Button variant="outline" onClick={onReject} className="gap-2" disabled={isSubmitting}>
             <X className="w-4 h-4" />
             {t('tailor.diffModal.rejectButton')}
           </Button>
-          <Button onClick={onConfirm} className="gap-2 bg-[#15803D] hover:bg-[#166534]">
-            <CheckCircle className="w-4 h-4" />
-            {t('tailor.diffModal.confirmButton')}
+          <Button
+            onClick={onConfirm}
+            className="gap-2 bg-[#15803D] hover:bg-[#166534]"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+            {isSubmitting ? t('common.processing') : t('tailor.diffModal.confirmButton')}
           </Button>
         </div>
       </DialogContent>

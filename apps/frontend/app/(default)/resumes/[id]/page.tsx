@@ -38,6 +38,8 @@ export default function ResumeViewerPage() {
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [showDownloadSuccessDialog, setShowDownloadSuccessDialog] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [showEnrichmentModal, setShowEnrichmentModal] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
   const [resumeTitle, setResumeTitle] = useState<string | null>(null);
@@ -163,6 +165,8 @@ export default function ResumeViewerPage() {
   };
 
   const handleDownload = async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
     try {
       const blob = await downloadResumePdf(resumeId, undefined, uiLanguage);
       const filename = sanitizeFilename(resumeTitle, resumeId, 'resume');
@@ -178,10 +182,14 @@ export default function ResumeViewerPage() {
         }
         return;
       }
+    } finally {
+      setIsDownloading(false);
     }
   };
 
   const handleDeleteResume = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
     try {
       setDeleteError(null);
       await deleteResume(resumeId);
@@ -197,6 +205,8 @@ export default function ResumeViewerPage() {
       console.error('Failed to delete resume:', err);
       setDeleteError(t('resumeViewer.errors.failedToDelete'));
       setShowDeleteDialog(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -335,9 +345,13 @@ export default function ResumeViewerPage() {
               <Edit className="w-4 h-4" />
               {t('dashboard.editResume')}
             </Button>
-            <Button variant="success" onClick={handleDownload}>
-              <Download className="w-4 h-4" />
-              {t('resumeViewer.downloadResume')}
+            <Button variant="success" onClick={handleDownload} disabled={isDownloading}>
+              {isDownloading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              {isDownloading ? t('common.processing') : t('resumeViewer.downloadResume')}
             </Button>
           </div>
         </div>
@@ -430,6 +444,8 @@ export default function ResumeViewerPage() {
         onConfirm={handleDeleteResume}
         variant="danger"
         closeOnConfirm={false}
+        confirmLoading={isDeleting}
+        confirmDisabled={isDeleting}
       />
 
       <ConfirmDialog

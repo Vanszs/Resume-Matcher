@@ -1188,6 +1188,9 @@ export default function SettingsPage() {
         description={t('confirmations.clearApiKeysDescription')}
         confirmLabel={t('common.delete')}
         variant="warning"
+        confirmLoading={isResetting}
+        confirmDisabled={isResetting}
+        closeOnConfirm={false}
         onConfirm={() => handleClearApiKeysWithScope('self')}
       />
 
@@ -1198,6 +1201,9 @@ export default function SettingsPage() {
         description={t('confirmations.resetDatabaseDescription')}
         confirmLabel={t('common.reset')}
         variant="danger"
+        confirmLoading={isResetting}
+        confirmDisabled={isResetting}
+        closeOnConfirm={false}
         onConfirm={() => handleResetDatabaseWithScope('self')}
       />
 

@@ -52,6 +52,8 @@ export default function AdminPage() {
     const [newPassword, setNewPassword] = useState('');
     const [newRoleId, setNewRoleId] = useState('');
     const [addingUser, setAddingUser] = useState(false);
+    const [userActionId, setUserActionId] = useState<string | null>(null);
+    const [userActionType, setUserActionType] = useState<'toggle' | 'delete' | null>(null);
 
     // App settings
     const [registerEnabled, setRegisterEnabled] = useState(false);
@@ -139,6 +141,9 @@ export default function AdminPage() {
     }
 
     async function handleToggleActive(userId: string) {
+        if (userActionId === userId) return;
+        setUserActionId(userId);
+        setUserActionType('toggle');
         try {
             const res = await apiFetch(`/admin/users/${userId}/toggle-active`, { method: 'PATCH' });
             if (!res.ok) {
@@ -149,11 +154,17 @@ export default function AdminPage() {
         } catch (err: any) {
             console.error('Toggle active failed:', err);
             setFeedback({ type: 'error', message: err.message || 'Failed to update user status' });
+        } finally {
+            setUserActionId(null);
+            setUserActionType(null);
         }
     }
 
     async function handleDeleteUser(userId: string, email: string) {
+        if (userActionId === userId) return;
         if (!confirm(`Are you sure you want to delete ${email}? This action cannot be undone.`)) return;
+        setUserActionId(userId);
+        setUserActionType('delete');
 
         try {
             const res = await apiDelete(`/admin/users/${userId}`);
@@ -165,6 +176,9 @@ export default function AdminPage() {
             await loadData();
         } catch (err: any) {
             setFeedback({ type: 'error', message: err.message || 'Failed to delete user' });
+        } finally {
+            setUserActionId(null);
+            setUserActionType(null);
         }
     }
 
@@ -496,8 +510,11 @@ export default function AdminPage() {
                                                                     size="icon"
                                                                     onClick={() => handleToggleActive(user.id)}
                                                                     title={user.is_active ? 'Disable user' : 'Enable user'}
+                                                                    disabled={userActionId === user.id}
                                                                 >
-                                                                    {user.is_active ? (
+                                                                    {userActionId === user.id && userActionType === 'toggle' ? (
+                                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                                    ) : user.is_active ? (
                                                                         <ToggleRight className="w-4 h-4 text-green-600" />
                                                                     ) : (
                                                                         <ToggleLeft className="w-4 h-4 text-gray-400" />
@@ -509,8 +526,13 @@ export default function AdminPage() {
                                                                     onClick={() => handleDeleteUser(user.id, user.email)}
                                                                     title="Delete user"
                                                                     className="hover:bg-red-100 text-red-600"
+                                                                    disabled={userActionId === user.id}
                                                                 >
-                                                                    <Trash2 className="w-4 h-4" />
+                                                                    {userActionId === user.id && userActionType === 'delete' ? (
+                                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                                    ) : (
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    )}
                                                                 </Button>
                                                             </div>
                                                         </td>
