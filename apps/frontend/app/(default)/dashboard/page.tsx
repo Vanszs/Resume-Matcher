@@ -302,9 +302,9 @@ export default function DashboardPage() {
     <div className="space-y-6">
       {/* Configuration Warning Banner */}
       {masterResumeId && !isLlmConfigured && !statusLoading && (
-        <div className="border-2 border-warning bg-amber-50 p-4 shadow-sw-default mb-6 flex items-center justify-between">
+        <div className="border-2 border-warning bg-amber-50 p-4 shadow-sw-default mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-warning" />
+            <AlertTriangle className="w-5 h-5 text-warning shrink-0" />
             <div>
               <p className="font-mono text-sm font-bold uppercase tracking-wider text-amber-800">
                 {t('dashboard.llmNotConfiguredTitle')}
@@ -314,8 +314,8 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <Link href="/settings">
-            <Button variant="outline" size="sm" className="border-warning text-amber-700">
+          <Link href="/settings" className="self-start sm:self-auto">
+            <Button variant="outline" size="sm" className="border-warning text-amber-700 w-full sm:w-auto">
               <Settings className="w-4 h-4 mr-2" />
               {t('nav.settings')}
             </Button>

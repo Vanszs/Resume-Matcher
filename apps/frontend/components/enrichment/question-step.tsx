@@ -137,13 +137,13 @@ export function QuestionStep({
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center justify-between pt-6 border-t border-gray-200 mt-6">
-        <Button variant="outline" onClick={onPrev} disabled={isFirst} className="gap-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center sm:justify-between gap-3 pt-6 border-t border-gray-200 mt-6">
+        <Button variant="outline" onClick={onPrev} disabled={isFirst} className="gap-2 w-full sm:w-auto order-2 sm:order-1">
           <ChevronLeft className="w-4 h-4" />
           {t('common.back')}
         </Button>
 
-        <Button onClick={handleContinue} className="gap-2">
+        <Button onClick={handleContinue} className="gap-2 w-full sm:w-auto order-1 sm:order-2">
           {isLast ? (
             <>
               {t('common.finish')}

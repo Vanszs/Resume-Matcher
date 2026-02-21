@@ -1,13 +1,15 @@
 """Authentication endpoints."""
 
 import logging
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
+from app.dependencies import get_current_user
 from app.prisma_db import prisma
-from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.auth import LoginRequest, TokenResponse, UserResponse
 from app.services.auth import create_access_token, get_password_hash, verify_password
 from app.config import load_config_file
 
@@ -16,6 +18,24 @@ logger = logging.getLogger(__name__)
 limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(tags=["Authentication"])
+
+
+@router.get("/auth/me", response_model=UserResponse)
+async def get_current_user_info(
+    user: Annotated[object, Depends(get_current_user)],
+) -> UserResponse:
+    """Return the profile of the currently authenticated user.
+
+    Validates the JWT token and returns user info.  The frontend calls
+    this on app load to verify the session is still valid.
+    """
+    return UserResponse(
+        user_id=user.id,
+        email=user.email,
+        username=user.username,
+        role=user.role.name if user.role else "user",
+        is_active=user.isActive,
+    )
 
 
 @router.get("/auth/register-status")

@@ -254,12 +254,12 @@ export const RegenerateDiffPreview: React.FC<RegenerateDiffPreviewProps> = ({
           ))}
         </div>
 
-        <DialogFooter className="bg-[#E5E5E0] border-t border-black flex-row justify-between gap-3">
+        <DialogFooter className="bg-[#E5E5E0] border-t border-black flex-col sm:flex-row sm:justify-between gap-3">
           <Button
             variant="outline"
             onClick={onReject}
             disabled={isApplying}
-            className="rounded-none border-black"
+            className="rounded-none border-black w-full sm:w-auto order-2 sm:order-1"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             {t('builder.regenerate.diffPreview.rejectButton')}
@@ -268,7 +268,7 @@ export const RegenerateDiffPreview: React.FC<RegenerateDiffPreviewProps> = ({
             variant="success"
             onClick={onAccept}
             disabled={isApplying}
-            className="rounded-none"
+            className="rounded-none w-full sm:w-auto order-1 sm:order-2"
           >
             {isApplying ? (
               <>

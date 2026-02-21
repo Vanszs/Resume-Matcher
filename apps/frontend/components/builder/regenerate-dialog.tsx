@@ -201,16 +201,16 @@ export const RegenerateDialog: React.FC<RegenerateDialogProps> = ({
           )}
         </div>
 
-        <DialogFooter className="bg-[#E5E5E0] border-t border-black flex-row justify-end gap-3">
+        <DialogFooter className="bg-[#E5E5E0] border-t border-black flex-col-reverse sm:flex-row sm:justify-end gap-3">
           <DialogClose asChild>
-            <Button variant="outline" className="rounded-none border-black">
+            <Button variant="outline" className="rounded-none border-black w-full sm:w-auto">
               {t('common.cancel')}
             </Button>
           </DialogClose>
           <Button
             onClick={onContinue}
             disabled={selectedItems.length === 0}
-            className="rounded-none"
+            className="rounded-none w-full sm:w-auto"
           >
             {t('builder.regenerate.selectDialog.continueButton')}
           </Button>

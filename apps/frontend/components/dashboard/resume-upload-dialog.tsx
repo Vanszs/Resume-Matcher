@@ -290,11 +290,11 @@ export function ResumeUploadDialog({
           )}
         </div>
 
-        <div className="p-4 border-t border-black bg-white flex justify-end gap-2">
+        <div className="p-4 border-t border-black bg-white flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
           {uploadFeedback?.type === 'error' && failedResumeId && (
             <Button
               variant="outline"
-              className="rounded-none border-black hover:bg-gray-100"
+              className="rounded-none border-black hover:bg-gray-100 w-full sm:w-auto"
               onClick={handleRetryProcessing}
               disabled={isRetryingProcessing}
             >
@@ -306,7 +306,7 @@ export function ResumeUploadDialog({
           {uploadFeedback?.type === 'error' && files.length > 0 && (
             <Button
               variant="outline"
-              className="rounded-none border-black hover:bg-gray-100"
+              className="rounded-none border-black hover:bg-gray-100 w-full sm:w-auto"
               disabled={isRetryingProcessing}
               onClick={() => {
                 if (files[0]) removeFile(files[0].id);
@@ -318,7 +318,7 @@ export function ResumeUploadDialog({
             </Button>
           )}
           <DialogClose asChild>
-            <Button variant="outline" className="rounded-none border-black hover:bg-gray-100">
+            <Button variant="outline" className="rounded-none border-black hover:bg-gray-100 w-full sm:w-auto">
               {t('common.cancel')}
             </Button>
           </DialogClose>

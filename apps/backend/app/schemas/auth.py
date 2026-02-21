@@ -10,3 +10,11 @@ class TokenResponse(BaseModel):
     user_id: str
     email: str
     role: str
+
+class UserResponse(BaseModel):
+    """Current user profile returned by /auth/me."""
+    user_id: str
+    email: str
+    username: str
+    role: str
+    is_active: bool

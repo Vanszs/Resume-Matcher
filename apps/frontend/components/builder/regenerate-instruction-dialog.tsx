@@ -136,17 +136,17 @@ export const RegenerateInstructionDialog: React.FC<RegenerateInstructionDialogPr
           </div>
         </div>
 
-        <DialogFooter className="bg-[#E5E5E0] border-t border-black flex-row justify-between gap-3">
+        <DialogFooter className="bg-[#E5E5E0] border-t border-black flex-col sm:flex-row sm:justify-between gap-3">
           <Button
             variant="outline"
             onClick={onBack}
             disabled={isGenerating}
-            className="rounded-none border-black"
+            className="rounded-none border-black w-full sm:w-auto order-2 sm:order-1"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             {t('builder.regenerate.instructionDialog.backButton')}
           </Button>
-          <Button onClick={onGenerate} disabled={isGenerating} className="rounded-none">
+          <Button onClick={onGenerate} disabled={isGenerating} className="rounded-none w-full sm:w-auto order-1 sm:order-2">
             {isGenerating ? (
               <>
                 <Sparkles className="w-4 h-4 animate-spin" />

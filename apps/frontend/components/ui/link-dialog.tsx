@@ -164,16 +164,16 @@ export const LinkDialog: React.FC<LinkDialogProps> = ({ editor, onClose }) => {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 justify-end pt-2">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end pt-2">
               {hasExistingLink && (
-                <Button type="button" variant="destructive" size="sm" onClick={handleRemoveLink}>
+                <Button type="button" variant="destructive" size="sm" onClick={handleRemoveLink} className="w-full sm:w-auto">
                   Remove Link
                 </Button>
               )}
-              <Button type="button" variant="outline" size="sm" onClick={onClose}>
+              <Button type="button" variant="outline" size="sm" onClick={onClose} className="w-full sm:w-auto">
                 Cancel
               </Button>
-              <Button type="submit" variant="default" size="sm">
+              <Button type="submit" variant="default" size="sm" className="w-full sm:w-auto">
                 {hasExistingLink ? 'Update' : 'Add'} Link
               </Button>
             </div>

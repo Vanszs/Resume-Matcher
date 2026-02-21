@@ -129,11 +129,11 @@ export function ErrorStep({ error, onRetry, onClose }: ErrorStepProps) {
           {error}
         </p>
       </div>
-      <div className="flex gap-3 mt-4">
-        <Button variant="outline" onClick={onClose}>
+      <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full sm:w-auto">
+        <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
           {t('common.cancel')}
         </Button>
-        <Button onClick={onRetry}>{t('common.retry')}</Button>
+        <Button onClick={onRetry} className="w-full sm:w-auto">{t('common.retry')}</Button>
       </div>
     </div>
   );

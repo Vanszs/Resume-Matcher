@@ -17,6 +17,15 @@ export function middleware(request: NextRequest) {
     }
 
     if (pathname.startsWith('/login')) {
+        // If the user already has an auth token, redirect to dashboard
+        const token = request.cookies.get('auth_token')?.value;
+        if (token) {
+            const params = new URL(request.url).searchParams;
+            const destination = params.get('from') || '/dashboard';
+            const response = NextResponse.redirect(new URL(destination, request.url));
+            response.headers.set('X-Robots-Tag', noIndexValue);
+            return response;
+        }
         const response = NextResponse.next();
         response.headers.set('X-Robots-Tag', noIndexValue);
         return response;

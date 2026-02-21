@@ -133,12 +133,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             </div>
           </div>
         )}
-        <DialogFooter className="bg-[#E5E5E0] border-t border-black flex-row justify-end gap-3">
+        <DialogFooter className="bg-[#E5E5E0] border-t border-black flex-col-reverse sm:flex-row sm:justify-end gap-3">
           {showCancelButton && (
             <Button
               variant="outline"
               onClick={handleCancel}
-              className="rounded-none border-black"
+              className="rounded-none border-black w-full sm:w-auto"
               disabled={confirmLoading}
             >
               {finalCancelLabel}
@@ -147,7 +147,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <Button
             variant={buttonVariant}
             onClick={handleConfirm}
-            className="rounded-none"
+            className="rounded-none w-full sm:w-auto"
             disabled={confirmDisabled || confirmLoading}
           >
             {confirmLoading ? (

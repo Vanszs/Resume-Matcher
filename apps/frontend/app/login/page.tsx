@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { apiPost, API_BASE } from '@/lib/api/client';
+import { apiPost, apiFetch, API_BASE } from '@/lib/api/client';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -17,6 +17,36 @@ export default function LoginPage() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [checkingSession, setCheckingSession] = useState(true);
+
+    // On mount: verify existing token with the backend
+    useEffect(() => {
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+            setCheckingSession(false);
+            return;
+        }
+
+        apiFetch('/auth/me')
+            .then((res) => {
+                if (res.ok) {
+                    // Valid session — redirect to dashboard (or ?from= destination)
+                    const params = new URLSearchParams(window.location.search);
+                    router.replace(params.get('from') || '/dashboard');
+                } else {
+                    // Token invalid/expired — clear stale credentials
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user_role');
+                    localStorage.removeItem('user_email');
+                    document.cookie = 'auth_token=; path=/; max-age=0; SameSite=Lax';
+                    document.cookie = 'user_role=; path=/; max-age=0; SameSite=Lax';
+                    setCheckingSession(false);
+                }
+            })
+            .catch(() => {
+                setCheckingSession(false);
+            });
+    }, [router]);
 
     // Check if registration is enabled (public endpoint, no token needed)
     useEffect(() => {
@@ -81,6 +111,17 @@ export default function LoginPage() {
     };
 
     const isRegister = mode === 'register';
+
+    // Show a minimal loading state while verifying existing session
+    if (checkingSession) {
+        return (
+            <div className="min-h-screen bg-canvas flex items-center justify-center p-4">
+                <div className="font-mono text-xs uppercase tracking-widest text-gray-500 animate-pulse">
+                    Verifying session...
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-canvas flex items-center justify-center p-4">

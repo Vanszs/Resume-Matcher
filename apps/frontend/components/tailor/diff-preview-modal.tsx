@@ -61,11 +61,11 @@ export function DiffPreviewModal({
             <span>{t('tailor.missingDiffDialog.confirmLabel')}</span>
           </div>
 
-          <div className="flex justify-end items-center gap-3 pt-4 border-t-2 border-black bg-white -mx-6 -mb-6 px-6 py-4">
-            <Button variant="outline" onClick={onClose} className="gap-2" disabled={isSubmitting}>
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end items-stretch sm:items-center gap-3 pt-4 border-t-2 border-black bg-white -mx-6 -mb-6 px-6 py-4">
+            <Button variant="outline" onClick={onClose} className="gap-2 w-full sm:w-auto" disabled={isSubmitting}>
               {t('common.cancel')}
             </Button>
-            <Button variant="warning" onClick={onConfirm} className="gap-2" disabled={isSubmitting}>
+            <Button variant="warning" onClick={onConfirm} className="gap-2 w-full sm:w-auto" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -282,14 +282,14 @@ export function DiffPreviewModal({
         </div>
 
         {/* Action buttons */}
-        <div className="flex justify-between items-center pt-4 border-t-2 border-black bg-white -mx-6 -mb-6 px-6 py-4">
-          <Button variant="outline" onClick={onReject} className="gap-2" disabled={isSubmitting}>
+        <div className="flex flex-col sm:flex-row sm:justify-between items-stretch sm:items-center gap-3 pt-4 border-t-2 border-black bg-white -mx-6 -mb-6 px-6 py-4">
+          <Button variant="outline" onClick={onReject} className="gap-2 w-full sm:w-auto order-2 sm:order-1" disabled={isSubmitting}>
             <X className="w-4 h-4" />
             {t('tailor.diffModal.rejectButton')}
           </Button>
           <Button
             onClick={onConfirm}
-            className="gap-2 bg-[#15803D] hover:bg-[#166534]"
+            className="gap-2 bg-[#15803D] hover:bg-[#166534] w-full sm:w-auto order-1 sm:order-2"
             disabled={isSubmitting}
           >
             {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
