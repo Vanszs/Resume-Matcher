@@ -176,26 +176,16 @@ export default function Hero() {
             <p className="font-mono text-sm md:text-base text-gray-800 mb-6 md:mb-8 leading-relaxed max-w-md">
               Stop starting from scratch. We optimize your master resume to instantly generate tailored CVs for every job you want — and beat the ATS while doing it.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
-              <Link
-                href="/login"
-                className="bg-blue-600 text-white font-mono font-bold text-base px-5 md:px-6 py-2.5 md:py-3 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center flex items-center justify-center gap-2 group w-full sm:w-auto uppercase tracking-wider"
-              >
-                Get Started →
-              </Link>
-              <a
-                href="https://github.com/srbhr/Resume-Matcher"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-[#F0F0E8] text-black font-mono font-bold text-base px-5 md:px-6 py-2.5 md:py-3 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center w-full sm:w-auto uppercase tracking-wider"
-              >
-                Try on GitHub
-              </a>
-            </div>
+            <Link
+              href="/login"
+              className="bg-blue-600 text-white font-mono font-bold text-base px-5 md:px-6 py-2.5 md:py-3 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center flex items-center justify-center gap-2 group w-full sm:w-auto uppercase tracking-wider"
+            >
+              Get Started →
+            </Link>
           </div>
           <div className="hidden md:flex md:w-1/2 relative h-[300px] md:h-[400px] lg:h-[500px] w-full items-center justify-center">
             <div className="absolute top-6 right-6 md:top-10 md:right-10 w-40 h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 bg-yellow-400 rounded-full mix-blend-multiply opacity-90 z-0"></div>
-            <div className="relative w-full h-full bg-white flex items-center justify-center transform rotate-2 z-10 overflow-hidden">
+            <div className="relative w-full h-full bg-[#F0F0E8] flex items-center justify-center transform rotate-2 z-10 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/portrait-person-with-collage-technique-color-blocking%20(1).webp"
