@@ -135,7 +135,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 export default function Hero() {
   return (
-    <div className="min-h-screen w-full bg-[#F0F0E8] flex flex-col overflow-x-hidden">
+    <div className="min-h-screen w-full bg-[#F0F0E8] flex flex-col overflow-x-hidden overflow-y-auto">
 
       {/* ── NAV ── */}
       <nav className="sticky top-0 z-50 bg-[#F0F0E8] border-b-[3px] border-black px-6 md:px-12 lg:px-16 py-4 w-full">
@@ -198,7 +198,7 @@ export default function Hero() {
             <div className="relative w-full h-full bg-white flex items-center justify-center transform rotate-2 z-10 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/assets/portrait-person-with-visual-metaphor-memory-removebg-preview (1) (1).png"
+                src="/assets/login-hero-image.png"
                 alt="Portrait with visual metaphor"
                 className="w-full h-full object-contain"
                 loading="eager"

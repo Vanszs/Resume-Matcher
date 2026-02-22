@@ -145,9 +145,9 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="bg-[#FDFBF7] text-[#101922] font-sans min-h-screen flex flex-col md:flex-row overflow-x-hidden">
+        <div className="bg-[#FDFBF7] text-[#101922] font-sans min-h-screen max-h-screen flex flex-col md:flex-row overflow-hidden">
             {/* Left Panel: Artistic Collage */}
-            <div className="relative hidden md:flex w-1/2 flex-col justify-between border-r-4 border-[#101922] bg-[#FF5C00] p-8 lg:p-12 overflow-hidden">
+            <div className="relative hidden md:flex w-1/2 flex-col justify-between border-r-4 border-[#101922] bg-[#FF5C00] p-8 lg:p-12 overflow-hidden max-h-screen">
                 {/* Abstract Shapes / Collage Elements */}
                 <div 
                     className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none" 
@@ -164,7 +164,7 @@ export default function LoginPage() {
                         <div 
                             className="absolute inset-0 bg-cover bg-center" 
                             style={{
-                                backgroundImage: "url('/assets/portrait-person-with-visual-metaphor-memory-removebg-preview (1) (1).png')"
+                                backgroundImage: "url('/assets/login-hero-image.png')"
                             }}
                         />
                         
@@ -199,7 +199,7 @@ export default function LoginPage() {
             </div>
 
             {/* Right Panel: Auth Form */}
-            <div className="flex-1 flex flex-col min-h-screen bg-[#FDFBF7] relative">
+            <div className="flex-1 flex flex-col min-h-screen max-h-screen overflow-y-auto bg-[#FDFBF7] relative">
                 {/* Header / Logo Area */}
                 <header className="p-6 md:p-10 flex justify-between items-center border-b-2 border-[#101922]/10">
                     <Link href="/" className="flex items-center gap-2 select-none">
@@ -372,7 +372,7 @@ export default function LoginPage() {
                             >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img 
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfkZepdPtUNyTcLiw0fK01JrYloupvPIAbIFBCAn_uxYDNIcgy0ZC2p9FVw0skU9huxDWl9ejCfkGKDvKq7cfQ_mB6ahpMzIGTvt-7WfX8ymTj2xIqz1I_NtI78ny8479M0CKjJWNuYUm6Vb5EO-z_hzIzhmp1ahVJtXv12v0ycc_z7p8Cdh9Lht4B-JLi2VVJNT_F2RUA5-MpnKzqiZM3bCbqZdUWdLIPPYJOqDXnf4YbnE_1NHN6MsyViV8S5yZ8kyslYfmm0g" 
+                                    src="/google-g-logo.svg" 
                                     alt="Google Logo" 
                                     className="w-5 h-5"
                                 />
@@ -395,7 +395,7 @@ export default function LoginPage() {
                             >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img 
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1brlDgudFyEGuJ4G1rBv4BHp_BTCU11GWhD7utiAWI_eUduN4vtbli-WOjhFB26lsMpceqtNCMK76B-KxnrXjUyG5ERyNb6taVcBX1s7ScLebrzHUxNmkaYFmOgxQUqCbkQQthxy5EtHXySXM1gVIAozhffnqsOP-Sb4rWp8gDPIqap495ICWC9NfiVEcxBQGyRT41xcGShEIuZzIAX28aFajAKVwKZHsYTpG6ea9ApomDBSuuMmbMi2ys5ODfujtUzlCz9_oSA" 
+                                    src="/MetaMask-icon-fox.svg" 
                                     alt="MetaMask Logo" 
                                     className="w-5 h-5"
                                 />
