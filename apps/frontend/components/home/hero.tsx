@@ -132,7 +132,7 @@ export default function Hero() {
 
       {/* ── NAV ── */}
       <nav className="w-full border-b-2 border-black bg-white sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between h-14">
+        <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-2 border-2 border-black px-3 py-1.5 bg-white shadow-[2px_2px_0px_0px_#000000]">
             <span className="font-mono text-xs font-bold text-[#1D4ED8]">✳</span>
@@ -168,7 +168,7 @@ export default function Hero() {
 
       {/* ── HERO (2-col split) ── */}
       <section className="w-full bg-[#F0F0E8] border-b-2 border-black" style={GRID_BG}>
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="max-w-7xl mx-auto px-8 py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
           {/* Left */}
           <div className="flex flex-col gap-8">
@@ -215,7 +215,7 @@ export default function Hero() {
                 href="#demo"
                 className="rounded-none border-2 border-black bg-white px-8 py-3.5 font-mono text-sm font-bold uppercase tracking-wider text-black hover:bg-[#F0F0E8] transition-all shadow-[4px_4px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none"
               >
-                Watch Demo ↓
+                See Demo ↓
               </a>
             </div>
 
@@ -285,9 +285,26 @@ export default function Hero() {
         </div>
       </section>
 
+      {/* ── GIF TEMPELAN ── */}
+      <section id="demo" className="w-full bg-[#F0F0E8] border-b-2 border-black">
+        <div className="max-w-7xl mx-auto px-8 pt-0 pb-12 flex justify-center">
+          <div
+            className="-mt-10 relative z-10 border-2 border-black overflow-hidden shadow-[8px_8px_0px_0px_#000000] w-full max-w-4xl"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://raw.githubusercontent.com/srbhr/Resume-Matcher/main/assets/Resume_Matcher_Demo_2.gif"
+              alt="Resume Matcher AI demo"
+              className="w-full h-auto block"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* ── PAIN POINTS ── */}
-      <section id="demo" className="w-full bg-black border-b-2 border-black">
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-20">
+      <section className="w-full bg-black border-b-2 border-black">
+        <div className="max-w-7xl mx-auto px-8 py-20">
           <div className="mb-10">
             <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">// The Problem</span>
             <h2 className="mt-2 font-serif text-3xl md:text-4xl font-bold text-[#F0F0E8] uppercase leading-tight">
@@ -315,7 +332,7 @@ export default function Hero() {
 
       {/* ── SOLUTION BANNER ── */}
       <section className="w-full bg-[#1D4ED8] border-b-2 border-black">
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="max-w-7xl mx-auto px-8 py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div>
             <span className="font-mono text-xs uppercase tracking-widest text-white opacity-60 font-bold">// Solution</span>
             <h2 className="mt-2 font-serif text-2xl md:text-3xl font-bold text-white uppercase leading-tight max-w-xl">
@@ -333,7 +350,7 @@ export default function Hero() {
 
       {/* ── FEATURES ── */}
       <section id="features" className="w-full bg-[#F0F0E8] border-b-2 border-black">
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-8 py-20">
           <div className="mb-12">
             <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">// Features</span>
             <h2 className="mt-2 font-serif text-3xl md:text-4xl font-bold uppercase text-black leading-tight">
@@ -365,7 +382,7 @@ export default function Hero() {
 
       {/* ── HOW IT WORKS ── */}
       <section id="how-it-works" className="w-full bg-[#F0F0E8] border-b-2 border-black" style={GRID_BG}>
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-8 py-20">
           <div className="mb-12">
             <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">// Process</span>
             <h2 className="mt-2 font-serif text-3xl md:text-4xl font-bold uppercase text-black leading-tight">
@@ -389,7 +406,7 @@ export default function Hero() {
 
       {/* ── FAQ ── */}
       <section id="faq" className="w-full bg-[#F0F0E8] border-b-2 border-black">
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-8 py-20">
           <div className="mb-12">
             <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">// FAQ</span>
             <h2 className="mt-2 font-serif text-3xl md:text-4xl font-bold uppercase text-black leading-tight">
@@ -406,7 +423,7 @@ export default function Hero() {
 
       {/* ── CTA ── */}
       <section className="w-full bg-[#F0F0E8] border-b-2 border-black" style={GRID_BG}>
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-20 md:py-28 flex flex-col items-center text-center gap-6">
+        <div className="max-w-7xl mx-auto px-8 py-20 flex flex-col items-center text-center gap-6">
           <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">// Convinced?</span>
           <h2 className="font-serif font-bold uppercase text-black leading-tight max-w-2xl" style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }}>
             Try Resume Matcher.<br />It's free.
@@ -438,7 +455,7 @@ export default function Hero() {
 
       {/* ── FOOTER ── */}
       <footer className="w-full bg-black">
-        <div className="max-w-7xl mx-auto px-6 md:px-10 py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+        <div className="max-w-7xl mx-auto px-8 py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
           <div className="flex items-center gap-2 border border-[#333] px-3 py-1.5">
             <span className="font-mono text-xs font-bold text-[#1D4ED8]">✳</span>
             <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#F0F0E8]">
