@@ -93,10 +93,10 @@ const STEPS = [
 const FAQS = [
   {
     q: 'Is Resume Matcher free to use?',
-    a: 'Yes! Resume Matcher is open source and free forever. For AI features, you can use Ollama locally (100% free) or connect your own API key. You pay your chosen AI provider directly for what you use.',
+    a: 'Yes! Resume Matcher is open source and free forever. For AI features, connect your own API key from OpenAI, Anthropic, Gemini, or other cloud providers. You pay your chosen AI provider directly for what you use. Note: This hosted version requires cloud AI providers with public APIs.',
   },
   {
-    q: 'Will my resume data be kept private?',
+    q: 'Will my data be kept private?',
     a: 'This tool is a hosted version of the open-source project available at https://github.com/srbhr/Resume-Matcher. We provide the infrastructure and domain to make the tool easily accessible. If you prefer full control over your data, you are welcome to run the project locally using the open-source repository. For security best practices, we recommend redacting sensitive personal information (such as ID numbers, full addresses, or phone numbers) before uploading any document. Authentication data (such as email or username) is used strictly for account access and is not embedded into your resume content. While we implement reasonable safeguards, users who require complete data control are encouraged to self-host the open-source version.',
   },
   {
@@ -109,7 +109,7 @@ const FAQS = [
   },
   {
     q: 'Which AI providers can I use?',
-    a: 'We support Ollama (local, free), OpenAI (GPT-4), Anthropic (Claude), Google Gemini, OpenRouter, and DeepSeek. Switch between providers anytime in settings.',
+    a: 'We support OpenAI (GPT-4), Anthropic (Claude), Google Gemini, OpenRouter, and DeepSeek. Note: Local Ollama is not available on this hosted version. If you need local AI, please self-host the open-source version from GitHub. Switch between cloud providers anytime in settings.',
   },
 ];
 
@@ -160,26 +160,26 @@ export default function Hero() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="w-full px-6 md:px-12 lg:px-16 py-12 md:py-20 lg:py-24 relative overflow-hidden border-b-[3px] border-black min-h-[calc(100vh-80px)] flex items-center">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-12 relative z-10 w-full">
+      <section className="w-full px-6 md:px-12 lg:px-16 py-8 md:py-12 relative overflow-hidden border-b-[3px] border-black min-h-[calc(100vh-72px)] flex items-center">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-6 md:gap-10 relative z-10 w-full">
           <div className="md:w-1/2 text-left pr-0 md:pr-8">
-            <h1 className="font-serif font-extrabold text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.0] text-black mb-6 md:mb-8 tracking-tight">
+            <h1 className="font-serif font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.0] text-black mb-4 md:mb-6 tracking-tight">
               Finding a job is <br/>
-              <span className="bg-black text-white px-2 inline-block font-serif italic border-2 border-transparent relative mt-2 mb-2">
+              <span className="bg-black text-white px-2 inline-block font-serif italic border-2 border-transparent relative mt-1 mb-1">
                 Hard.
               </span> <br/>
               We make it <br/>
-              <span className="bg-blue-600 text-white px-2 inline-block shadow-[4px_4px_0px_0px_#000000] font-serif italic border-2 border-black relative mt-2">
+              <span className="bg-blue-600 text-white px-2 inline-block shadow-[4px_4px_0px_0px_#000000] font-serif italic border-2 border-black relative mt-1">
                 easier.
               </span>
             </h1>
-            <p className="font-mono text-base md:text-lg text-gray-800 mb-8 md:mb-10 leading-relaxed max-w-md">
+            <p className="font-mono text-sm md:text-base lg:text-lg text-gray-800 mb-6 md:mb-8 leading-relaxed max-w-md">
               Stop starting from scratch. We optimize your master resume to instantly generate tailored CVs for every job you want — and beat the ATS while doing it.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
               <Link
                 href="/login"
-                className="bg-blue-600 text-white font-mono font-bold text-base md:text-lg px-6 md:px-8 py-3 md:py-4 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center flex items-center justify-center gap-2 group w-full sm:w-auto uppercase tracking-wider"
+                className="bg-blue-600 text-white font-mono font-bold text-sm md:text-base px-5 md:px-6 py-2.5 md:py-3 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center flex items-center justify-center gap-2 group w-full sm:w-auto uppercase tracking-wider"
               >
                 Get Started →
               </Link>
@@ -187,15 +187,15 @@ export default function Hero() {
                 href="https://github.com/srbhr/Resume-Matcher"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[#F0F0E8] text-black font-mono font-bold text-base md:text-lg px-6 md:px-8 py-3 md:py-4 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center w-full sm:w-auto uppercase tracking-wider"
+                className="bg-[#F0F0E8] text-black font-mono font-bold text-sm md:text-base px-5 md:px-6 py-2.5 md:py-3 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center w-full sm:w-auto uppercase tracking-wider"
               >
                 Try on GitHub
               </a>
             </div>
           </div>
-          <div className="md:w-1/2 relative h-[400px] md:h-[500px] lg:h-[600px] w-full flex items-center justify-center">
-            <div className="absolute top-10 right-10 w-48 h-48 md:w-64 md:h-64 bg-yellow-400 rounded-full mix-blend-multiply opacity-90 z-0"></div>
-            <div className="relative w-full h-full border-2 border-black bg-white flex items-center justify-center transform rotate-2 shadow-[4px_4px_0px_0px_#000000] z-10 overflow-hidden">
+          <div className="md:w-1/2 relative h-[300px] md:h-[400px] lg:h-[500px] w-full flex items-center justify-center">
+            <div className="absolute top-6 right-6 md:top-10 md:right-10 w-40 h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 bg-yellow-400 rounded-full mix-blend-multiply opacity-90 z-0"></div>
+            <div className="relative w-full h-full bg-white flex items-center justify-center transform rotate-2 z-10 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/assets/portrait-person-with-visual-metaphor-memory-removebg-preview (1) (1).png"
@@ -203,8 +203,8 @@ export default function Hero() {
                 className="w-full h-full object-contain"
                 loading="eager"
               />
-              <div className="absolute top-1/4 left-10 text-orange-600 text-6xl font-serif transform -rotate-12">↑</div>
-              <div className="absolute bottom-1/4 right-10 text-orange-600 text-6xl font-serif transform rotate-12">↑</div>
+              <div className="absolute top-1/4 left-6 md:left-10 text-orange-600 text-4xl md:text-5xl lg:text-6xl font-serif transform -rotate-12">↑</div>
+              <div className="absolute bottom-1/4 right-6 md:right-10 text-orange-600 text-4xl md:text-5xl lg:text-6xl font-serif transform rotate-12">↑</div>
             </div>
           </div>
         </div>
@@ -228,11 +228,6 @@ export default function Hero() {
                   className="w-full h-full object-cover"
                   loading="lazy"
                 />
-                <div className="absolute top-4 left-4 flex gap-2 z-10">
-                  <div className="w-3 h-3 rounded-full bg-red-500 border border-black/30"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500 border border-black/30"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-500 border border-black/30"></div>
-                </div>
               </div>
               <div className="absolute bottom-3 right-4 font-mono text-xs text-red-500 font-bold flex items-center gap-1 animate-pulse">
                 <span className="w-2 h-2 bg-red-500 rounded-full"></span> LIVE DEMO
