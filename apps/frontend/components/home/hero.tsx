@@ -23,7 +23,7 @@ const PAIN_POINTS = [
 
 const FEATURES = [
   {
-    icon: '🧠',
+    icon: '▲',
     title: 'AI-Powered Analysis',
     body: 'Compare your resume against job descriptions instantly. Get actionable feedback on what\'s missing.',
     decorations: [
@@ -32,36 +32,36 @@ const FEATURES = [
     ],
   },
   {
-    icon: '🔑',
+    icon: '■',
     title: 'Keyword Wizardry',
     body: 'Extract high-value keywords from JD. We highlight hard skills, soft skills, and tech stacks you need.',
     decorations: [
       { type: 'square', className: 'absolute -bottom-4 -right-4 w-12 h-12 bg-yellow-400 border-2 border-black transform rotate-45 z-20 hidden md:block' },
-      { type: 'emoji', className: 'absolute -top-6 -right-2 text-4xl transform rotate-12 z-30 hidden md:block', content: '👁️' },
+      { type: 'emoji', className: 'absolute -top-6 -right-2 text-4xl transform rotate-12 z-30 hidden md:block', content: '●' },
     ],
   },
   {
-    icon: '📊',
-    title: 'Score Everything',
+    icon: '●',
+    title: 'Match Score',
     body: 'Get a numeric match score. Know exactly how well you fit the role before hitting \'Apply\'.',
     decorations: [],
   },
   {
-    icon: '🌐',
+    icon: '✦',
     title: 'Multi-Language CVs',
     body: 'Applying globally? Generate resumes in multiple languages without losing formatting.',
     decorations: [],
   },
   {
-    icon: '📄',
+    icon: '▢',
     title: 'Print-Ready PDF Export',
-    body: 'Clean, professional, ATS-friendly LaTeX templates compiled to PDF in one click.',
+    body: 'Clean, professional, ATS-friendly templates compiled to PDF in one click.',
     decorations: [],
   },
   {
-    icon: '🔒',
-    title: 'Your Data, Your Account',
-    body: 'Privacy first. Manage your data locally or securely in the cloud. Open source at heart.',
+    icon: '◆',
+    title: 'Privacy First',
+    body: 'Your data, your control. Local storage with optional cloud sync. Open source at heart.',
     decorations: [],
   },
 ];
@@ -92,20 +92,24 @@ const STEPS = [
 
 const FAQS = [
   {
-    q: 'Is it really free?',
-    a: 'Yes. The core platform is open source and free to use. For AI features, you just plug in your own API key from OpenAI or others. You pay them directly for usage (which is usually pennies).',
+    q: 'Is Resume Matcher free to use?',
+    a: 'Yes! Resume Matcher is open source and free forever. For AI features, you can use Ollama locally (100% free) or connect your own API key. You pay your chosen AI provider directly for what you use.',
   },
   {
-    q: 'Is my data safe?',
-    a: 'Absolutely. We don\'t store your resumes on our servers for AI processing unless you explicitly save them to your profile. The AI processing happens via your own API key.',
+    q: 'Will my resume data be kept private?',
+    a: 'This tool is a hosted version of the open-source project available at https://github.com/srbhr/Resume-Matcher. We provide the infrastructure and domain to make the tool easily accessible. If you prefer full control over your data, you are welcome to run the project locally using the open-source repository. For security best practices, we recommend redacting sensitive personal information (such as ID numbers, full addresses, or phone numbers) before uploading any document. Authentication data (such as email or username) is used strictly for account access and is not embedded into your resume content. While we implement reasonable safeguards, users who require complete data control are encouraged to self-host the open-source version.',
   },
   {
-    q: 'Do I need to know coding?',
-    a: 'Nope! While we use LaTeX under the hood for beautiful PDFs, our interface handles everything visually. You just type and click.',
+    q: 'What languages does the app support?',
+    a: 'The interface is available in English, Spanish, Indonesian, Japanese, Portuguese, and Chinese. AI-powered content generation works in any language supported by your chosen provider.',
   },
   {
-    q: 'Can I customize the templates?',
-    a: 'Yes, we offer several professional templates. Since it\'s open source, you can even contribute your own if you know LaTeX!',
+    q: 'How do I get started?',
+    a: 'Simply sign up, upload your resume (PDF or DOCX), paste a job description, and let our AI analyze and optimize your content. You can then review, edit, and export as PDF.',
+  },
+  {
+    q: 'Which AI providers can I use?',
+    a: 'We support Ollama (local, free), OpenAI (GPT-4), Anthropic (Claude), Google Gemini, OpenRouter, and DeepSeek. Switch between providers anytime in settings.',
   },
 ];
 
@@ -134,7 +138,7 @@ export default function Hero() {
     <div className="min-h-screen w-full bg-[#F0F0E8] flex flex-col overflow-x-hidden">
 
       {/* ── NAV ── */}
-      <nav className="sticky top-0 z-50 bg-[#F0F0E8] border-b-[3px] border-black px-4 md:px-8 py-4 w-full">
+      <nav className="sticky top-0 z-50 bg-[#F0F0E8] border-b-[3px] border-black px-6 md:px-12 lg:px-16 py-4 w-full">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="font-serif font-bold text-xl md:text-2xl tracking-tight flex items-center gap-2 text-black">
@@ -156,10 +160,10 @@ export default function Hero() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="w-full px-6 md:px-12 py-16 md:py-24 relative overflow-hidden border-b-[3px] border-black">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 relative z-10">
-          <div className="md:w-1/2 text-left">
-            <h1 className="font-serif font-extrabold text-6xl md:text-7xl lg:text-8xl leading-[1.0] text-black mb-8 tracking-tight">
+      <section className="w-full px-6 md:px-12 lg:px-16 py-12 md:py-20 lg:py-24 relative overflow-hidden border-b-[3px] border-black min-h-[calc(100vh-80px)] flex items-center">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-12 relative z-10 w-full">
+          <div className="md:w-1/2 text-left pr-0 md:pr-8">
+            <h1 className="font-serif font-extrabold text-5xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.0] text-black mb-6 md:mb-8 tracking-tight">
               Finding a job is <br/>
               <span className="bg-black text-white px-2 inline-block font-serif italic border-2 border-transparent relative mt-2 mb-2">
                 Hard.
@@ -169,13 +173,13 @@ export default function Hero() {
                 easier.
               </span>
             </h1>
-            <p className="font-mono text-lg text-gray-800 mb-10 leading-relaxed max-w-md">
+            <p className="font-mono text-base md:text-lg text-gray-800 mb-8 md:mb-10 leading-relaxed max-w-md">
               Stop starting from scratch. We optimize your master resume to instantly generate tailored CVs for every job you want — and beat the ATS while doing it.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6">
+            <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
               <Link
                 href="/login"
-                className="bg-blue-600 text-white font-mono font-bold text-lg px-8 py-4 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center flex items-center justify-center gap-2 group w-full sm:w-auto uppercase tracking-wider"
+                className="bg-blue-600 text-white font-mono font-bold text-base md:text-lg px-6 md:px-8 py-3 md:py-4 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center flex items-center justify-center gap-2 group w-full sm:w-auto uppercase tracking-wider"
               >
                 Get Started →
               </Link>
@@ -183,14 +187,14 @@ export default function Hero() {
                 href="https://github.com/srbhr/Resume-Matcher"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[#F0F0E8] text-black font-mono font-bold text-lg px-8 py-4 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center w-full sm:w-auto uppercase tracking-wider"
+                className="bg-[#F0F0E8] text-black font-mono font-bold text-base md:text-lg px-6 md:px-8 py-3 md:py-4 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center w-full sm:w-auto uppercase tracking-wider"
               >
                 Try on GitHub
               </a>
             </div>
           </div>
-          <div className="md:w-1/2 relative h-[500px] w-full flex items-center justify-center">
-            <div className="absolute top-10 right-10 w-64 h-64 bg-yellow-400 rounded-full mix-blend-multiply opacity-90 z-0"></div>
+          <div className="md:w-1/2 relative h-[400px] md:h-[500px] lg:h-[600px] w-full flex items-center justify-center">
+            <div className="absolute top-10 right-10 w-48 h-48 md:w-64 md:h-64 bg-yellow-400 rounded-full mix-blend-multiply opacity-90 z-0"></div>
             <div className="relative w-full h-full border-2 border-black bg-white flex items-center justify-center transform rotate-2 shadow-[4px_4px_0px_0px_#000000] z-10 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -204,20 +208,18 @@ export default function Hero() {
             </div>
           </div>
         </div>
-        <div className="absolute top-1/2 left-4 w-8 h-8 bg-black hidden lg:block rotate-45"></div>
-        <div className="absolute top-1/3 right-8 text-6xl transform rotate-12 hidden lg:block opacity-20 select-none">↯</div>
+        <div className="absolute top-1/2 -left-4 w-12 h-12 bg-black hidden lg:block rotate-45"></div>
+        <div className="absolute top-1/3 -right-4 text-6xl transform rotate-12 hidden lg:block opacity-20 select-none">↯</div>
       </section>
 
       {/* ── DEMO SECTION ── */}
-      <section className="w-full py-20 px-6 md:px-12 bg-white border-b-[3px] border-black relative overflow-hidden">
+      <section className="w-full py-20 px-6 md:px-12 lg:px-16 bg-white border-b-[3px] border-black relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-block bg-black text-white px-4 py-1 font-mono font-bold mb-8 transform -rotate-1 border border-white shadow-[2px_2px_0px_0px_#000000]">
             // SEE IT IN ACTION
           </div>
           <div className="relative perspective-tilt group mx-auto" id="demo">
             <div className="bg-black p-2 md:p-3 border-[4px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-gray-900 relative overflow-hidden transform md:rotate-1 transition-transform duration-500 hover:rotate-0">
-              {/* CRT scanline effect */}
-              <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-20 pointer-events-none bg-[length:100%_4px,3px_100%]"></div>
               <div className="aspect-video bg-gray-800 flex items-center justify-center relative border border-gray-700 overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -244,7 +246,7 @@ export default function Hero() {
       </section>
 
       {/* ── PAIN POINTS ── */}
-      <section className="w-full py-24 px-6 md:px-12 bg-[#F0F0E8] border-b-[3px] border-black">
+      <section className="w-full py-24 px-6 md:px-12 lg:px-16 bg-[#F0F0E8] border-b-[3px] border-black">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="font-serif text-5xl md:text-7xl text-black leading-tight">
@@ -288,7 +290,7 @@ export default function Hero() {
       </section>
 
       {/* ── SOLUTION BANNER ── */}
-      <section className="w-full py-24 px-6 md:px-12 bg-yellow-400 border-b-[3px] border-black relative overflow-hidden">
+      <section className="w-full py-24 px-6 md:px-12 lg:px-16 bg-yellow-400 border-b-[3px] border-black relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiMwMDAiLz48L3N2Zz4=')]"></div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-block bg-white border-[3px] border-black px-4 py-1 font-mono font-bold mb-6 shadow-[2px_2px_0px_0px_#000000] transform -rotate-2">// SOLUTION</div>
@@ -306,7 +308,7 @@ export default function Hero() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section className="w-full py-20 px-6 md:px-12 bg-[#F0F0E8] border-b-[3px] border-black relative overflow-hidden" id="features">
+      <section className="w-full py-20 px-6 md:px-12 lg:px-16 bg-[#F0F0E8] border-b-[3px] border-black relative overflow-hidden" id="features">
         <div className="max-w-7xl mx-auto relative z-10">
           <span className="font-mono font-bold text-purple-600 mb-8 block text-xl">// FEATURES</span>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -350,7 +352,7 @@ export default function Hero() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="w-full py-24 px-6 md:px-12 bg-white border-b-[3px] border-black overflow-hidden" id="how-it-works">
+      <section className="w-full py-24 px-6 md:px-12 lg:px-16 bg-white border-b-[3px] border-black overflow-hidden" id="how-it-works">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="md:w-1/3">
@@ -384,7 +386,7 @@ export default function Hero() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="w-full py-20 px-6 md:px-12 bg-[#F0F0E8] border-b-[3px] border-black" id="faq">
+      <section className="w-full py-20 px-6 md:px-12 lg:px-16 bg-[#F0F0E8] border-b-[3px] border-black" id="faq">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <span className="font-mono font-bold text-black bg-pink-500 px-2 py-1 transform -rotate-2 inline-block shadow-[2px_2px_0px_0px_#000000] border border-black">// FAQ</span>
@@ -399,7 +401,7 @@ export default function Hero() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="w-full py-24 px-6 md:px-12 bg-black text-white relative overflow-hidden">
+      <section className="w-full py-24 px-6 md:px-12 lg:px-16 bg-black text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNmZmYiLz48L3N2Zz4=')] opacity-10"></div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-block border-2 border-white px-4 py-1 rounded-full mb-8 font-mono text-sm animate-pulse">
@@ -416,29 +418,35 @@ export default function Hero() {
             >
               Get Started →
             </Link>
-            <a
-              href="https://github.com/srbhr/Resume-Matcher"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-transparent text-white font-mono font-bold text-lg px-8 py-4 border-[3px] border-white hover:bg-white hover:text-black transition-all flex items-center justify-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-              View on GitHub
-            </a>
           </div>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="w-full bg-white border-t-[3px] border-black p-8">
+      <footer className="w-full bg-white border-t-[3px] border-black py-8 px-6 md:px-12 lg:px-16">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-mono text-gray-500">
           <div>
-            © {new Date().getFullYear()} Vanszs. All rights reserved.
+            © {new Date().getFullYear()}{' '}
+            <a 
+              href="https://bevansatria.my.id" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-black transition-colors"
+            >
+              Vanszs
+            </a>
+            . All rights reserved.
           </div>
           <div>
-            based on srbhr/Resume-Matcher (Apache 2.0)
+            based on{' '}
+            <a 
+              href="https://github.com/srbhr/Resume-Matcher" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-black transition-colors"
+            >
+              srbhr/Resume-Matcher
+            </a>
           </div>
         </div>
       </footer>
