@@ -2,44 +2,61 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 const GRID_BG = {
   backgroundImage:
-    'linear-gradient(rgba(29, 78, 216, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(29, 78, 216, 0.06) 1px, transparent 1px)',
+    'linear-gradient(rgba(29, 78, 216, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(29, 78, 216, 0.05) 1px, transparent 1px)',
   backgroundSize: '48px 48px',
 };
+
+const PAIN_POINTS = [
+  {
+    num: '01',
+    title: 'The Manual Edit Loop',
+    body: 'Wasting hours shuffling bullet points only to see the job posting expire before you hit send.',
+  },
+  {
+    num: '02',
+    title: 'The Silent Rejection',
+    body: 'One keyword mismatch or formatting glitch and your resume hits the trash pile. You will never even know why.',
+  },
+  {
+    num: '03',
+    title: 'The ATS Black Hole',
+    body: 'Blindly guessing keywords against an algorithm literally programmed to reject you. Stop guessing.',
+  },
+];
 
 const FEATURES = [
   {
     tag: '01',
-    title: 'AI Resume Tailoring',
-    body: 'Paste any job description and AI rewrites your resume to match exact keywords, tone, and requirements — in seconds.',
+    title: 'AI-Powered Analysis',
+    body: 'You missed half the requirements. We didn\'t. We find the fine print you ignored so you stop wasting everyone\'s time.',
   },
   {
     tag: '02',
-    title: 'ATS Keyword Optimisation',
-    body: 'Applicant Tracking Systems filter before humans read. Resume Matcher closes every keyword gap so your application gets through.',
+    title: 'Keyword Wizardry',
+    body: 'Stop guessing keywords. We pull the exact technical terms the algorithm wants. Feed the bot what it needs.',
   },
   {
     tag: '03',
-    title: 'Professional PDF Export',
-    body: 'Export polished PDFs using Swiss design templates — single-column or two-column, always print-ready and recruiter-approved.',
+    title: 'Score Everything',
+    body: 'Your friends lie to be nice. Our scoring engine doesn\'t. If your match rate is low, fix it before you hit send.',
   },
   {
     tag: '04',
-    title: 'Multi-Language Support',
-    body: 'Generate tailored resumes in English, Spanish, Chinese, Japanese, Portuguese, and Indonesian to target global opportunities.',
+    title: 'Multi-Language CVs',
+    body: 'Generate tailored resumes in English, Spanish, Chinese, Japanese, Portuguese, and Indonesian.',
   },
   {
     tag: '05',
-    title: 'Privacy First',
-    body: 'Your data stays in your account session. Your LLM API key is stored only in your browser and never sent to our servers.',
+    title: 'Print-Ready PDF Export',
+    body: 'Export polished PDFs using Swiss design templates — single-column or two-column, always recruiter-approved.',
   },
   {
     tag: '06',
-    title: '100% Free — Forever',
-    body: 'No subscription, no freemium wall. Bring your own LLM API key and configure it once in Settings. Every feature, free.',
+    title: 'Your Data, Your Account',
+    body: 'Resume data and your API key are stored per-user on our server. Your key only calls your chosen AI provider — never shared.',
   },
 ];
 
@@ -52,39 +69,39 @@ const STEPS = [
   {
     num: '02',
     label: 'Upload & Paste',
-    desc: 'Add your CV and the job description you are targeting. Our AI analyses every requirement.',
+    desc: 'Add your master CV once. Paste any job description you are targeting.',
   },
   {
     num: '03',
     label: 'Review & Export',
-    desc: 'Accept AI suggestions, customise sections, download a polished PDF.',
+    desc: 'Accept AI keyword suggestions, customise sections, download a polished PDF.',
   },
 ];
 
 const FAQS = [
   {
     q: 'Is Resume Matcher really free?',
-    a: 'Yes — 100% free with no subscription or hidden fees. A free account is required to access the dashboard. Then bring your own LLM API key (OpenAI, Anthropic, Gemini, DeepSeek, Ollama, and more) and configure it once in Settings.',
+    a: 'Yes — 100% free, no subscription. A free account is required. Bring your own LLM API key (OpenAI, Anthropic, Gemini, DeepSeek, Ollama, and more) and configure it once in Settings.',
   },
   {
     q: 'Do I need to create an account?',
-    a: 'Yes — a free account is required to use the AI resume dashboard. Registration is instant and free. No subscription or credit card needed.',
+    a: 'Yes — a free account is required to use the AI dashboard. Registration is instant. No credit card needed.',
   },
   {
     q: 'Which AI providers are supported?',
-    a: 'OpenAI (GPT-4o), Anthropic (Claude), Google Gemini, DeepSeek, OpenRouter, and local Ollama models — all via LiteLLM. You bring your own API key and configure it in Settings after login.',
+    a: 'OpenAI (GPT-4o), Anthropic (Claude), Google Gemini, DeepSeek, OpenRouter, and local Ollama — all via LiteLLM. Bring your own key.',
   },
   {
     q: 'What is ATS and why does it matter?',
-    a: 'Applicant Tracking Systems filter resumes before a human reads them. Up to 75% of resumes are rejected by ATS. Resume Matcher optimises your CV to pass these filters with targeted keyword matching.',
+    a: 'Applicant Tracking Systems filter resumes before a human reads them. Up to 75% of resumes are rejected by ATS. Resume Matcher optimises your CV to pass every filter.',
   },
   {
     q: 'Can I export as PDF?',
-    a: 'Yes. Every resume exports as a professionally formatted PDF using our Swiss design templates — single-column or two-column layout.',
+    a: 'Yes. Every resume exports as a professionally formatted PDF using our Swiss design templates — single or two-column layout.',
   },
   {
-    q: 'Is my resume data private?',
-    a: 'Your resume data is stored in your account session. Your LLM API key is stored only in your browser and is never sent to our servers.',
+    q: 'Is my data private?',
+    a: 'Your resume data and API key are stored securely in your account on our server. Your key is only used to forward requests to your chosen AI provider and is never shared with third parties.',
   },
 ];
 
@@ -114,139 +131,201 @@ export default function Hero() {
     <div className="min-h-screen w-full bg-[#F0F0E8] flex flex-col">
 
       {/* ── NAV ── */}
-      <nav className="w-full border-b border-black bg-[#F0F0E8] sticky top-0 z-50" style={GRID_BG}>
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-16">
-          <div className="flex items-center gap-3">
-            <Image src="/logo.svg" alt="Resume Matcher" width={28} height={28} className="w-7 h-7" />
-            <span className="font-mono text-sm font-bold uppercase tracking-widest text-black">
+      <nav className="w-full border-b-2 border-black bg-white sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 flex items-center justify-between h-14">
+          {/* Logo */}
+          <div className="flex items-center gap-2 border-2 border-black px-3 py-1.5 bg-white shadow-[2px_2px_0px_0px_#000000]">
+            <span className="font-mono text-xs font-bold text-[#1D4ED8]">✳</span>
+            <span className="font-mono text-xs font-bold uppercase tracking-widest text-black">
               Resume Matcher
             </span>
           </div>
+          {/* Nav links */}
+          <div className="hidden md:flex items-center gap-1">
+            {[
+              { label: 'Features', href: '#features' },
+              { label: 'How It Works', href: '#how-it-works' },
+              { label: 'FAQ', href: '#faq' },
+            ].map((l) => (
+              <a
+                key={l.label}
+                href={l.href}
+                className="px-4 py-1.5 font-sans text-sm text-black hover:text-[#1D4ED8] transition-colors"
+              >
+                {l.label}
+              </a>
+            ))}
+          </div>
+          {/* CTA */}
           <Link
             href="/login"
-            className="rounded-none border border-black bg-[#1D4ED8] px-6 py-2 font-mono text-xs font-bold uppercase tracking-wider text-white shadow-[2px_2px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
+            className="rounded-none border-2 border-black bg-[#1D4ED8] px-5 py-2 font-mono text-xs font-bold uppercase tracking-wider text-white shadow-[2px_2px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
           >
-            Sign In
+            Sign In →
           </Link>
         </div>
       </nav>
 
-      {/* ── HERO ── */}
-      <section
-        className="w-full flex-1 flex items-center justify-center px-6 md:px-12 py-24 md:py-36 bg-[#F0F0E8]"
-        style={GRID_BG}
-      >
-        <div className="max-w-7xl mx-auto w-full border border-black bg-[#F0F0E8] shadow-[8px_8px_0px_0px_rgba(0,0,0,0.08)] px-10 py-16 md:px-20 md:py-24 flex flex-col items-start gap-10">
+      {/* ── HERO (2-col split) ── */}
+      <section className="w-full bg-[#F0F0E8] border-b-2 border-black" style={GRID_BG}>
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-24 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
-          {/* Status badges */}
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-green-700" />
-              <span className="font-mono text-xs uppercase tracking-widest text-green-700 font-bold">
+          {/* Left */}
+          <div className="flex flex-col gap-8">
+            {/* Status badges */}
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 border border-black bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-widest font-bold text-green-700 shadow-[1px_1px_0px_0px_#000]">
+                <span className="w-1.5 h-1.5 bg-green-700 inline-block" />
                 Free*
               </span>
-            </div>
-            <div className="w-px h-4 bg-black opacity-20" />
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-[#1D4ED8]" />
-              <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">
+              <span className="inline-flex items-center gap-1.5 border border-black bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-widest font-bold text-[#1D4ED8] shadow-[1px_1px_0px_0px_#000]">
+                <span className="w-1.5 h-1.5 bg-[#1D4ED8] inline-block" />
                 Login Required
               </span>
-            </div>
-            <div className="w-px h-4 bg-black opacity-20" />
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 bg-amber-500" />
-              <span className="font-mono text-xs uppercase tracking-widest text-amber-600 font-bold">
-                Use Your Own AI Key
+              <span className="inline-flex items-center gap-1.5 border border-black bg-white px-3 py-1 font-mono text-[10px] uppercase tracking-widest font-bold text-amber-600 shadow-[1px_1px_0px_0px_#000]">
+                <span className="w-1.5 h-1.5 bg-amber-500 inline-block" />
+                Bring Your API Key
               </span>
             </div>
-          </div>
 
-          {/* Headline */}
-          <div>
-            <h1 className="font-serif text-[clamp(3rem,9vw,8rem)] font-bold leading-[0.92] tracking-tight text-black uppercase selection:bg-[#1D4ED8] selection:text-white">
-              Resume
+            {/* Headline */}
+            <h1 className="font-serif font-bold leading-[0.95] tracking-tight text-black" style={{ fontSize: 'clamp(2.8rem, 6vw, 5.5rem)' }}>
+              Finding a job<br />
+              is{' '}
+              <span className="bg-black text-[#F0F0E8] px-2 italic">Hard.</span>
               <br />
-              <span className="text-[#1D4ED8]">Matcher</span>
+              We make it<br />
+              <span className="bg-[#1D4ED8] text-white px-2">easier.</span>
             </h1>
-            <p className="mt-6 font-sans text-lg md:text-xl text-black max-w-xl leading-relaxed">
-              The free AI tool that tailors your CV to any job description in seconds.
-              Boost ATS scores, match keywords, and export beautiful PDFs.
+
+            <p className="font-sans text-base md:text-lg text-black opacity-75 leading-relaxed max-w-lg">
+              Stop starting from scratch. We optimise your master resume to instantly generate
+              tailored CVs for every job you want — and beat the ATS while doing it.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row gap-3 items-start">
+              <Link
+                href="/login"
+                className="rounded-none border-2 border-black bg-[#1D4ED8] px-8 py-3.5 font-mono text-sm font-bold uppercase tracking-wider text-white shadow-[4px_4px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
+              >
+                Get Started →
+              </Link>
+              <a
+                href="#demo"
+                className="rounded-none border-2 border-black bg-white px-8 py-3.5 font-mono text-sm font-bold uppercase tracking-wider text-black hover:bg-[#F0F0E8] transition-all shadow-[4px_4px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none"
+              >
+                Watch Demo ↓
+              </a>
+            </div>
+
+            {/* Footnote */}
+            <p className="font-mono text-[10px] text-black opacity-35 leading-relaxed max-w-md">
+              * AI features are free — platform &amp; templates included. Just bring your own LLM API key
+              (OpenAI, Anthropic, Gemini, DeepSeek, OpenRouter, or local Ollama).
+              Your key is saved to your account and used only to call your chosen AI provider.
             </p>
           </div>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start">
-            <Link
-              href="/login"
-              className="rounded-none border-2 border-black bg-[#1D4ED8] px-10 py-4 font-mono text-sm font-bold uppercase tracking-wider text-white shadow-[4px_4px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
-            >
-              Sign In — Free
-            </Link>
-            <a
-              href="#features"
-              className="rounded-none border-2 border-black bg-transparent px-10 py-4 font-mono text-sm font-bold uppercase tracking-wider text-black hover:bg-black hover:text-[#F0F0E8] transition-all"
-            >
-              See Features ↓
-            </a>
+          {/* Right — Demo GIF */}
+          <div className="relative flex items-center justify-center">
+            <div className="border-2 border-black bg-white shadow-[8px_8px_0px_0px_#000000] overflow-hidden w-full">
+              {/* Browser bar mock */}
+              <div className="border-b border-black bg-[#F0F0E8] px-4 py-2 flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 bg-black opacity-20" />
+                  <div className="w-3 h-3 bg-black opacity-20" />
+                  <div className="w-3 h-3 bg-black opacity-20" />
+                </div>
+                <div className="flex-1 border border-black bg-white px-3 py-0.5 font-mono text-[9px] text-black opacity-40 uppercase tracking-wide">
+                  resume.bevansatria.my.id/dashboard
+                </div>
+              </div>
+              {/* GIF */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://raw.githubusercontent.com/srbhr/Resume-Matcher/main/assets/Resume_Matcher_Demo_2.gif"
+                alt="Resume Matcher AI demo — tailoring a CV to a job description"
+                className="w-full h-auto block"
+                loading="lazy"
+              />
+            </div>
           </div>
+        </div>
+      </section>
 
-          {/* Footnote */}
-          <p className="font-mono text-[11px] text-black opacity-40 leading-relaxed max-w-lg -mt-4">
-            * AI features require a free account + your own LLM API key
-            (OpenAI, Anthropic, Google Gemini, DeepSeek, OpenRouter, or local Ollama).
-            Your key is stored only in your browser and never sent to our servers.
-          </p>
-
-          {/* Metrics strip */}
-          <div className="flex flex-wrap gap-0 border-t border-black pt-8 w-full">
-            {[
-              { val: 'Free', label: 'Always*' },
-              { val: 'AI', label: 'Powered' },
-              { val: 'ATS', label: 'Optimised' },
-              { val: 'PDF', label: 'Export' },
-            ].map((m, i) => (
-              <div key={i} className={`flex flex-col px-8 py-4 ${i !== 0 ? 'border-l border-black' : ''}`}>
-                <span className="font-serif text-3xl font-bold text-[#1D4ED8] leading-none">{m.val}</span>
-                <span className="font-mono text-xs uppercase tracking-wider text-black mt-1">{m.label}</span>
+      {/* ── PAIN POINTS ── */}
+      <section id="demo" className="w-full bg-black border-b-2 border-black">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-20">
+          <div className="mb-10">
+            <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">// The Problem</span>
+            <h2 className="mt-2 font-serif text-3xl md:text-4xl font-bold text-[#F0F0E8] uppercase leading-tight">
+              The joy &amp; pain of manually editing resumes
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 border border-[#333]">
+            {PAIN_POINTS.map((p, i) => (
+              <div
+                key={i}
+                className={[
+                  'p-8',
+                  i < 2 ? 'md:border-r border-[#333]' : '',
+                  i < PAIN_POINTS.length - 1 ? 'border-b md:border-b-0 border-[#333]' : '',
+                ].filter(Boolean).join(' ')}
+              >
+                <span className="font-mono text-4xl font-bold text-[#1D4ED8] leading-none block">{p.num}</span>
+                <h3 className="mt-4 font-serif text-lg font-bold text-[#F0F0E8] uppercase">{p.title}</h3>
+                <p className="mt-2 font-sans text-sm text-[#F0F0E8] opacity-55 leading-relaxed">{p.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* ── SOLUTION BANNER ── */}
+      <section className="w-full bg-[#1D4ED8] border-b-2 border-black">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <span className="font-mono text-xs uppercase tracking-widest text-white opacity-60 font-bold">// Solution</span>
+            <h2 className="mt-2 font-serif text-2xl md:text-3xl font-bold text-white uppercase leading-tight max-w-xl">
+              Stop guessing what recruiters want.<br />Tailor every application in seconds.
+            </h2>
+          </div>
+          <Link
+            href="/login"
+            className="shrink-0 rounded-none border-2 border-white bg-white text-[#1D4ED8] px-8 py-3.5 font-mono text-sm font-bold uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(255,255,255,0.3)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
+          >
+            Get Started Free →
+          </Link>
+        </div>
+      </section>
+
       {/* ── FEATURES ── */}
-      <section id="features" className="w-full bg-[#F0F0E8] border-t border-black">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 py-20">
+      <section id="features" className="w-full bg-[#F0F0E8] border-b-2 border-black">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-20">
           <div className="mb-12">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">
-              // Capabilities
-            </span>
-            <h2 className="mt-3 font-serif text-4xl md:text-5xl font-bold uppercase text-black leading-tight">
-              Everything You Need
+            <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">// Features</span>
+            <h2 className="mt-2 font-serif text-3xl md:text-4xl font-bold uppercase text-black leading-tight">
+              Because no product is complete<br />without a feature list.
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border border-black">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-2 border-black">
             {FEATURES.map((f, i) => (
               <div
                 key={i}
                 className={[
-                  'p-8 md:p-10 bg-[#F0F0E8] hover:bg-white transition-colors',
-                  i % 3 !== 2 ? 'lg:border-r border-black' : '',
-                  i % 2 === 0 && i % 3 !== 2 ? 'md:border-r border-black lg:border-r-0' : '',
-                  i < 3 ? 'lg:border-b border-black' : '',
-                  i < 4 ? 'md:border-b border-black lg:border-b-0' : '',
-                  i < 5 ? 'border-b border-black lg:border-b-0' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
+                  'p-7 bg-[#F0F0E8] hover:bg-white transition-colors group',
+                  i % 3 !== 2 ? 'lg:border-r-2 lg:border-black' : '',
+                  i % 2 === 0 ? 'md:border-r-2 md:border-black lg:border-r-0' : '',
+                  i < 3 ? 'lg:border-b-2 lg:border-black' : '',
+                  i < 4 ? 'md:border-b-2 md:border-black' : '',
+                  i < 5 ? 'border-b-2 border-black md:border-b-0' : '',
+                ].filter(Boolean).join(' ')}
               >
-                <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">
-                  {f.tag}
-                </span>
-                <h3 className="mt-3 font-serif text-xl font-bold text-black">{f.title}</h3>
-                <p className="mt-3 font-sans text-sm text-black leading-relaxed opacity-70">{f.body}</p>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-[#1D4ED8] font-bold">{f.tag}</span>
+                <h3 className="mt-2 font-serif text-lg font-bold text-black group-hover:text-[#1D4ED8] transition-colors">{f.title}</h3>
+                <p className="mt-2 font-sans text-sm text-black opacity-65 leading-relaxed">{f.body}</p>
               </div>
             ))}
           </div>
@@ -254,30 +333,23 @@ export default function Hero() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="w-full bg-black border-t border-black">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 py-20">
+      <section id="how-it-works" className="w-full bg-[#F0F0E8] border-b-2 border-black" style={GRID_BG}>
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-20">
           <div className="mb-12">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">
-              // Process
-            </span>
-            <h2 className="mt-3 font-serif text-4xl md:text-5xl font-bold uppercase text-[#F0F0E8] leading-tight">
-              Three Steps
+            <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">// Process</span>
+            <h2 className="mt-2 font-serif text-3xl md:text-4xl font-bold uppercase text-black leading-tight">
+              Three steps. That's it.
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 border border-[#F0F0E8]">
+          <div className="grid grid-cols-1 md:grid-cols-3 border-2 border-black bg-black gap-[2px]">
             {STEPS.map((s, i) => (
-              <div
-                key={i}
-                className={[
-                  'p-8 md:p-10',
-                  i < 2 ? 'md:border-r border-[#F0F0E8]' : '',
-                  i < STEPS.length - 1 ? 'border-b md:border-b-0 border-[#F0F0E8]' : '',
-                ].filter(Boolean).join(' ')}
-              >
+              <div key={i} className="p-8 bg-[#F0F0E8] flex flex-col gap-4">
                 <span className="font-mono text-5xl font-bold text-[#1D4ED8] leading-none">{s.num}</span>
-                <h3 className="mt-4 font-serif text-xl font-bold text-[#F0F0E8] uppercase">{s.label}</h3>
-                <p className="mt-2 font-sans text-sm text-[#F0F0E8] leading-relaxed opacity-60">{s.desc}</p>
+                <div>
+                  <h3 className="font-serif text-xl font-bold text-black uppercase">{s.label}</h3>
+                  <p className="mt-2 font-sans text-sm text-black opacity-65 leading-relaxed">{s.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -285,18 +357,15 @@ export default function Hero() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="w-full bg-[#F0F0E8] border-t border-black">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 py-20">
+      <section id="faq" className="w-full bg-[#F0F0E8] border-b-2 border-black">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-20">
           <div className="mb-12">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">
-              // FAQ
-            </span>
-            <h2 className="mt-3 font-serif text-4xl md:text-5xl font-bold uppercase text-black leading-tight">
+            <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">// FAQ</span>
+            <h2 className="mt-2 font-serif text-3xl md:text-4xl font-bold uppercase text-black leading-tight">
               Common Questions
             </h2>
           </div>
-
-          <div className="border border-black">
+          <div className="border-2 border-black max-w-3xl">
             {FAQS.map((item, i) => (
               <FaqItem key={i} q={item.q} a={item.a} />
             ))}
@@ -305,45 +374,61 @@ export default function Hero() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="w-full bg-[#F0F0E8] border-t border-black" style={GRID_BG}>
-        <div className="max-w-7xl mx-auto px-6 md:px-12 py-24 flex flex-col items-center text-center gap-6">
-          <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">
-            // Ready
-          </span>
-          <h2 className="font-serif text-4xl md:text-6xl font-bold uppercase text-black leading-tight max-w-2xl">
-            Land Your Next Role
+      <section className="w-full bg-[#F0F0E8] border-b-2 border-black" style={GRID_BG}>
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-20 md:py-28 flex flex-col items-center text-center gap-6">
+          <span className="font-mono text-xs uppercase tracking-widest text-[#1D4ED8] font-bold">// Convinced?</span>
+          <h2 className="font-serif font-bold uppercase text-black leading-tight max-w-2xl" style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }}>
+            Try Resume Matcher.<br />It's free.
           </h2>
-          <p className="font-sans text-base text-black opacity-60 max-w-md">
-            Create a free account or sign in to access the full AI dashboard.
-            No subscription required.
+          <p className="font-sans text-base text-black opacity-55 max-w-md">
+            Create a free account, connect your LLM API key, and start tailoring CVs in minutes.
           </p>
-          <Link
-            href="/login"
-            className="rounded-none border-2 border-black bg-[#1D4ED8] px-12 py-5 font-mono text-sm font-bold uppercase tracking-wider text-white shadow-[6px_6px_0px_0px_#000000] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-[2px_2px_0px_0px_#000000] transition-all"
-          >
-            Sign In — Free
-          </Link>
-          <p className="font-mono text-[11px] text-black opacity-30">
-            * AI features require your own LLM API key. Configure it in Settings after login.
+          <div className="flex flex-col sm:flex-row gap-3 items-center">
+            <Link
+              href="/login"
+              className="rounded-none border-2 border-black bg-[#1D4ED8] px-10 py-4 font-mono text-sm font-bold uppercase tracking-wider text-white shadow-[4px_4px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
+            >
+              Get Started →
+            </Link>
+            <a
+              href="https://github.com/srbhr/Resume-Matcher"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-none border-2 border-black bg-white px-10 py-4 font-mono text-sm font-bold uppercase tracking-wider text-black shadow-[4px_4px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
+            >
+              View on GitHub
+            </a>
+          </div>
+          <p className="font-mono text-[10px] text-black opacity-30">
+            * AI features are free — just bring your own LLM API key and configure it once in Settings.
           </p>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="w-full bg-[#F0F0E8] border-t border-black">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Image src="/logo.svg" alt="Resume Matcher" width={20} height={20} className="w-5 h-5" />
-            <span className="font-mono text-xs uppercase tracking-wider text-black font-bold">
+      <footer className="w-full bg-black">
+        <div className="max-w-7xl mx-auto px-6 md:px-10 py-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+          <div className="flex items-center gap-2 border border-[#333] px-3 py-1.5">
+            <span className="font-mono text-xs font-bold text-[#1D4ED8]">✳</span>
+            <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#F0F0E8]">
               Resume Matcher
             </span>
           </div>
-          <div className="flex flex-col items-start sm:items-end gap-1">
-            <span className="font-mono text-xs text-black uppercase tracking-wider">
+          <div className="flex flex-wrap gap-6">
+            {[
+              { label: 'Dashboard', href: '/dashboard' },
+              { label: 'Settings', href: '/dashboard' },
+            ].map((l) => (
+              <Link key={l.label} href={l.href} className="font-mono text-xs uppercase tracking-wider text-[#F0F0E8] opacity-40 hover:opacity-100 transition-opacity">
+                {l.label}
+              </Link>
+            ))}
+          </div>
+          <div className="flex flex-col items-start md:items-end gap-1.5">
+            <span className="font-mono text-xs text-[#F0F0E8] uppercase tracking-wider opacity-50">
               © {new Date().getFullYear()} Vanszs. All rights reserved.
             </span>
-            {/* Subtle upstream attribution — Apache 2.0 requires notice */}
-            <span className="font-mono text-[10px] text-black opacity-25 normal-case tracking-normal">
+            <span className="font-mono text-[10px] text-[#F0F0E8] opacity-20 normal-case tracking-normal">
               based on{' '}
               <a
                 href="https://github.com/srbhr/Resume-Matcher"
