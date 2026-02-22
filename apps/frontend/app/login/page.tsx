@@ -16,6 +16,7 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [checkingSession, setCheckingSession] = useState(true);
     const [showComingSoon, setShowComingSoon] = useState<'google' | 'metamask' | null>(null);
+    const [showForgotTooltip, setShowForgotTooltip] = useState(false);
 
     // Helper function to clear all auth credentials
     const clearAuthCredentials = () => {
@@ -250,8 +251,8 @@ export default function LoginPage() {
                 </header>
 
                 {/* Main Form Content */}
-                <main className="flex-1 flex flex-col justify-center px-6 py-6 sm:px-12 lg:px-20 max-w-2xl mx-auto w-full">
-                    <div className="mb-6">
+                <main className="flex-1 flex flex-col justify-center px-6 py-4 md:py-6 sm:px-12 lg:px-20 max-w-2xl mx-auto w-full">
+                    <div className="mb-4 md:mb-6">
                         <h2 className="font-serif text-4xl md:text-5xl font-normal text-[#101922] mb-2 tracking-tight">
                             {isRegister ? 'Join Us.' : 'Welcome Back.'}
                         </h2>
@@ -336,13 +337,24 @@ export default function LoginPage() {
                                     Password
                                 </label>
                                 {!isRegister && (
-                                    <a 
-                                        href="#" 
-                                        className="text-xs font-mono font-bold underline decoration-2 decoration-[#1D4ED8]/50 hover:decoration-[#1D4ED8]"
-                                        onClick={(e) => e.preventDefault()}
-                                    >
-                                        Forgot?
-                                    </a>
+                                    <div className="relative">
+                                        <a 
+                                            href="#" 
+                                            className="text-xs font-mono font-bold underline decoration-2 decoration-[#1D4ED8]/50 hover:decoration-[#1D4ED8]"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setShowForgotTooltip(true);
+                                                setTimeout(() => setShowForgotTooltip(false), 3000);
+                                            }}
+                                        >
+                                            Forgot?
+                                        </a>
+                                        {showForgotTooltip && (
+                                            <div className="absolute -top-14 right-0 bg-[#101922] text-white px-3 py-2 rounded text-xs font-mono whitespace-nowrap shadow-lg z-50 max-w-[200px] text-center">
+                                                we dont have this feature rn, just make a new account :D
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                             <input
