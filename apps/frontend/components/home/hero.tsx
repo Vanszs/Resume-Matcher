@@ -191,11 +191,14 @@ export default function Hero() {
           </div>
           <div className="md:w-1/2 relative h-[500px] w-full flex items-center justify-center">
             <div className="absolute top-10 right-10 w-64 h-64 bg-yellow-400 rounded-full mix-blend-multiply opacity-90 z-0"></div>
-            <div className="relative w-full h-full border-2 border-dashed border-gray-400 bg-gray-100/50 flex flex-col items-center justify-center transform rotate-2 shadow-[4px_4px_0px_0px_#000000] z-10">
-              <svg className="w-36 h-36 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-              </svg>
-              <p className="font-mono text-gray-400 mt-4 text-center px-8">High-Contrast Collage Art Placeholder<br/>(Hands + Magnifying Glass)</p>
+            <div className="relative w-full h-full border-2 border-black bg-white flex items-center justify-center transform rotate-2 shadow-[4px_4px_0px_0px_#000000] z-10 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/assets/portrait-person-with-visual-metaphor-memory-removebg-preview (1) (1).png"
+                alt="Portrait with visual metaphor"
+                className="w-full h-full object-contain"
+                loading="eager"
+              />
               <div className="absolute top-1/4 left-10 text-orange-600 text-6xl font-serif transform -rotate-12">↑</div>
               <div className="absolute bottom-1/4 right-10 text-orange-600 text-6xl font-serif transform rotate-12">↑</div>
             </div>
@@ -215,13 +218,14 @@ export default function Hero() {
             <div className="bg-black p-2 md:p-3 border-[4px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-gray-900 relative overflow-hidden transform md:rotate-1 transition-transform duration-500 hover:rotate-0">
               {/* CRT scanline effect */}
               <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-20 pointer-events-none bg-[length:100%_4px,3px_100%]"></div>
-              <div className="aspect-video bg-gray-800 flex items-center justify-center relative border border-gray-700">
-                <div className="text-center z-10">
-                  <svg className="w-20 h-20 mx-auto mb-4 text-white/80" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                  <p className="font-mono text-white/60 uppercase tracking-widest text-sm">Tutorial GIF Placeholder</p>
-                </div>
+              <div className="aspect-video bg-gray-800 flex items-center justify-center relative border border-gray-700 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/assets/Resume_Matcher_Demo.gif"
+                  alt="Resume Matcher Demo Tutorial"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
                 <div className="absolute top-4 left-4 flex gap-2 z-10">
                   <div className="w-3 h-3 rounded-full bg-red-500 border border-black/30"></div>
                   <div className="w-3 h-3 rounded-full bg-yellow-500 border border-black/30"></div>
@@ -250,24 +254,15 @@ export default function Hero() {
             </h2>
           </div>
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
-            {/* Collage placeholder */}
-            <div className="relative min-h-[400px] h-full flex items-center justify-center p-8 bg-purple-100 border-2 border-dashed border-purple-400 rounded-lg transform -rotate-1">
-              <div className="absolute top-0 left-0 w-full h-8 bg-purple-300 border-b-2 border-dashed border-purple-400 flex gap-2 px-2 items-center">
-                <div className="w-3 h-3 bg-white rounded-full"></div>
-                <div className="w-3 h-3 bg-white rounded-full"></div>
-                <div className="w-3 h-3 bg-white rounded-full"></div>
-                <div className="w-3 h-3 bg-white rounded-full"></div>
-              </div>
-              <div className="text-center relative z-10">
-                <span className="text-9xl">😫</span>
-                <p className="font-mono text-purple-900 mt-4 max-w-xs mx-auto">Collage Placeholder:<br/>Frustrated face, shouting mouth, hand holding pen</p>
-              </div>
-              <div className="absolute top-20 right-10 w-16 h-16 bg-white border-2 border-black rounded-full flex items-center justify-center transform rotate-12 shadow-sm">
-                <span className="text-3xl">👁️</span>
-              </div>
-              <div className="absolute bottom-10 left-10 w-20 h-20 bg-white border-2 border-black transform -rotate-6 shadow-sm flex items-center justify-center">
-                <span className="text-4xl">💀</span>
-              </div>
+            {/* Collage - Pain of editing */}
+            <div className="relative min-h-[400px] h-full flex items-center justify-center bg-[#F0F0E8] border-2 border-black transform -rotate-1 shadow-[4px_4px_0px_0px_#000000] overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://resumematcher.fyi/_astro/manually_editing_resumes.BYuNwN7N_Zsu3rt.webp"
+                alt="Pain of manually editing resumes collage"
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
             </div>
 
             {/* List of pain points */}
