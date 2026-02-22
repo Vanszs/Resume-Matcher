@@ -415,7 +415,7 @@ export default function LoginPage() {
                             >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img 
-                                    src="/google-g-logo.svg" 
+                                    src="/Logo-google-icon-PNG.png" 
                                     alt="Google Logo" 
                                     className="w-5 h-5"
                                 />
