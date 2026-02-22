@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { Sparkles, Hash, TrendingUp, Globe, FileText, Shield } from 'lucide-react';
 
 const PAIN_POINTS = [
   {
@@ -23,7 +24,7 @@ const PAIN_POINTS = [
 
 const FEATURES = [
   {
-    icon: '▲',
+    icon: Sparkles,
     title: 'AI-Powered Analysis',
     body: 'Compare your resume against job descriptions instantly. Get actionable feedback on what\'s missing.',
     decorations: [
@@ -32,7 +33,7 @@ const FEATURES = [
     ],
   },
   {
-    icon: '■',
+    icon: Hash,
     title: 'Keyword Wizardry',
     body: 'Extract high-value keywords from JD. We highlight hard skills, soft skills, and tech stacks you need.',
     decorations: [
@@ -41,25 +42,25 @@ const FEATURES = [
     ],
   },
   {
-    icon: '●',
+    icon: TrendingUp,
     title: 'Match Score',
-    body: 'Get a numeric match score. Know exactly how well you fit the role before hitting \'Apply\'.',
+    body: 'Get a numeric match score. Know exactly how well you fit the role before hitting \'Apply\'.', 
     decorations: [],
   },
   {
-    icon: '✦',
+    icon: Globe,
     title: 'Multi-Language CVs',
     body: 'Applying globally? Generate resumes in multiple languages without losing formatting.',
     decorations: [],
   },
   {
-    icon: '▢',
+    icon: FileText,
     title: 'Print-Ready PDF Export',
     body: 'Clean, professional, ATS-friendly templates compiled to PDF in one click.',
     decorations: [],
   },
   {
-    icon: '◆',
+    icon: Shield,
     title: 'Privacy First',
     body: 'Your data, your control. Local storage with optional cloud sync. Open source at heart.',
     decorations: [],
@@ -325,8 +326,8 @@ export default function Hero() {
                   return null;
                 })}
 
-                <div className="w-12 h-12 bg-blue-600 border-2 border-black mb-4 flex items-center justify-center text-white text-2xl">
-                  {feature.icon}
+                <div className="w-12 h-12 bg-blue-600 border-2 border-black mb-4 flex items-center justify-center text-white">
+                  <feature.icon className="w-6 h-6" strokeWidth={2.5} />
                 </div>
                 <h3 className="font-serif font-bold text-2xl mb-3">{feature.title}</h3>
                 <p className="font-mono text-sm text-gray-600">{feature.body}</p>
