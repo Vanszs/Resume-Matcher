@@ -131,11 +131,11 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 export default function Hero() {
   return (
-    <div className="min-h-screen w-full bg-[#F0F0E8] flex flex-col">
+    <div className="min-h-screen w-full bg-[#F0F0E8] flex flex-col overflow-x-hidden">
 
       {/* ── NAV ── */}
-      <nav className="sticky top-0 z-50 bg-[#F0F0E8] border-b-[3px] border-black px-4 md:px-8 py-4">
-        <div className="flex items-center justify-between">
+      <nav className="sticky top-0 z-50 bg-[#F0F0E8] border-b-[3px] border-black px-4 md:px-8 py-4 w-full">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="font-serif font-bold text-xl md:text-2xl tracking-tight flex items-center gap-2 text-black">
               <span className="text-orange-600 text-2xl">✳</span> Resume Matcher
@@ -156,7 +156,7 @@ export default function Hero() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="px-6 md:px-12 py-16 md:py-24 relative overflow-hidden border-b-[3px] border-black">
+      <section className="w-full px-6 md:px-12 py-16 md:py-24 relative overflow-hidden border-b-[3px] border-black">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 relative z-10">
           <div className="md:w-1/2 text-left">
             <h1 className="font-serif font-extrabold text-6xl md:text-7xl lg:text-8xl leading-[1.0] text-black mb-8 tracking-tight">
@@ -209,7 +209,7 @@ export default function Hero() {
       </section>
 
       {/* ── DEMO SECTION ── */}
-      <section className="py-20 px-6 md:px-12 bg-white border-b-[3px] border-black relative overflow-hidden">
+      <section className="w-full py-20 px-6 md:px-12 bg-white border-b-[3px] border-black relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-block bg-black text-white px-4 py-1 font-mono font-bold mb-8 transform -rotate-1 border border-white shadow-[2px_2px_0px_0px_#000000]">
             // SEE IT IN ACTION
@@ -236,15 +236,15 @@ export default function Hero() {
                 <span className="w-2 h-2 bg-red-500 rounded-full"></span> LIVE DEMO
               </div>
             </div>
-            <div className="absolute -bottom-8 -right-8 w-28 h-28 bg-orange-600 border-[3px] border-black rounded-full flex items-center justify-center transform rotate-12 z-30 shadow-[4px_4px_0px_0px_#000000] hover:scale-110 transition-transform cursor-pointer">
-              <span className="font-serif font-bold text-white text-xl leading-none text-center italic">Watch<br/>Now!</span>
+            <div className="absolute -bottom-4 -right-4 md:-bottom-6 md:-right-6 lg:-bottom-8 lg:-right-8 w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 bg-orange-600 border-[3px] border-black rounded-full flex items-center justify-center transform rotate-12 z-30 shadow-[4px_4px_0px_0px_#000000] hover:scale-110 transition-transform cursor-pointer">
+              <span className="font-serif font-bold text-white text-sm md:text-base lg:text-xl leading-none text-center italic">Watch<br/>Now!</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── PAIN POINTS ── */}
-      <section className="py-24 px-6 md:px-12 bg-[#F0F0E8] border-b-[3px] border-black">
+      <section className="w-full py-24 px-6 md:px-12 bg-[#F0F0E8] border-b-[3px] border-black">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="font-serif text-5xl md:text-7xl text-black leading-tight">
@@ -255,7 +255,7 @@ export default function Hero() {
           </div>
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
             {/* Collage - Pain of editing */}
-            <div className="relative min-h-[400px] h-full flex items-center justify-center bg-[#F0F0E8] border-2 border-black transform -rotate-1 shadow-[4px_4px_0px_0px_#000000] overflow-hidden">
+            <div className="relative min-h-[400px] h-full flex items-center justify-center bg-[#F0F0E8] overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="https://resumematcher.fyi/_astro/manually_editing_resumes.BYuNwN7N_Zsu3rt.webp"
@@ -288,7 +288,7 @@ export default function Hero() {
       </section>
 
       {/* ── SOLUTION BANNER ── */}
-      <section className="py-24 px-6 md:px-12 bg-yellow-400 border-b-[3px] border-black relative overflow-hidden">
+      <section className="w-full py-24 px-6 md:px-12 bg-yellow-400 border-b-[3px] border-black relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiMwMDAiLz48L3N2Zz4=')]"></div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-block bg-white border-[3px] border-black px-4 py-1 font-mono font-bold mb-6 shadow-[2px_2px_0px_0px_#000000] transform -rotate-2">// SOLUTION</div>
@@ -306,7 +306,7 @@ export default function Hero() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section className="py-20 px-6 md:px-12 bg-[#F0F0E8] border-b-[3px] border-black relative" id="features">
+      <section className="w-full py-20 px-6 md:px-12 bg-[#F0F0E8] border-b-[3px] border-black relative overflow-hidden" id="features">
         <div className="max-w-7xl mx-auto relative z-10">
           <span className="font-mono font-bold text-purple-600 mb-8 block text-xl">// FEATURES</span>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -350,7 +350,7 @@ export default function Hero() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="py-24 px-6 md:px-12 bg-white border-b-[3px] border-black" id="how-it-works">
+      <section className="w-full py-24 px-6 md:px-12 bg-white border-b-[3px] border-black overflow-hidden" id="how-it-works">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row gap-12 items-center">
             <div className="md:w-1/3">
@@ -359,21 +359,21 @@ export default function Hero() {
               <div className="w-24 h-2 bg-black mb-6"></div>
               <p className="font-mono text-gray-600">Streamlined for speed. Get from job discovery to application in under 5 minutes.</p>
             </div>
-            <div className="md:w-2/3 space-y-6">
+            <div className="md:w-2/3 space-y-6 relative">
               {STEPS.map((step, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center gap-6 p-4 border-2 border-black bg-[#F0F0E8] shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]"
-                  style={{ marginLeft: `${step.indent * 2}rem` }}
+                  className="flex items-center gap-6 p-4 border-2 border-black bg-[#F0F0E8] shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] relative"
+                  style={{ marginLeft: step.indent === 0 ? '0' : step.indent === 1 ? 'clamp(0rem, 5vw, 2rem)' : 'clamp(0rem, 8vw, 4rem)' }}
                 >
                   <div className={`font-serif text-4xl font-bold ${step.color} opacity-50`}>{step.num}</div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-bold font-sans text-xl uppercase">{step.label}</h3>
                     <p className="font-mono text-sm text-gray-600">{step.desc}</p>
                   </div>
                   {idx === STEPS.length - 1 && (
-                    <div className="absolute -right-12 top-0 transform w-24 h-24 bg-gray-100 border-2 border-black rotate-12 shadow-[4px_4px_0px_0px_#000000] hidden lg:flex flex-col items-center justify-center p-1 z-10">
-                      <span className="text-4xl">👍</span>
+                    <div className="absolute -top-2 -right-2 md:-top-4 md:-right-4 transform w-14 h-14 md:w-20 md:h-20 bg-gray-100 border-2 border-black rotate-12 shadow-[4px_4px_0px_0px_#000000] hidden md:flex flex-col items-center justify-center p-1 z-10">
+                      <span className="text-2xl md:text-3xl">👍</span>
                     </div>
                   )}
                 </div>
@@ -384,7 +384,7 @@ export default function Hero() {
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-20 px-6 md:px-12 bg-[#F0F0E8] border-b-[3px] border-black" id="faq">
+      <section className="w-full py-20 px-6 md:px-12 bg-[#F0F0E8] border-b-[3px] border-black" id="faq">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <span className="font-mono font-bold text-black bg-pink-500 px-2 py-1 transform -rotate-2 inline-block shadow-[2px_2px_0px_0px_#000000] border border-black">// FAQ</span>
@@ -399,7 +399,7 @@ export default function Hero() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-24 px-6 md:px-12 bg-black text-white relative overflow-hidden">
+      <section className="w-full py-24 px-6 md:px-12 bg-black text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNmZmYiLz48L3N2Zz4=')] opacity-10"></div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-block border-2 border-white px-4 py-1 rounded-full mb-8 font-mono text-sm animate-pulse">
@@ -432,8 +432,8 @@ export default function Hero() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="bg-white border-t-[3px] border-black p-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-mono text-gray-500">
+      <footer className="w-full bg-white border-t-[3px] border-black p-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-mono text-gray-500">
           <div>
             © {new Date().getFullYear()} Vanszs. All rights reserved.
           </div>
