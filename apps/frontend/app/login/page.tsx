@@ -262,17 +262,8 @@ export default function LoginPage() {
                         </p>
                     </div>
 
-                    {/* Back button (mobile only) */}
-                    <Link 
-                        href="/" 
-                        className="md:hidden inline-flex items-center gap-2 font-mono text-xs font-bold uppercase hover:underline mb-4 text-[#101922]"
-                    >
-                        <span>←</span>
-                        Back
-                    </Link>
-
                     {/* Tabs */}
-                    <div className="flex gap-8 border-b-2 border-[#101922]/10 mb-6">
+                    <div className="flex gap-8 border-b-2 border-[#101922]/10 mb-6 items-center">
                         <button
                             type="button"
                             onClick={() => switchMode('login')}
@@ -296,6 +287,13 @@ export default function LoginPage() {
                         >
                             REGISTER
                         </button>
+                        <Link 
+                            href="/" 
+                            className="md:hidden ml-auto inline-flex items-center gap-1 font-mono text-xs font-bold uppercase hover:underline text-[#101922] pb-3"
+                        >
+                            <span>←</span>
+                            Back
+                        </Link>
                     </div>
 
                     {/* Error Message */}
@@ -452,17 +450,6 @@ export default function LoginPage() {
                         </div>
                     </div>
                 </main>
-
-                {/* Footer Mobile */}
-                <footer className="p-6 text-center md:hidden border-t-2 border-[#101922]/10 bg-white">
-                    <Link 
-                        href="/" 
-                        className="font-mono text-xs font-bold uppercase hover:underline inline-flex items-center gap-1"
-                    >
-                        <span>←</span>
-                        Go back to Home
-                    </Link>
-                </footer>
             </div>
         </div>
     );
