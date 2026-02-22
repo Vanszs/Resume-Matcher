@@ -4,23 +4,36 @@ import Hero from '@/components/home/hero';
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://resume.bevansatria.my.id';
 
 export const metadata: Metadata = {
-  title: 'Free AI Resume Tailoring — Match Your CV to Any Job Description',
+  title: 'Free CV Maker & AI Resume Tailoring — Resume Matcher',
   description:
-    'The free AI tool that tailors your resume to any job description in seconds. Boost ATS scores, match keywords, and export beautiful PDFs — completely free, no sign-up required.',
+    'Resume Matcher is a free AI-powered CV maker and resume tailoring tool. Tailor your resume to any job description in seconds, pass ATS filters, and export a polished PDF — no sign-up, no subscription, 100% free.',
+  keywords: [
+    'free cv maker',
+    'free resume builder',
+    'AI resume tailoring',
+    'resume tailoring tool',
+    'ATS resume optimizer',
+    'CV tailored to job description',
+    'free ATS resume checker',
+    'resume keyword optimizer',
+    'job application CV builder',
+    'AI CV generator free',
+  ],
   alternates: {
     canonical: siteUrl,
   },
   openGraph: {
-    title: 'Free AI Resume Tailoring — Match Your CV to Any Job Description',
+    title: 'Free CV Maker & AI Resume Tailoring — Resume Matcher',
     description:
-      'Tailor your CV to any job description for free with AI. ATS keyword matching, smart rewrites, and polished PDF export. No subscription.',
+      'Tailor your CV to any job description with AI — completely free. ATS keyword optimisation, smart rewrites, polished PDF export. No account required.',
     url: siteUrl,
     type: 'website',
   },
   twitter: {
-    title: 'Free AI Resume Tailoring — Match Your CV to Any Job Description',
+    card: 'summary_large_image',
+    title: 'Free CV Maker & AI Resume Tailoring — Resume Matcher',
     description:
-      'Tailor your CV to any job description for free with AI. ATS keyword matching, smart rewrites, and polished PDF export.',
+      'Free AI resume builder and CV tailoring tool. Beat ATS, match job keywords, export polished PDFs. No subscription or sign-up needed.',
   },
 };
 
@@ -35,7 +48,8 @@ export default function Home() {
     operatingSystem: 'Web',
     url: siteUrl,
     description:
-      'Free AI-powered resume tailoring tool. Match your CV to any job description, optimize for ATS, and export polished PDFs.',
+      'Free AI-powered CV maker and resume tailoring tool. Tailor your resume to any job description, pass ATS filters, and export polished PDFs — 100% free, no subscription.',
+    alternateName: ['Free CV Maker', 'Free Resume Builder', 'AI Resume Tailoring Tool'],
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -43,12 +57,13 @@ export default function Home() {
       description: 'Free — no subscription required',
     },
     featureList: [
-      'AI resume tailoring to job descriptions',
-      'ATS keyword optimization',
-      'Resume builder with Swiss design templates',
-      'PDF export',
-      'Multi-language support',
-      'Resume score and gap analysis',
+      'Free AI resume tailoring to job descriptions',
+      'ATS keyword optimisation and gap analysis',
+      'CV builder with professional Swiss design templates',
+      'PDF export — single and two-column layouts',
+      'Multi-language support (EN, ES, ZH, JA, PT, ID)',
+      'Bring your own AI key (OpenAI, Anthropic, Gemini, Ollama)',
+      'No account required, no subscription',
     ],
     screenshot: `${siteUrl}/og-image.png`,
     softwareVersion: '2.0',
@@ -85,42 +100,50 @@ export default function Home() {
     mainEntity: [
       {
         '@type': 'Question',
-        name: 'Is Resume Matcher free to use?',
+        name: 'Is Resume Matcher really free?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. Resume Matcher is completely free. You can tailor your CV to any job description, optimize for ATS, and export polished PDFs at no cost with no subscription required.',
+          text: 'Yes — 100% free with no subscription or hidden fees. You can bring your own AI API key (OpenAI, Anthropic, Gemini, etc.) or use the shared instance at no cost.',
         },
       },
       {
         '@type': 'Question',
-        name: 'How does AI resume tailoring work?',
+        name: 'Do I need to create an account?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Resume Matcher uses AI to analyze your existing resume and a job description, then rewrites and adjusts your content to match the required keywords and skills — improving your ATS score and relevance to that specific role.',
+          text: 'No account required to start. You can use the full resume builder and tailoring features without signing up.',
         },
       },
       {
         '@type': 'Question',
-        name: 'What is ATS and why does my resume need to be ATS-friendly?',
+        name: 'What is ATS and why does it matter?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'ATS (Applicant Tracking System) is software used by employers to filter resumes before a human reads them. An ATS-friendly resume includes the right keywords from the job description so it passes the automated screening and reaches the hiring manager.',
+          text: 'Applicant Tracking Systems are software used by recruiters to filter resumes before a human reads them. Up to 75% of resumes are rejected by ATS — Resume Matcher optimises your CV to pass these filters.',
         },
       },
       {
         '@type': 'Question',
-        name: 'Can I tailor my CV to multiple job descriptions?',
+        name: 'Which AI providers are supported?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. Resume Matcher lets you keep one master resume and create unlimited tailored versions — each optimized for a specific job description — all for free.',
+          text: 'OpenAI (GPT-4o), Anthropic (Claude), Google Gemini, DeepSeek, OpenRouter, and local Ollama models are all supported via LiteLLM.',
         },
       },
       {
         '@type': 'Question',
-        name: 'Does Resume Matcher export to PDF?',
+        name: 'Can I export my resume as PDF?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. Resume Matcher exports your tailored resume as a polished, print-ready PDF using professional Swiss design templates.',
+          text: 'Yes. Every resume can be exported as a professionally formatted PDF using our Swiss design templates — single-column or two-column layout.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Is my resume data private?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Your resume data is stored locally in your browser session. We do not upload or store your personal data on any server beyond what is needed to generate the AI response.',
         },
       },
     ],
