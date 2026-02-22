@@ -70,7 +70,7 @@ const PROVIDERS: LLMProvider[] = [
   'openrouter',
   'gemini',
   'deepseek',
-  'ollama',
+  // 'ollama', // Commented out - not available for hosted version
 ];
 
 const SEGMENTED_BUTTON_BASE =
