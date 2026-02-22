@@ -351,7 +351,7 @@ export default function LoginPage() {
                                         </a>
                                         {showForgotTooltip && (
                                             <div className="absolute -top-14 right-0 bg-[#101922] text-white px-3 py-2 rounded text-xs font-mono whitespace-nowrap shadow-lg z-50 max-w-[200px] text-center">
-                                                we dont have this feature rn, just make a new account :D
+                                                We dontt have this feature rn, just make a new account :D
                                             </div>
                                         )}
                                     </div>
