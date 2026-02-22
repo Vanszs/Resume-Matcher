@@ -159,10 +159,10 @@ export default function LoginPage() {
                 
                 <div className="relative z-10 flex flex-col h-full justify-center items-center">
                     {/* Collage Container */}
-                    <div className="relative w-[400px] h-[500px] border-4 border-[#101922] bg-white shadow-[6px_6px_0px_0px_#101922] rotate-[-2deg]">
+                    <div className="relative w-[450px] h-[550px] border-4 border-[#101922] bg-[#FDFBF7] shadow-[6px_6px_0px_0px_#101922] rotate-[-2deg]">
                         {/* Image Placeholder */}
                         <div 
-                            className="absolute inset-0 bg-cover bg-center grayscale contrast-125" 
+                            className="absolute inset-0 bg-cover bg-center" 
                             style={{
                                 backgroundImage: "url('/assets/portrait-person-with-visual-metaphor-memory-removebg-preview (1) (1).png')"
                             }}
@@ -218,10 +218,10 @@ export default function LoginPage() {
                 {/* Main Form Content */}
                 <main className="flex-1 flex flex-col justify-center px-6 py-8 sm:px-12 lg:px-20 max-w-2xl mx-auto w-full">
                     <div className="mb-8">
-                        <h2 className="font-serif text-5xl md:text-6xl font-normal text-[#101922] mb-2 tracking-tight">
+                        <h2 className="font-serif text-4xl md:text-5xl font-normal text-[#101922] mb-2 tracking-tight">
                             {isRegister ? 'Join Us.' : 'Welcome Back.'}
                         </h2>
-                        <p className="text-[#101922]/60 font-medium">
+                        <p className="text-[#101922]/60 font-medium text-base">
                             {isRegister 
                                 ? 'Create an account to get started with Resume Matcher.' 
                                 : 'Enter your credentials to access your dashboard.'}
@@ -233,7 +233,7 @@ export default function LoginPage() {
                         <button
                             type="button"
                             onClick={() => switchMode('login')}
-                            className={`pb-3 border-b-4 font-mono font-bold text-lg tracking-wide transition-colors ${
+                            className={`pb-3 border-b-4 font-mono font-bold text-base tracking-wide transition-colors ${
                                 !isRegister 
                                     ? 'border-[#101922] text-[#101922]' 
                                     : 'border-transparent text-[#101922]/40 hover:text-[#101922]'
@@ -245,7 +245,7 @@ export default function LoginPage() {
                             type="button"
                             onClick={() => switchMode('register')}
                             disabled={!registerEnabled}
-                            className={`pb-3 border-b-4 font-mono font-bold text-lg tracking-wide transition-colors ${
+                            className={`pb-3 border-b-4 font-mono font-bold text-base tracking-wide transition-colors ${
                                 isRegister 
                                     ? 'border-[#101922] text-[#101922]' 
                                     : 'border-transparent text-[#101922]/40 hover:text-[#101922]'
@@ -335,7 +335,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={isLoading || (isRegister && !registerEnabled)}
-                            className="mt-4 w-full h-14 bg-[#1D4ED8] text-white border-2 border-[#101922] rounded-lg font-bold text-lg flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_#101922] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#101922] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0px_0px_#101922]"
+                            className="mt-4 w-full h-14 bg-[#1D4ED8] text-white border-2 border-[#101922] rounded-lg font-bold text-base flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_#101922] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#101922] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0px_0px_#101922]"
                         >
                             {isLoading ? (
                                 <span>Processing...</span>

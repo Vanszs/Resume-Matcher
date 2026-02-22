@@ -163,7 +163,7 @@ export default function Hero() {
       <section className="w-full px-6 md:px-12 lg:px-16 py-8 md:py-12 relative overflow-hidden border-b-[3px] border-black min-h-[calc(100vh-72px)] flex items-center">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-6 md:gap-10 relative z-10 w-full">
           <div className="md:w-1/2 text-left pr-0 md:pr-8">
-            <h1 className="font-serif font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.0] text-black mb-4 md:mb-6 tracking-tight">
+            <h1 className="font-serif font-extrabold text-4xl sm:text-5xl md:text-5xl lg:text-6xl leading-[1.0] text-black mb-4 md:mb-6 tracking-tight">
               Finding a job is <br/>
               <span className="bg-black text-white px-2 inline-block font-serif italic border-2 border-transparent relative mt-1 mb-1">
                 Hard.
@@ -173,13 +173,13 @@ export default function Hero() {
                 easier.
               </span>
             </h1>
-            <p className="font-mono text-sm md:text-base lg:text-lg text-gray-800 mb-6 md:mb-8 leading-relaxed max-w-md">
+            <p className="font-mono text-sm md:text-base text-gray-800 mb-6 md:mb-8 leading-relaxed max-w-md">
               Stop starting from scratch. We optimize your master resume to instantly generate tailored CVs for every job you want — and beat the ATS while doing it.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
               <Link
                 href="/login"
-                className="bg-blue-600 text-white font-mono font-bold text-sm md:text-base px-5 md:px-6 py-2.5 md:py-3 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center flex items-center justify-center gap-2 group w-full sm:w-auto uppercase tracking-wider"
+                className="bg-blue-600 text-white font-mono font-bold text-base px-5 md:px-6 py-2.5 md:py-3 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center flex items-center justify-center gap-2 group w-full sm:w-auto uppercase tracking-wider"
               >
                 Get Started →
               </Link>
@@ -187,7 +187,7 @@ export default function Hero() {
                 href="https://github.com/srbhr/Resume-Matcher"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[#F0F0E8] text-black font-mono font-bold text-sm md:text-base px-5 md:px-6 py-2.5 md:py-3 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center w-full sm:w-auto uppercase tracking-wider"
+                className="bg-[#F0F0E8] text-black font-mono font-bold text-base px-5 md:px-6 py-2.5 md:py-3 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] hover:shadow-[2px_2px_0px_0px_#000000] hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center w-full sm:w-auto uppercase tracking-wider"
               >
                 Try on GitHub
               </a>
@@ -244,7 +244,7 @@ export default function Hero() {
       <section className="w-full py-24 px-6 md:px-12 lg:px-16 bg-[#F0F0E8] border-b-[3px] border-black">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-5xl md:text-7xl text-black leading-tight">
+            <h2 className="font-serif text-4xl md:text-5xl text-black leading-tight">
               The <span className="line-through text-gray-400">joy</span>{' '}
               <span className="bg-blue-600 text-white px-2 inline-block border-2 border-black transform -rotate-2 relative z-10">pain</span>{' '}
               of manually <br/> editing resumes
@@ -272,7 +272,7 @@ export default function Hero() {
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-serif font-bold text-3xl mb-3 text-black">{p.title}</h3>
+                    <h3 className="font-serif font-bold text-2xl mb-3 text-black">{p.title}</h3>
                     <p className="font-mono text-base text-gray-600 leading-relaxed">
                       {p.body}
                     </p>
@@ -288,14 +288,14 @@ export default function Hero() {
       <section className="w-full py-24 px-6 md:px-12 lg:px-16 bg-yellow-400 border-b-[3px] border-black relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiMwMDAiLz48L3N2Zz4=')]"></div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="inline-block bg-white border-[3px] border-black px-4 py-1 font-mono font-bold mb-6 shadow-[2px_2px_0px_0px_#000000] transform -rotate-2">// SOLUTION</div>
-          <h2 className="font-serif font-bold text-5xl md:text-7xl mb-8 leading-tight">
+          <div className="inline-block bg-white border-[3px] border-black px-4 py-1 font-mono font-bold mb-6 shadow-[2px_2px_0px_0px_#000000] transform -rotate-2 text-base">// SOLUTION</div>
+          <h2 className="font-serif font-bold text-4xl md:text-5xl mb-8 leading-tight">
             Stop guessing what recruiters want. <br/>
             <span className="italic text-white" style={{ textShadow: '2px 2px 0px #000' }}>Tailor every application in seconds.</span>
           </h2>
           <Link
             href="/login"
-            className="inline-block bg-black text-white font-mono font-bold text-xl px-10 py-5 border-[3px] border-white shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all"
+            className="inline-block bg-black text-white font-mono font-bold text-base px-10 py-5 border-[3px] border-white shadow-[4px_4px_0px_0px_#ffffff] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all"
           >
             Get Started Free →
           </Link>
@@ -305,7 +305,7 @@ export default function Hero() {
       {/* ── FEATURES ── */}
       <section className="w-full py-20 px-6 md:px-12 lg:px-16 bg-[#F0F0E8] border-b-[3px] border-black relative overflow-hidden" id="features">
         <div className="max-w-7xl mx-auto relative z-10">
-          <span className="font-mono font-bold text-purple-600 mb-8 block text-xl">// FEATURES</span>
+          <span className="font-mono font-bold text-purple-600 mb-8 block text-base">// FEATURES</span>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {FEATURES.map((feature, idx) => (
               <div
