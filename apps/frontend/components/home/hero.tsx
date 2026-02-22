@@ -227,25 +227,56 @@ export default function Hero() {
             </p>
           </div>
 
-          {/* Right — Demo GIF */}
-          <div className="relative flex items-center justify-center">
-            <div className="border-2 border-black bg-white shadow-[8px_8px_0px_0px_#000000] overflow-hidden w-full">
-              {/* Browser bar mock */}
-              <div className="border-b border-black bg-[#F0F0E8] px-4 py-2 flex items-center gap-2">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 bg-black opacity-20" />
-                  <div className="w-3 h-3 bg-black opacity-20" />
-                  <div className="w-3 h-3 bg-black opacity-20" />
-                </div>
-                <div className="flex-1 border border-black bg-white px-3 py-0.5 font-mono text-[9px] text-black opacity-40 uppercase tracking-wide">
-                  resume.bevansatria.my.id/dashboard
-                </div>
-              </div>
-              {/* GIF */}
+          {/* Right — Stacked collage photos */}
+          <div className="relative flex items-center justify-center min-h-[480px] md:min-h-[560px]">
+            {/* Back card — glitch face, rotated right */}
+            <div
+              className="absolute w-[58%] aspect-[3/4] border-2 border-black overflow-hidden shadow-[6px_6px_0px_0px_#1D4ED8]"
+              style={{ rotate: '7deg', bottom: '2%', right: '2%' }}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="https://raw.githubusercontent.com/srbhr/Resume-Matcher/main/assets/Resume_Matcher_Demo_2.gif"
-                alt="Resume Matcher AI demo — tailoring a CV to a job description"
+                src="/hero-2.jpg"
+                alt=""
+                aria-hidden="true"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Mid card — orange collage woman, rotated left */}
+            <div
+              className="absolute w-[62%] aspect-[2/3] border-2 border-black overflow-hidden shadow-[6px_6px_0px_0px_#000000]"
+              style={{ rotate: '-5deg', top: '4%', left: '4%' }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/hero-1.jpg"
+                alt=""
+                aria-hidden="true"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Front card — app screenshot, near-straight with hard shadow */}
+            <div
+              className="relative z-10 w-[68%] border-2 border-black bg-white overflow-hidden shadow-[8px_8px_0px_0px_#000000]"
+              style={{ rotate: '1.5deg', marginTop: '20px' }}
+            >
+              {/* fake browser bar */}
+              <div className="border-b border-black bg-[#F0F0E8] px-3 py-1.5 flex items-center gap-2">
+                <div className="flex gap-1">
+                  <div className="w-2.5 h-2.5 bg-black opacity-15" />
+                  <div className="w-2.5 h-2.5 bg-black opacity-15" />
+                  <div className="w-2.5 h-2.5 bg-black opacity-15" />
+                </div>
+                <div className="flex-1 border border-black bg-white px-2 py-0.5 font-mono text-[8px] text-black opacity-35 uppercase tracking-wide truncate">
+                  resume.bevansatria.my.id
+                </div>
+              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/hero-3.png"
+                alt="Resume Matcher dashboard preview"
                 className="w-full h-auto block"
                 loading="lazy"
               />
