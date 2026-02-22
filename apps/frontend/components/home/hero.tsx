@@ -193,7 +193,7 @@ export default function Hero() {
               </a>
             </div>
           </div>
-          <div className="md:w-1/2 relative h-[300px] md:h-[400px] lg:h-[500px] w-full flex items-center justify-center">
+          <div className="hidden md:flex md:w-1/2 relative h-[300px] md:h-[400px] lg:h-[500px] w-full items-center justify-center">
             <div className="absolute top-6 right-6 md:top-10 md:right-10 w-40 h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 bg-yellow-400 rounded-full mix-blend-multiply opacity-90 z-0"></div>
             <div className="relative w-full h-full bg-white flex items-center justify-center transform rotate-2 z-10 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
