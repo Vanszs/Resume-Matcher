@@ -234,7 +234,7 @@ export default function LoginPage() {
             </div>
 
             {/* Right Panel: Auth Form */}
-            <div className="flex-1 flex flex-col h-screen overflow-y-auto bg-[#FDFBF7] relative">
+            <div className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden bg-[#FDFBF7] relative">
                 {/* Header / Logo Area */}
                 <header className="hidden md:flex p-6 md:p-10 justify-between items-center border-b-2 border-[#101922]/10">
                     <Link href="/" className="flex items-center gap-2 select-none">
@@ -350,8 +350,8 @@ export default function LoginPage() {
                                             Forgot?
                                         </a>
                                         {showForgotTooltip && (
-                                            <div className="absolute -top-14 right-0 bg-[#101922] text-white px-3 py-2 rounded text-xs font-mono whitespace-nowrap shadow-lg z-50 max-w-[200px] text-center">
-                                                We don't have this feature yet, just make a new account :D
+                                            <div className="absolute -top-16 right-0 md:left-1/2 md:-translate-x-1/2 md:right-auto bg-[#101922] text-white px-3 py-2 rounded text-xs font-mono shadow-lg z-50 w-48 text-center leading-relaxed">
+                                                we dont have this feature rn, just make a new account :D
                                             </div>
                                         )}
                                     </div>
