@@ -17,17 +17,40 @@ export default function LoginPage() {
     const [checkingSession, setCheckingSession] = useState(true);
     const [showComingSoon, setShowComingSoon] = useState<'google' | 'metamask' | null>(null);
 
+    // Helper function to clear all auth credentials
+    const clearAuthCredentials = () => {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('user_email');
+        // Clear cookies with all possible path variations to handle edge cases
+        const cookieOptions = [
+            'auth_token=; path=/; max-age=0; SameSite=Lax',
+            'user_role=; path=/; max-age=0; SameSite=Lax',
+            'auth_token=; path=/; max-age=0', // Without SameSite for older browsers
+            'user_role=; path=/; max-age=0',
+        ];
+        cookieOptions.forEach(opt => {
+            document.cookie = opt;
+        });
+    };
+
     // On mount: verify existing token with the backend (5 s timeout)
     useEffect(() => {
         const token = localStorage.getItem('auth_token');
         if (!token) {
+            // Extra safety: clear any stale cookies even if no localStorage token
+            clearAuthCredentials();
             setCheckingSession(false);
             return;
         }
 
         let cancelled = false;
         const timeoutId = setTimeout(() => {
-            if (!cancelled) setCheckingSession(false);
+            if (!cancelled) {
+                // Timeout - clear stale credentials and show login
+                clearAuthCredentials();
+                setCheckingSession(false);
+            }
         }, 5000);
 
         apiFetch('/auth/me')
@@ -44,17 +67,15 @@ export default function LoginPage() {
                     router.replace(destination);
                 } else {
                     // Token invalid/expired — clear stale credentials
-                    localStorage.removeItem('auth_token');
-                    localStorage.removeItem('user_role');
-                    localStorage.removeItem('user_email');
-                    document.cookie = 'auth_token=; path=/; max-age=0; SameSite=Lax';
-                    document.cookie = 'user_role=; path=/; max-age=0; SameSite=Lax';
+                    clearAuthCredentials();
                     setCheckingSession(false);
                 }
             })
             .catch(() => {
                 if (!cancelled) {
                     clearTimeout(timeoutId);
+                    // Network error or other issue — clear stale credentials
+                    clearAuthCredentials();
                     setCheckingSession(false);
                 }
             });
@@ -145,9 +166,9 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="bg-[#FDFBF7] text-[#101922] font-sans min-h-screen max-h-screen flex flex-col md:flex-row overflow-hidden">
+        <div className="bg-[#FDFBF7] text-[#101922] font-sans h-screen flex flex-col md:flex-row overflow-hidden">
             {/* Left Panel: Artistic Collage */}
-            <div className="relative hidden md:flex w-1/2 flex-col justify-between border-r-4 border-[#101922] bg-[#FF5C00] p-8 lg:p-12 overflow-hidden max-h-screen">
+            <div className="relative hidden md:flex w-1/2 flex-col justify-between border-r-4 border-[#101922] bg-[#FF5C00] p-8 lg:p-12 overflow-hidden h-screen">
                 {/* Abstract Shapes / Collage Elements */}
                 <div 
                     className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none" 
@@ -159,19 +180,32 @@ export default function LoginPage() {
                 
                 <div className="relative z-10 flex flex-col h-full justify-center items-center">
                     {/* Collage Container */}
-                    <div className="relative w-[450px] h-[550px] border-4 border-[#101922] bg-[#FDFBF7] shadow-[6px_6px_0px_0px_#101922] rotate-[-2deg]">
-                        {/* Image Placeholder */}
-                        <div 
-                            className="absolute inset-0 bg-cover bg-center" 
-                            style={{
-                                backgroundImage: "url('/assets/login-hero-image.png')"
+                    <div className="relative w-[450px] h-[550px] border-4 border-[#101922] bg-[#FDFBF7] shadow-[6px_6px_0px_0px_#101922] rotate-[-2deg] overflow-hidden">
+                        {/* Image */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                            src="/portrait-person-with-collage-technique-color-blocking%20(1).webp"
+                            alt="Resume Matcher Hero"
+                            className="absolute inset-0 w-full h-full object-cover"
+                            onError={(e) => {
+                                // Fallback gradient if image fails to load
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.parentElement!.style.background = 'linear-gradient(135deg, #FF5C00 0%, #1D4ED8 100%)';
                             }}
                         />
                         
                         {/* Decorative elements overlay */}
                         <div className="absolute -top-12 -right-12 w-24 h-24 bg-[#1D4ED8] rounded-full border-4 border-[#101922] z-20" />
                         <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-yellow-400 border-4 border-[#101922] z-20 flex items-center justify-center">
-                            <span className="text-4xl font-bold">👁️</span>
+                            {/* Target/Search Icon */}
+                            <svg className="w-12 h-12 text-[#101922]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="9" />
+                                <circle cx="12" cy="12" r="3" fill="currentColor" />
+                                <line x1="12" y1="3" x2="12" y2="9" />
+                                <line x1="12" y1="15" x2="12" y2="21" />
+                                <line x1="3" y1="12" x2="9" y2="12" />
+                                <line x1="15" y1="12" x2="21" y2="12" />
+                            </svg>
                         </div>
                         
                         {/* Sticker */}
@@ -199,12 +233,12 @@ export default function LoginPage() {
             </div>
 
             {/* Right Panel: Auth Form */}
-            <div className="flex-1 flex flex-col min-h-screen max-h-screen overflow-y-auto bg-[#FDFBF7] relative">
+            <div className="flex-1 flex flex-col h-screen overflow-y-auto bg-[#FDFBF7] relative">
                 {/* Header / Logo Area */}
                 <header className="p-6 md:p-10 flex justify-between items-center border-b-2 border-[#101922]/10">
                     <Link href="/" className="flex items-center gap-2 select-none">
                         <span className="text-[#1D4ED8] text-3xl font-bold">✦</span>
-                        <h1 className="text-xl font-extrabold tracking-tight uppercase">Resume Matcher</h1>
+                        <h1 className="text-xl font-extrabold tracking-tight uppercase hidden md:block">Resume Matcher</h1>
                     </Link>
                     <Link 
                         href="/" 
@@ -216,8 +250,8 @@ export default function LoginPage() {
                 </header>
 
                 {/* Main Form Content */}
-                <main className="flex-1 flex flex-col justify-center px-6 py-8 sm:px-12 lg:px-20 max-w-2xl mx-auto w-full">
-                    <div className="mb-8">
+                <main className="flex-1 flex flex-col justify-center px-6 py-6 sm:px-12 lg:px-20 max-w-2xl mx-auto w-full">
+                    <div className="mb-6">
                         <h2 className="font-serif text-4xl md:text-5xl font-normal text-[#101922] mb-2 tracking-tight">
                             {isRegister ? 'Join Us.' : 'Welcome Back.'}
                         </h2>
@@ -229,7 +263,7 @@ export default function LoginPage() {
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex gap-8 border-b-2 border-[#101922]/10 mb-10">
+                    <div className="flex gap-8 border-b-2 border-[#101922]/10 mb-6">
                         <button
                             type="button"
                             onClick={() => switchMode('login')}
@@ -349,7 +383,7 @@ export default function LoginPage() {
                     </form>
 
                     {/* Divider */}
-                    <div className="relative my-10 flex items-center justify-center">
+                    <div className="relative my-6 flex items-center justify-center">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t-2 border-[#101922]/10" />
                         </div>

@@ -56,6 +56,20 @@ export function StatusCacheProvider({ children }: { children: React.ReactNode })
     setCache((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
+      // Only fetch from backend if user is authenticated
+      // This prevents 401 redirects on public pages
+      const authToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      if (!authToken) {
+        // Not authenticated - skip status fetch
+        if (!mountedRef.current) return;
+        setCache((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: null,
+        }));
+        return;
+      }
+
       const status = await fetchSystemStatus(fullCheck);
       if (!mountedRef.current) return;
 
@@ -80,6 +94,10 @@ export function StatusCacheProvider({ children }: { children: React.ReactNode })
   // Refresh just LLM health (called periodically) – always uses full live check
   const refreshLlmHealth = useCallback(async () => {
     try {
+      // Only fetch if authenticated
+      const authToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      if (!authToken) return;
+
       const status = await fetchSystemStatus(true);
       if (!mountedRef.current) return;
 

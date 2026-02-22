@@ -11,9 +11,23 @@ export function middleware(request: NextRequest) {
 
     const noIndexValue = 'noindex, nofollow, noarchive';
 
-    // Allow public paths
-    if (pathname === '/') {
+    // Allow Next.js internals and static files first (before any other checks)
+    if (
+        pathname.startsWith('/_next') ||
+        pathname.startsWith('/api') ||
+        pathname.includes('.')
+    ) {
         return NextResponse.next();
+    }
+
+    // Allow public home page (normalize trailing slash)
+    const normalizedPath = pathname === '/' || pathname === '' ? '/' : pathname;
+    if (normalizedPath === '/') {
+        const response = NextResponse.next();
+        response.headers.set('X-Robots-Tag', noIndexValue);
+        // Clear any stale cache headers that might cause redirect loops
+        response.headers.set('Cache-Control', 'no-store, must-revalidate');
+        return response;
     }
 
     if (pathname.startsWith('/login')) {
@@ -32,16 +46,9 @@ export function middleware(request: NextRequest) {
         }
         const response = NextResponse.next();
         response.headers.set('X-Robots-Tag', noIndexValue);
+        // Prevent caching of login page
+        response.headers.set('Cache-Control', 'no-store, must-revalidate');
         return response;
-    }
-
-    // Allow Next.js internals and static files
-    if (
-        pathname.startsWith('/_next') ||
-        pathname.startsWith('/api') ||
-        pathname.includes('.')
-    ) {
-        return NextResponse.next();
     }
 
     // Check for auth cookie (set on login, mirrors localStorage)

@@ -44,11 +44,20 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
           setContentLanguageState(cachedContentLang as SupportedLanguage);
         }
 
-        // Then fetch content language from backend to ensure sync
-        const config = await fetchLanguageConfig();
-        if (config.content_language && locales.includes(config.content_language as Locale)) {
-          setContentLanguageState(config.content_language);
-          localStorage.setItem(CONTENT_STORAGE_KEY, config.content_language);
+        // Only fetch from backend if user is authenticated
+        // This prevents 401 redirects on public pages
+        const authToken = localStorage.getItem('auth_token');
+        if (authToken) {
+          try {
+            const config = await fetchLanguageConfig();
+            if (config.content_language && locales.includes(config.content_language as Locale)) {
+              setContentLanguageState(config.content_language);
+              localStorage.setItem(CONTENT_STORAGE_KEY, config.content_language);
+            }
+          } catch (error) {
+            // Silently fail if backend fetch fails - use cached values
+            console.debug('Backend language fetch failed, using cached values');
+          }
         }
       } catch (error) {
         console.error('Failed to load language config:', error);

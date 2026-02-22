@@ -37,6 +37,10 @@ export const metadata: Metadata = {
   },
 };
 
+// Prevent caching of landing page to avoid redirect loops on mobile browsers
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function Home() {
   // Schema 1: SoftwareApplication (rich result eligible)
   const softwareAppSchema = {

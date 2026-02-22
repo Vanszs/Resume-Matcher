@@ -198,7 +198,7 @@ export default function Hero() {
             <div className="relative w-full h-full bg-white flex items-center justify-center transform rotate-2 z-10 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/assets/login-hero-image.png"
+                src="/portrait-person-with-collage-technique-color-blocking%20(1).webp"
                 alt="Portrait with visual metaphor"
                 className="w-full h-full object-contain"
                 loading="eager"
