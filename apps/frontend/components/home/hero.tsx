@@ -161,10 +161,10 @@ export default function Hero() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="w-full px-6 md:px-12 lg:px-16 py-8 md:py-12 relative overflow-hidden border-b-[3px] border-black min-h-[calc(100vh-72px)] flex items-center">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-6 md:gap-10 relative z-10 w-full">
+      <section className="w-full px-6 md:px-12 lg:px-16 py-12 md:py-12 relative overflow-hidden border-b-[3px] border-black min-h-[calc(100vh-72px)] flex items-center">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-10 relative z-10 w-full">
           <div className="md:w-1/2 text-left pr-0 md:pr-8">
-            <h1 className="font-serif font-extrabold text-4xl sm:text-5xl md:text-5xl lg:text-6xl leading-[1.0] text-black mb-4 md:mb-6 tracking-tight">
+            <h1 className="font-serif font-extrabold text-5xl sm:text-6xl md:text-5xl lg:text-6xl leading-[1.0] text-black mb-6 md:mb-6 tracking-tight">
               Finding a job is <br/>
               <span className="bg-black text-white px-2 inline-block font-serif italic border-2 border-transparent relative mt-1 mb-1">
                 Hard.
@@ -174,7 +174,7 @@ export default function Hero() {
                 easier.
               </span>
             </h1>
-            <p className="font-mono text-sm md:text-base text-gray-800 mb-6 md:mb-8 leading-relaxed max-w-md">
+            <p className="font-mono text-base md:text-base text-gray-800 mb-8 md:mb-8 leading-relaxed max-w-md">
               Stop starting from scratch. We optimize your master resume to instantly generate tailored CVs for every job you want — and beat the ATS while doing it.
             </p>
             <Link
@@ -189,7 +189,7 @@ export default function Hero() {
             <div className="relative w-full h-full bg-[#F0F0E8] flex items-center justify-center transform rotate-2 z-10 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/portrait-person-with-collage-technique-color-blocking%20(1).webp"
+                src="/assets/portrait-person-with-visual-metaphor-memory-removebg-preview (1) (1).png"
                 alt="Portrait with visual metaphor"
                 className="w-full h-full object-contain"
                 loading="eager"
