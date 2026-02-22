@@ -51,8 +51,10 @@
   --shadow-sw-card: 6px 6px 0px 0px #000000;
 
   /* Fonts */
-  --font-sans: 'Geist Sans', sans-serif;
-  --font-mono: 'Space Grotesk', monospace;
+  --font-sans: var(--font-inter), 'Inter', sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), 'IBM Plex Mono', monospace;
+  --font-serif: var(--font-playfair), 'Playfair Display', serif;
+  --font-display: var(--font-playfair), 'Playfair Display', serif;
 
   /* Animations */
   --animate-gradient: gradient 8s linear infinite;
@@ -65,9 +67,11 @@
 }
 
 :root {
-  --font-mono: 'Geist Mono', monospace;
-  --font-sans: 'Geist', sans-serif;
-  --radius: 0.625rem;
+  --font-mono: var(--font-ibm-plex-mono), 'IBM Plex Mono', monospace;
+  --font-sans: var(--font-inter), 'Inter', sans-serif;
+  --font-serif: var(--font-playfair), 'Playfair Display', serif;
+  --font-display: var(--font-playfair), 'Playfair Display', serif;
+  --radius: 0rem; /* Brutalist: no rounded corners */
 
   /* Swiss International Style Palette */
   --background: #f0f0e8; /* Canvas */
@@ -278,4 +282,79 @@
     break-before: avoid !important;
     page-break-before: avoid !important;
   }
+}
+
+/* Brutalist Design System Utilities */
+.bg-grid-pattern {
+  background-image: linear-gradient(#e5e5e5 1px, transparent 1px), linear-gradient(90deg, #e5e5e5 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.strike-through {
+  position: relative;
+}
+
+.strike-through::after {
+  content: '';
+  position: absolute;
+  left: -5%;
+  top: 50%;
+  width: 110%;
+  height: 3px;
+  background: black;
+  transform: rotate(-5deg);
+}
+
+.perspective-tilt {
+  transform: perspective(1000px) rotateX(5deg) rotateY(-2deg);
+}
+
+.text-stroke-sm {
+  -webkit-text-stroke: 1px black;
+}
+
+.text-stroke-white-sm {
+  -webkit-text-stroke: 1px white;
+}
+
+/* Brutalist shadows */
+.shadow-brutalist {
+  box-shadow: 4px 4px 0px 0px #000000;
+}
+
+.shadow-brutalist-sm {
+  box-shadow: 2px 2px 0px 0px #000000;
+}
+
+.shadow-brutalist-lg {
+  box-shadow: 8px 8px 0px 0px #000000;
+}
+
+.shadow-brutalist-hover {
+  box-shadow: 2px 2px 0px 0px #000000;
+}
+
+.shadow-brutalist-white {
+  box-shadow: 4px 4px 0px 0px #ffffff;
+}
+
+/* CRT Screen effect */
+.crt-screen {
+  position: relative;
+}
+
+.crt-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
+  background-size: 100% 4px, 3px 100%;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* Selection colors */
+::selection {
+  background-color: #f97316;
+  color: white;
 }

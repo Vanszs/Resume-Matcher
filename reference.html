@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Resume Matcher - Landing Page</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#000000",
+              "background-light": "#f0eee5", 
+              "background-dark": "#1a1a1a",
+              "accent-blue": "#2563eb",
+              "accent-orange": "#f97316",
+              "accent-purple": "#a855f7",
+              "accent-pink": "#ec4899",
+              "accent-green": "#22c55e",
+              "accent-yellow": "#eab308",
+              "paper-white": "#ffffff",
+              "brutalist-border": "#000000",
+            },
+            fontFamily: {
+              display: ["'Playfair Display'", "serif"],
+              mono: ["'IBM Plex Mono'", "monospace"],
+              sans: ["'Inter'", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0px", 
+            },
+            boxShadow: {
+              'brutalist': '4px 4px 0px 0px #000000',
+              'brutalist-sm': '2px 2px 0px 0px #000000',
+              'brutalist-lg': '8px 8px 0px 0px #000000',
+              'brutalist-hover': '2px 2px 0px 0px #000000',
+              'brutalist-white': '4px 4px 0px 0px #ffffff',
+            },
+            rotate: {
+                '3': '3deg',
+                '6': '6deg',
+                '12': '12deg',
+                '-3': '-3deg',
+                '-6': '-6deg',
+                '-12': '-12deg',
+            }
+          },
+        },
+      };
+    </script>
+<style>
+        .text-stroke-sm {
+            -webkit-text-stroke: 1px black;
+        }
+        .text-stroke-white-sm {
+            -webkit-text-stroke: 1px white;
+        }
+        .bg-grid-pattern {
+            background-image: linear-gradient(#e5e5e5 1px, transparent 1px), linear-gradient(90deg, #e5e5e5 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .dark .bg-grid-pattern {
+            background-image: linear-gradient(#333 1px, transparent 1px), linear-gradient(90deg, #333 1px, transparent 1px);
+        }
+        details summary::-webkit-details-marker {
+          display: none;
+        }
+        .clip-path-jagged {
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 85%, 5% 80%, 0% 75%, 5% 70%, 0% 65%, 5% 60%, 0% 55%);
+        }
+        .perspective-tilt {
+            transform: perspective(1000px) rotateX(5deg) rotateY(-2deg);
+        }
+        .cutout-mask {
+             mask-image: radial-gradient(circle at center, black 60%, transparent 60%);
+        }
+        .strike-through {
+            position: relative;
+        }
+        .strike-through::after {
+            content: '';
+            position: absolute;
+            left: -5%;
+            top: 50%;
+            width: 110%;
+            height: 3px;
+            background: black;
+            transform: rotate(-5deg);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-black dark:text-gray-100 font-sans overflow-x-hidden selection:bg-accent-orange selection:text-white">
+<div class="fixed inset-0 pointer-events-none z-[-1] opacity-40 bg-grid-pattern"></div>
+<div class="border-x-0 border-y-0 md:border-x-[3px] border-brutalist-border dark:border-gray-700 max-w-7xl mx-auto min-h-screen bg-background-light dark:bg-background-dark relative">
+<nav class="sticky top-0 z-50 bg-background-light dark:bg-background-dark border-b-[3px] border-black px-4 md:px-8 py-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="font-display font-bold text-xl md:text-2xl tracking-tight flex items-center gap-2 text-black dark:text-white">
+<span class="text-accent-orange text-2xl">✳</span> Resume Matcher
+                    </div>
+</div>
+<div class="hidden md:flex items-center gap-8 font-mono font-medium text-sm">
+<a class="hover:bg-black hover:text-white px-2 py-1 transition-colors" href="#features">Features</a>
+<a class="hover:bg-black hover:text-white px-2 py-1 transition-colors" href="#how-it-works">How It Works</a>
+<a class="hover:bg-black hover:text-white px-2 py-1 transition-colors" href="#faq">FAQ</a>
+</div>
+<a class="bg-white dark:bg-gray-800 text-black dark:text-white font-mono text-sm font-bold px-6 py-2 border-[2px] border-black dark:border-white shadow-brutalist-sm hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-none transition-all flex items-center gap-2" href="#">
+                    Sign In →
+                </a>
+</div>
+</nav>
+<header class="px-6 md:px-12 py-16 md:py-24 relative overflow-hidden border-b-[3px] border-black">
+<div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 relative z-10">
+<div class="md:w-1/2 text-left">
+<h1 class="font-display font-extrabold text-6xl md:text-7xl lg:text-8xl leading-[1.0] text-black dark:text-white mb-8 tracking-tight">
+                Finding a job is <br/>
+<span class="bg-black text-white px-2 inline-block font-display italic border-2 border-transparent relative mt-2 mb-2">
+                    Hard.
+                </span> <br/>
+                We make it <br/>
+<span class="bg-accent-blue text-white px-2 inline-block shadow-brutalist font-display italic border-2 border-black relative mt-2">
+                    easier.
+                </span>
+</h1>
+<p class="font-mono text-lg text-gray-800 dark:text-gray-200 mb-10 leading-relaxed max-w-md">
+                Stop starting from scratch. We optimize your master resume to instantly generate tailored CVs for every job you want — and beat the ATS while doing it.
+            </p>
+<div class="flex flex-col sm:flex-row gap-6">
+<a class="bg-accent-blue text-white font-mono font-bold text-lg px-8 py-4 border-[3px] border-black shadow-brutalist hover:shadow-brutalist-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center flex items-center justify-center gap-2 group w-full sm:w-auto uppercase tracking-wider" href="#">
+                    Get Started →
+                </a>
+<a class="bg-background-light text-black font-mono font-bold text-lg px-8 py-4 border-[3px] border-black shadow-brutalist hover:shadow-brutalist-hover hover:translate-x-[2px] hover:translate-y-[2px] transition-all text-center w-full sm:w-auto uppercase tracking-wider" href="#demo">
+                    Try on GitHub
+                </a>
+</div>
+</div>
+<div class="md:w-1/2 relative h-[500px] w-full flex items-center justify-center">
+<div class="absolute top-10 right-10 w-64 h-64 bg-accent-yellow rounded-full mix-blend-multiply opacity-90 z-0"></div>
+<div class="relative w-full h-full border-2 border-dashed border-gray-400 bg-gray-100/50 flex flex-col items-center justify-center transform rotate-2 shadow-brutalist z-10">
+<span class="material-symbols-outlined text-9xl text-gray-300">search</span>
+<p class="font-mono text-gray-400 mt-4 text-center px-8">High-Contrast Collage Art Placeholder<br/>(Hands + Magnifying Glass)</p>
+<div class="absolute top-1/4 left-10 text-accent-orange text-6xl font-display transform -rotate-12">↑</div>
+<div class="absolute bottom-1/4 right-10 text-accent-orange text-6xl font-display transform rotate-12">↑</div>
+</div>
+</div>
+</div>
+<div class="absolute top-1/2 left-4 w-8 h-8 bg-black hidden lg:block rotate-45"></div>
+<div class="absolute top-1/3 right-8 text-6xl transform rotate-12 hidden lg:block opacity-20 select-none">↯</div>
+</header>
+<section class="py-20 px-6 md:px-12 bg-white border-b-[3px] border-black relative overflow-hidden">
+<div class="max-w-4xl mx-auto text-center relative z-10">
+<div class="inline-block bg-black text-white px-4 py-1 font-mono font-bold mb-8 transform -rotate-1 border border-white shadow-brutalist-sm">
+            // SEE IT IN ACTION
+        </div>
+<div class="relative perspective-tilt group mx-auto" id="demo">
+<div class="bg-black p-2 md:p-3 border-[4px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] bg-gray-900 relative overflow-hidden transform md:rotate-1 transition-transform duration-500 hover:rotate-0">
+<div class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-20 pointer-events-none bg-[length:100%_4px,3px_100%]"></div>
+<div class="aspect-video bg-gray-800 flex items-center justify-center relative border border-gray-700">
+<div class="text-center z-10">
+<span class="material-symbols-outlined text-7xl text-white/80 mb-4 drop-shadow-lg">play_circle</span>
+<p class="font-mono text-white/60 uppercase tracking-widest text-sm">Tutorial GIF Placeholder</p>
+</div>
+<div class="absolute top-4 left-4 flex gap-2 z-10">
+<div class="w-3 h-3 rounded-full bg-red-500 border border-black/30"></div>
+<div class="w-3 h-3 rounded-full bg-yellow-500 border border-black/30"></div>
+<div class="w-3 h-3 rounded-full bg-green-500 border border-black/30"></div>
+</div>
+<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNCIgaGVpZ2h0PSI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0wIDBoNHYxSDB6IiBmaWxsPSJyZ2JhKDAsIDAsIDAsIDAuMikiLz48L3N2Zz4=')] opacity-20 pointer-events-none"></div>
+</div>
+<div class="absolute bottom-3 right-4 font-mono text-xs text-red-500 font-bold flex items-center gap-1 animate-pulse">
+<span class="w-2 h-2 bg-red-500 rounded-full"></span> LIVE DEMO
+                </div>
+</div>
+<div class="absolute -bottom-8 -right-8 w-28 h-28 bg-accent-orange border-[3px] border-black rounded-full flex items-center justify-center transform rotate-12 z-30 shadow-brutalist hover:scale-110 transition-transform cursor-pointer">
+<span class="font-display font-bold text-white text-xl leading-none text-center italic">Watch<br/>Now!</span>
+</div>
+</div>
+</div>
+</section>
+<section class="py-24 px-6 md:px-12 bg-background-light dark:bg-gray-900 border-b-[3px] border-black">
+<div class="max-w-7xl mx-auto">
+<div class="text-center mb-16">
+<h2 class="font-display text-5xl md:text-7xl text-black dark:text-white leading-tight">
+                The <span class="strike-through text-gray-400">joy</span> <span class="bg-accent-blue text-white px-2 inline-block border-2 border-black transform -rotate-2 relative z-10">pain</span> of manually <br/> editing resumes
+            </h2>
+</div>
+<div class="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+<div class="relative min-h-[400px] h-full flex items-center justify-center p-8 bg-accent-purple/20 border-2 border-dashed border-accent-purple rounded-lg transform -rotate-1">
+<div class="absolute top-0 left-0 w-full h-8 bg-purple-300 border-b-2 border-dashed border-purple-400 flex gap-2 px-2 items-center">
+<div class="w-3 h-3 bg-white rounded-full"></div>
+<div class="w-3 h-3 bg-white rounded-full"></div>
+<div class="w-3 h-3 bg-white rounded-full"></div>
+<div class="w-3 h-3 bg-white rounded-full"></div>
+</div>
+<div class="text-center relative z-10">
+<span class="material-symbols-outlined text-9xl text-purple-800">sentiment_very_dissatisfied</span>
+<p class="font-mono text-purple-900 mt-4 max-w-xs mx-auto">Collage Placeholder:<br/>Frustrated face, shouting mouth, hand holding pen</p>
+</div>
+<div class="absolute top-20 right-10 w-16 h-16 bg-white border-2 border-black rounded-full flex items-center justify-center transform rotate-12 shadow-sm">
+<span class="material-symbols-outlined text-3xl">visibility</span>
+</div>
+<div class="absolute bottom-10 left-10 w-20 h-20 bg-white border-2 border-black transform -rotate-6 shadow-sm flex items-center justify-center">
+<span class="material-symbols-outlined text-4xl">skull</span>
+</div>
+</div>
+<div class="space-y-12">
+<div class="flex gap-6 group">
+<div class="shrink-0">
+<div class="w-14 h-14 bg-accent-orange border-[3px] border-black shadow-brutalist flex items-center justify-center font-mono font-bold text-xl text-white group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none transition-all">
+                            01
+                        </div>
+</div>
+<div>
+<h3 class="font-display font-bold text-3xl mb-3 text-black dark:text-white">The Manual Edit Loop</h3>
+<p class="font-mono text-base text-gray-600 dark:text-gray-300 leading-relaxed">
+                            Waste hours shuffling bullet points only to see the job posting expire before you hit send.
+                        </p>
+</div>
+</div>
+<div class="flex gap-6 group">
+<div class="shrink-0">
+<div class="w-14 h-14 bg-accent-orange border-[3px] border-black shadow-brutalist flex items-center justify-center font-mono font-bold text-xl text-white group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none transition-all">
+                            02
+                        </div>
+</div>
+<div>
+<h3 class="font-display font-bold text-3xl mb-3 text-black dark:text-white">The Silent Rejection</h3>
+<p class="font-mono text-base text-gray-600 dark:text-gray-300 leading-relaxed">
+                            One tiny formatting glitch or typo guarantees the trash pile. You will never even know why you failed.
+                        </p>
+</div>
+</div>
+<div class="flex gap-6 group">
+<div class="shrink-0">
+<div class="w-14 h-14 bg-accent-orange border-[3px] border-black shadow-brutalist flex items-center justify-center font-mono font-bold text-xl text-white group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none transition-all">
+                            03
+                        </div>
+</div>
+<div>
+<h3 class="font-display font-bold text-3xl mb-3 text-black dark:text-white">The ATS Black Hole</h3>
+<p class="font-mono text-base text-gray-600 dark:text-gray-300 leading-relaxed">
+                            Blindly guessing keywords against an algorithm that is literally programmed to reject you.
+                        </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-24 px-6 md:px-12 bg-accent-yellow border-b-[3px] border-black relative overflow-hidden">
+<div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiMwMDAiLz48L3N2Zz4=')]"></div>
+<div class="max-w-4xl mx-auto text-center relative z-10">
+<div class="inline-block bg-white border-[3px] border-black px-4 py-1 font-mono font-bold mb-6 shadow-brutalist-sm transform -rotate-2">// SOLUTION</div>
+<h2 class="font-display font-bold text-5xl md:text-7xl mb-8 leading-tight">
+                    Stop guessing what recruiters want. <br/>
+<span class="italic text-white text-stroke-sm">Tailor every application in seconds.</span>
+</h2>
+<a class="inline-block bg-black text-white font-mono font-bold text-xl px-10 py-5 border-[3px] border-white shadow-brutalist-white hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all" href="#">
+                    Get Started Free →
+                </a>
+</div>
+</section>
+<section class="py-20 px-6 md:px-12 bg-background-light dark:bg-background-dark border-b-[3px] border-black relative" id="features">
+<div class="max-w-7xl mx-auto relative z-10">
+<span class="font-mono font-bold text-accent-purple mb-8 block text-xl">// FEATURES</span>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="bg-white dark:bg-gray-800 border-[3px] border-black p-6 shadow-brutalist hover:-translate-y-1 transition-transform flex flex-col h-full relative overflow-visible">
+<div class="absolute -top-6 -right-6 w-16 h-12 bg-white border-2 border-black rounded-full flex items-center justify-center transform rotate-12 z-20 shadow-sm hidden md:flex overflow-hidden">
+<div class="w-8 h-8 rounded-full bg-blue-500 border border-black relative">
+<div class="absolute top-2 right-2 w-2 h-2 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="absolute -top-8 left-4 w-12 h-12 bg-pink-400 rounded-full border-2 border-black z-30 transform -rotate-12 hidden md:block"></div>
+<div class="w-12 h-12 bg-accent-blue border-2 border-black mb-4 flex items-center justify-center text-white">
+<span class="material-symbols-outlined">psychology</span>
+</div>
+<h3 class="font-display font-bold text-2xl mb-3">AI-Powered Analysis</h3>
+<p class="font-mono text-sm text-gray-600 dark:text-gray-300">Compare your resume against job descriptions instantly. Get actionable feedback on what's missing.</p>
+</div>
+<div class="bg-white dark:bg-gray-800 border-[3px] border-black p-6 shadow-brutalist hover:-translate-y-1 transition-transform flex flex-col h-full relative overflow-visible">
+<div class="absolute -bottom-4 -right-4 w-12 h-12 bg-accent-yellow border-2 border-black transform rotate-45 z-20 hidden md:block"></div>
+<div class="absolute -top-6 -right-2 text-4xl transform rotate-12 z-30 hidden md:block">👁️</div>
+<div class="w-12 h-12 bg-accent-orange border-2 border-black mb-4 flex items-center justify-center text-white">
+<span class="material-symbols-outlined">key</span>
+</div>
+<h3 class="font-display font-bold text-2xl mb-3">Keyword Wizardry</h3>
+<p class="font-mono text-sm text-gray-600 dark:text-gray-300">Extract high-value keywords from JD. We highlight hard skills, soft skills, and tech stacks you need.</p>
+</div>
+<div class="bg-white dark:bg-gray-800 border-[3px] border-black p-6 shadow-brutalist hover:-translate-y-1 transition-transform flex flex-col h-full">
+<div class="w-12 h-12 bg-accent-green border-2 border-black mb-4 flex items-center justify-center text-white">
+<span class="material-symbols-outlined">scoreboard</span>
+</div>
+<h3 class="font-display font-bold text-2xl mb-3">Score Everything</h3>
+<p class="font-mono text-sm text-gray-600 dark:text-gray-300">Get a numeric match score. Know exactly how well you fit the role before hitting 'Apply'.</p>
+</div>
+<div class="bg-white dark:bg-gray-800 border-[3px] border-black p-6 shadow-brutalist hover:-translate-y-1 transition-transform flex flex-col h-full">
+<div class="w-12 h-12 bg-accent-purple border-2 border-black mb-4 flex items-center justify-center text-white">
+<span class="material-symbols-outlined">translate</span>
+</div>
+<h3 class="font-display font-bold text-2xl mb-3">Multi-Language CVs</h3>
+<p class="font-mono text-sm text-gray-600 dark:text-gray-300">Applying globally? Generate resumes in multiple languages without losing formatting.</p>
+</div>
+<div class="bg-white dark:bg-gray-800 border-[3px] border-black p-6 shadow-brutalist hover:-translate-y-1 transition-transform flex flex-col h-full">
+<div class="w-12 h-12 bg-accent-pink border-2 border-black mb-4 flex items-center justify-center text-white">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+</div>
+<h3 class="font-display font-bold text-2xl mb-3">Print-Ready PDF Export</h3>
+<p class="font-mono text-sm text-gray-600 dark:text-gray-300">Clean, professional, ATS-friendly LaTeX templates compiled to PDF in one click.</p>
+</div>
+<div class="bg-white dark:bg-gray-800 border-[3px] border-black p-6 shadow-brutalist hover:-translate-y-1 transition-transform flex flex-col h-full">
+<div class="w-12 h-12 bg-black border-2 border-white mb-4 flex items-center justify-center text-white">
+<span class="material-symbols-outlined">lock</span>
+</div>
+<h3 class="font-display font-bold text-2xl mb-3">Your Data, Your Account</h3>
+<p class="font-mono text-sm text-gray-600 dark:text-gray-300">Privacy first. Manage your data locally or securely in the cloud. Open source at heart.</p>
+</div>
+</div>
+</div>
+<div class="absolute top-20 left-0 w-24 h-32 bg-gray-300 border-2 border-black transform -rotate-12 rounded-r-full hidden lg:flex items-center justify-center opacity-50 z-0">
+<span class="material-symbols-outlined text-4xl">pan_tool</span>
+</div>
+</section>
+<section class="py-24 px-6 md:px-12 bg-white dark:bg-gray-900 border-b-[3px] border-black" id="how-it-works">
+<div class="max-w-5xl mx-auto">
+<div class="flex flex-col md:flex-row gap-12 items-center">
+<div class="md:w-1/3">
+<span class="font-mono font-bold text-accent-green mb-2 block">// PROCESS</span>
+<h2 class="font-display font-bold text-5xl mb-6">Three steps. That's it.</h2>
+<div class="w-24 h-2 bg-black mb-6"></div>
+<p class="font-mono text-gray-600 dark:text-gray-300">Streamlined for speed. Get from job discovery to application in under 5 minutes.</p>
+</div>
+<div class="md:w-2/3 space-y-6">
+<div class="flex items-center gap-6 p-4 border-2 border-black bg-background-light shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]">
+<div class="font-display text-4xl font-bold text-accent-blue opacity-50">01</div>
+<div>
+<h3 class="font-bold font-sans text-xl uppercase">Sign In</h3>
+<p class="font-mono text-sm text-gray-600">Create your secure account to manage resumes.</p>
+</div>
+</div>
+<div class="flex items-center gap-6 p-4 border-2 border-black bg-background-light shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] ml-4 md:ml-8">
+<div class="font-display text-4xl font-bold text-accent-orange opacity-50">02</div>
+<div>
+<h3 class="font-bold font-sans text-xl uppercase">Upload &amp; Paste</h3>
+<p class="font-mono text-sm text-gray-600">Upload your master resume and paste the Job Description.</p>
+</div>
+</div>
+<div class="flex items-center gap-6 p-4 border-2 border-black bg-background-light shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] ml-8 md:ml-16 relative">
+<div class="absolute -right-12 top-0 transform w-24 h-24 bg-gray-100 border-2 border-black rotate-12 shadow-brutalist hidden lg:flex flex-col items-center justify-center p-1 z-10">
+<span class="material-symbols-outlined text-4xl text-black">thumb_up</span>
+</div>
+<div class="font-display text-4xl font-bold text-accent-purple opacity-50">03</div>
+<div>
+<h3 class="font-bold font-sans text-xl uppercase">Review &amp; Export</h3>
+<p class="font-mono text-sm text-gray-600">Let AI optimize it, review the changes, and export PDF.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="py-20 px-6 md:px-12 bg-background-light dark:bg-background-dark border-b-[3px] border-black" id="faq">
+<div class="max-w-3xl mx-auto">
+<div class="text-center mb-12">
+<span class="font-mono font-bold text-black dark:text-white bg-accent-pink px-2 py-1 transform -rotate-2 inline-block shadow-brutalist-sm border border-black">// FAQ</span>
+<h2 class="font-display font-bold text-4xl mt-6">Questions? We got answers.</h2>
+</div>
+<div class="space-y-4">
+<details class="group bg-white border-2 border-black shadow-brutalist cursor-pointer">
+<summary class="flex justify-between items-center p-4 font-bold font-sans text-lg list-none">
+                            Is it really free?
+                            <span class="transition group-open:rotate-180 material-symbols-outlined">expand_more</span>
+</summary>
+<div class="p-4 pt-0 font-mono text-sm text-gray-700 border-t-2 border-black/10">
+                            Yes. The core platform is open source and free to use. For AI features, you just plug in your own API key from OpenAI or others. You pay them directly for usage (which is usually pennies).
+                        </div>
+</details>
+<details class="group bg-white border-2 border-black shadow-brutalist cursor-pointer">
+<summary class="flex justify-between items-center p-4 font-bold font-sans text-lg list-none">
+                            Is my data safe?
+                            <span class="transition group-open:rotate-180 material-symbols-outlined">expand_more</span>
+</summary>
+<div class="p-4 pt-0 font-mono text-sm text-gray-700 border-t-2 border-black/10">
+                            Absolutely. We don't store your resumes on our servers for AI processing unless you explicitly save them to your profile. The AI processing happens via your own API key.
+                        </div>
+</details>
+<details class="group bg-white border-2 border-black shadow-brutalist cursor-pointer">
+<summary class="flex justify-between items-center p-4 font-bold font-sans text-lg list-none">
+                            Do I need to know coding?
+                            <span class="transition group-open:rotate-180 material-symbols-outlined">expand_more</span>
+</summary>
+<div class="p-4 pt-0 font-mono text-sm text-gray-700 border-t-2 border-black/10">
+                            Nope! While we use LaTeX under the hood for beautiful PDFs, our interface handles everything visually. You just type and click.
+                        </div>
+</details>
+<details class="group bg-white border-2 border-black shadow-brutalist cursor-pointer">
+<summary class="flex justify-between items-center p-4 font-bold font-sans text-lg list-none">
+                            Can I customize the templates?
+                            <span class="transition group-open:rotate-180 material-symbols-outlined">expand_more</span>
+</summary>
+<div class="p-4 pt-0 font-mono text-sm text-gray-700 border-t-2 border-black/10">
+                            Yes, we offer several professional templates. Since it's open source, you can even contribute your own if you know LaTeX!
+                        </div>
+</details>
+</div>
+</div>
+</section>
+<section class="py-24 px-6 md:px-12 bg-black text-white relative overflow-hidden">
+<div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
+<div class="max-w-4xl mx-auto text-center relative z-10">
+<div class="inline-block border-2 border-white px-4 py-1 rounded-full mb-8 font-mono text-sm animate-pulse">
+                    ● OPEN SOURCE
+                </div>
+<h2 class="font-display font-bold text-6xl md:text-8xl mb-8">
+                    Try Resume Matcher.<br/>
+<span class="text-accent-blue italic">It's free.</span>
+</h2>
+<div class="flex flex-col sm:flex-row justify-center gap-6 mt-12">
+<a class="bg-white text-black font-mono font-bold text-lg px-8 py-4 border-[3px] border-transparent hover:border-accent-blue shadow-[4px_4px_0px_0px_#2563eb] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all" href="#">
+                        Get Started →
+                    </a>
+<a class="bg-transparent text-white font-mono font-bold text-lg px-8 py-4 border-[3px] border-white hover:bg-white hover:text-black transition-all flex items-center justify-center gap-2" href="#">
+<span class="material-symbols-outlined text-xl">code</span>
+                        View on GitHub
+                    </a>
+</div>
+</div>
+</section>
+<footer class="bg-white dark:bg-gray-900 border-t-[3px] border-black p-8">
+<div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-mono text-gray-500">
+<div>
+                    © 2026 Vanszs. All rights reserved.
+                </div>
+<div>
+                    based on srbhr/Resume-Matcher (Apache 2.0)
+                </div>
+</div>
+</footer>
+</div>
+</body></html>

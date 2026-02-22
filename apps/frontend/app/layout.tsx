@@ -1,18 +1,27 @@
 import type { Metadata } from 'next';
-import { Geist, Space_Grotesk } from 'next/font/google';
+import { Inter, IBM_Plex_Mono, Playfair_Display } from 'next/font/google';
 import './(default)/css/globals.css';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://resume.bevansatria.my.id';
 
-const spaceGrotesk = Space_Grotesk({
-  variable: '--font-space-grotesk',
+const inter = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
   display: 'swap',
 });
 
-const geist = Geist({
-  variable: '--font-geist',
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: '--font-ibm-plex-mono',
   subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+});
+
+const playfairDisplay = Playfair_Display({
+  variable: '--font-playfair',
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  style: ['normal', 'italic'],
   display: 'swap',
 });
 
@@ -96,7 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-US" className="h-full" suppressHydrationWarning>
       <body
-        className={`${geist.variable} ${spaceGrotesk.variable} antialiased bg-[#F0F0E8] text-gray-900 min-h-full`}
+        className={`${inter.variable} ${ibmPlexMono.variable} ${playfairDisplay.variable} antialiased bg-[#f0eee5] text-black min-h-full font-sans`}
       >
         {children}
       </body>
