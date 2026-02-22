@@ -93,7 +93,7 @@ const STEPS = [
 const FAQS = [
   {
     q: 'Is Resume Matcher free to use?',
-    a: 'Yes! Resume Matcher is open source and free forever. For AI features, connect your own API key from OpenAI, Anthropic, Gemini, or other cloud providers. You pay your chosen AI provider directly for what you use. Note: This hosted version requires cloud AI providers with public APIs.',
+    a: 'Yes! Resume Matcher is open source and free forever. For AI features, connect your own API key from OpenAI, Anthropic, Gemini, or other cloud providers. You pay your chosen AI provider directly for what you use.',
   },
   {
     q: 'Will my data be kept private?',
@@ -357,12 +357,16 @@ export default function Hero() {
               <p className="font-mono text-gray-600">Streamlined for speed. Get from job discovery to application in under 5 minutes.</p>
             </div>
             <div className="md:w-2/3 space-y-6 relative">
-              {STEPS.map((step, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-6 p-4 border-2 border-black bg-[#F0F0E8] shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] relative"
-                  style={{ marginLeft: step.indent === 0 ? '0' : step.indent === 1 ? 'clamp(0rem, 5vw, 2rem)' : 'clamp(0rem, 8vw, 4rem)' }}
-                >
+              {STEPS.map((step, idx) => {
+                // Only apply indent on desktop (md+)
+                const desktopMargin = step.indent === 0 ? '0' : step.indent === 1 ? 'clamp(0rem, 5vw, 2rem)' : 'clamp(0rem, 8vw, 4rem)';
+                
+                return (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-6 p-4 border-2 border-black bg-[#F0F0E8] shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] relative md:ml-[var(--step-indent)]"
+                    style={{ '--step-indent': desktopMargin } as React.CSSProperties}
+                  >
                   <div className={`font-serif text-4xl font-bold ${step.color} opacity-50`}>{step.num}</div>
                   <div className="flex-1">
                     <h3 className="font-bold font-sans text-xl uppercase">{step.label}</h3>
@@ -374,7 +378,8 @@ export default function Hero() {
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

@@ -235,14 +235,14 @@ export default function LoginPage() {
             {/* Right Panel: Auth Form */}
             <div className="flex-1 flex flex-col h-screen overflow-y-auto bg-[#FDFBF7] relative">
                 {/* Header / Logo Area */}
-                <header className="p-6 md:p-10 flex justify-between items-center border-b-2 border-[#101922]/10">
+                <header className="hidden md:flex p-6 md:p-10 justify-between items-center border-b-2 border-[#101922]/10">
                     <Link href="/" className="flex items-center gap-2 select-none">
                         <span className="text-[#1D4ED8] text-3xl font-bold">✦</span>
-                        <h1 className="text-xl font-extrabold tracking-tight uppercase hidden md:block">Resume Matcher</h1>
+                        <h1 className="text-xl font-extrabold tracking-tight uppercase">Resume Matcher</h1>
                     </Link>
                     <Link 
                         href="/" 
-                        className="hidden sm:inline-flex items-center gap-2 font-mono text-xs font-bold uppercase hover:underline"
+                        className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase hover:underline"
                     >
                         <span>←</span>
                         Back to Home
@@ -261,6 +261,15 @@ export default function LoginPage() {
                                 : 'Enter your credentials to access your dashboard.'}
                         </p>
                     </div>
+
+                    {/* Back button (mobile only) */}
+                    <Link 
+                        href="/" 
+                        className="md:hidden inline-flex items-center gap-2 font-mono text-xs font-bold uppercase hover:underline mb-4 text-[#101922]"
+                    >
+                        <span>←</span>
+                        Back
+                    </Link>
 
                     {/* Tabs */}
                     <div className="flex gap-8 border-b-2 border-[#101922]/10 mb-6">
