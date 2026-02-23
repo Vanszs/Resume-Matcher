@@ -204,7 +204,23 @@ export default function DashboardPage() {
       setMasterResumes(masters);
       const storedId = localStorage.getItem('master_resume_id');
       const storedMaster = masters.find((r) => r.resume_id === storedId);
-      const resolvedMasterId = storedMaster?.resume_id || null;
+
+      // Helper: pick the most-recently-updated item from a list
+      const pickLatest = (list: ResumeListItem[]) =>
+        [...list].sort(
+          (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+        )[0];
+
+      // Resolution order:
+      //  1. Previously stored selection (still exists in the list)
+      //  2. Latest master with status 'ready'
+      //  3. Latest master of any status
+      //  4. null (no masters at all)
+      const resolvedMasterId =
+        storedMaster?.resume_id ??
+        pickLatest(masters.filter((r) => r.processing_status === 'ready'))?.resume_id ??
+        pickLatest(masters)?.resume_id ??
+        null;
 
       if (resolvedMasterId) {
         localStorage.setItem('master_resume_id', resolvedMasterId);

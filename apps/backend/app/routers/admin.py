@@ -62,7 +62,28 @@ class RoleResponse(BaseModel):
     permissions: str
 
 
+class ChangeRoleRequest(BaseModel):
+    role_id: str
+
+
+class AdminMeResponse(BaseModel):
+    id: str
+    email: str
+    username: str
+    role_name: str
+
+
 # --- User CRUD ---
+
+@router.get("/me", response_model=AdminMeResponse)
+async def get_admin_me(admin=Depends(get_current_admin)) -> AdminMeResponse:
+    """Return the currently authenticated admin's own profile."""
+    return AdminMeResponse(
+        id=admin.id,
+        email=admin.email,
+        username=admin.username,
+        role_name=admin.role.name if admin.role else "admin",
+    )
 
 @router.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(request: CreateUserRequest, admin=Depends(get_current_admin)) -> UserResponse:
@@ -163,14 +184,25 @@ async def toggle_user_active(user_id: str, admin=Depends(get_current_admin)) -> 
 
 @router.delete("/users/{user_id}")
 async def delete_user(user_id: str, admin=Depends(get_current_admin)) -> dict:
-    """Delete a user (admin only). Cannot delete yourself."""
+    """Delete a user (admin only). Cannot delete yourself or the last admin."""
     if user_id == admin.id:
         raise HTTPException(status_code=400, detail="Cannot delete your own account")
 
     try:
-        user = await prisma.user.find_unique(where={"id": user_id})
+        user = await prisma.user.find_unique(where={"id": user_id}, include={"role": True})
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
+
+        # Last-admin guard: refuse if this is the only admin account
+        if user.role and user.role.name == "admin":
+            admin_count = await prisma.user.count(
+                where={"roleId": user.roleId, "isActive": True}
+            )
+            if admin_count <= 1:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Cannot delete the last admin account. Promote another user to admin first.",
+                )
 
         await prisma.user.delete(where={"id": user_id})
 
@@ -207,30 +239,6 @@ class ChangeUsernameRequest(BaseModel):
         return v
 
 
-@router.patch("/users/{user_id}/password")
-async def reset_user_password(
-    user_id: str,
-    request: ResetPasswordRequest,
-    admin=Depends(get_current_admin),
-) -> dict:
-    """Reset any user's password (admin only)."""
-    try:
-        user = await prisma.user.find_unique(where={"id": user_id})
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        hashed = get_password_hash(request.new_password)
-        await prisma.user.update(where={"id": user_id}, data={"passwordHash": hashed})
-
-        logger.info("Admin %s reset password for user %s", admin.email, user.email)
-        return {"message": f"Password reset for {user.email}"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error("Failed to reset password for user %s: %s", user_id, e)
-        raise HTTPException(status_code=500, detail="Failed to reset password.")
-
-
 @router.patch("/users/{user_id}/username")
 async def change_user_username(
     user_id: str,
@@ -262,6 +270,94 @@ async def change_user_username(
     except Exception as e:
         logger.error("Failed to change username for user %s: %s", user_id, e)
         raise HTTPException(status_code=500, detail="Failed to change username.")
+
+
+@router.patch("/users/{user_id}/password")
+async def reset_user_password(
+    user_id: str,
+    request: ResetPasswordRequest,
+    admin=Depends(get_current_admin),
+) -> dict:
+    """Reset any user's password (admin only)."""
+    try:
+        user = await prisma.user.find_unique(where={"id": user_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        hashed = get_password_hash(request.new_password)
+        await prisma.user.update(where={"id": user_id}, data={"passwordHash": hashed})
+
+        logger.info("Admin %s reset password for user %s", admin.email, user.email)
+        return {"message": f"Password reset for {user.email}"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Failed to reset password for user %s: %s", user_id, e)
+        raise HTTPException(status_code=500, detail="Failed to reset password.")
+
+
+@router.patch("/users/{user_id}/role")
+async def change_user_role(
+    user_id: str,
+    request: ChangeRoleRequest,
+    admin=Depends(get_current_admin),
+) -> UserResponse:
+    """Assign a different role to a user (admin only).
+
+    Guards:
+    - Cannot change your own role.
+    - Cannot demote the last admin account.
+    """
+    if user_id == admin.id:
+        raise HTTPException(status_code=400, detail="Cannot change your own role")
+
+    try:
+        user = await prisma.user.find_unique(where={"id": user_id}, include={"role": True})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        new_role = await prisma.role.find_unique(where={"id": request.role_id})
+        if not new_role:
+            raise HTTPException(status_code=404, detail="Role not found")
+
+        # Last-admin guard: if taking the user OUT of admin role
+        if user.role and user.role.name == "admin" and new_role.name != "admin":
+            admin_count = await prisma.user.count(
+                where={"roleId": user.roleId, "isActive": True}
+            )
+            if admin_count <= 1:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Cannot demote the last admin account. Promote another user to admin first.",
+                )
+
+        updated = await prisma.user.update(
+            where={"id": user_id},
+            data={"roleId": request.role_id},
+            include={"role": True},
+        )
+
+        logger.info(
+            "Admin %s changed role for %s: %s → %s",
+            admin.email,
+            updated.email,
+            user.role.name if user.role else "none",
+            new_role.name,
+        )
+
+        return UserResponse(
+            id=updated.id,
+            email=updated.email,
+            username=updated.username,
+            is_active=updated.isActive,
+            role_name=updated.role.name if updated.role else new_role.name,
+            created_at=updated.createdAt,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Failed to change role for user %s: %s", user_id, e)
+        raise HTTPException(status_code=500, detail="Failed to change user role.")
 
 
 # --- Role CRUD ---

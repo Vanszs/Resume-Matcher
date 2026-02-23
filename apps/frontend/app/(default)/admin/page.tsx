@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
-import { apiFetch, apiPost, apiDelete, logout } from '@/lib/api/client';
+import { apiFetch, apiPost, apiDelete, apiPatch, logout } from '@/lib/api/client';
 import {
     ArrowLeft,
     Users,
@@ -54,6 +54,8 @@ export default function AdminPage() {
     const [addingUser, setAddingUser] = useState(false);
     const [userActionId, setUserActionId] = useState<string | null>(null);
     const [userActionType, setUserActionType] = useState<'toggle' | 'delete' | null>(null);
+    const [currentAdminId, setCurrentAdminId] = useState<string | null>(null);
+    const [changingRoleUserId, setChangingRoleUserId] = useState<string | null>(null);
 
     // App settings
     const [registerEnabled, setRegisterEnabled] = useState(false);
@@ -70,10 +72,11 @@ export default function AdminPage() {
         setStatus('loading');
         setError(null);
         try {
-            const [usersRes, rolesRes, appSettingsRes] = await Promise.all([
+            const [usersRes, rolesRes, appSettingsRes, meRes] = await Promise.all([
                 apiFetch('/admin/users'),
                 apiFetch('/admin/roles'),
                 apiFetch('/admin/app-settings'),
+                apiFetch('/admin/me'),
             ]);
 
             if (usersRes.status === 403) {
@@ -97,6 +100,10 @@ export default function AdminPage() {
             if (appSettingsRes.ok) {
                 const appSettings = await appSettingsRes.json();
                 setRegisterEnabled(Boolean(appSettings.register_enabled));
+            }
+            if (meRes.ok) {
+                const meData = await meRes.json();
+                setCurrentAdminId(meData.id);
             }
             setStatus('idle');
         } catch (err) {
@@ -179,6 +186,24 @@ export default function AdminPage() {
         } finally {
             setUserActionId(null);
             setUserActionType(null);
+        }
+    }
+
+    async function handleChangeRole(userId: string, roleId: string) {
+        setChangingRoleUserId(userId);
+        setFeedback(null);
+        try {
+            const res = await apiPatch(`/admin/users/${userId}/role`, { role_id: roleId });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error((data as any).detail || 'Failed to change role');
+            }
+            setFeedback({ type: 'success', message: 'User role updated successfully' });
+            await loadData();
+        } catch (err: any) {
+            setFeedback({ type: 'error', message: err.message || 'Failed to change role' });
+        } finally {
+            setChangingRoleUserId(null);
         }
     }
 
@@ -486,9 +511,24 @@ export default function AdminPage() {
                                                         <td className="p-3 font-mono text-sm">{user.email}</td>
                                                         <td className="p-3 font-mono text-sm text-gray-600">{user.username}</td>
                                                         <td className="p-3">
-                                                            <span className="inline-block px-2 py-0.5 border border-black bg-blue-50 text-blue-800 font-mono text-xs uppercase">
-                                                                {user.role_name}
-                                                            </span>
+                                                            <div className="relative flex items-center gap-1">
+                                                                <select
+                                                                    value={roles.find((r) => r.name === user.role_name)?.id ?? roles[0]?.id ?? ''}
+                                                                    onChange={(e) => handleChangeRole(user.id, e.target.value)}
+                                                                    disabled={user.id === currentAdminId || changingRoleUserId === user.id || roles.length === 0}
+                                                                    title={user.id === currentAdminId ? 'Cannot change your own role' : 'Change role'}
+                                                                    className="h-7 pl-2 pr-6 border border-black bg-blue-50 text-blue-800 font-mono text-xs uppercase focus:outline-none focus:ring-2 focus:ring-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                >
+                                                                    {roles.map((role) => (
+                                                                        <option key={role.id} value={role.id}>
+                                                                            {role.name.toUpperCase()}
+                                                                        </option>
+                                                                    ))}
+                                                                </select>
+                                                                {changingRoleUserId === user.id && (
+                                                                    <Loader2 className="w-3 h-3 animate-spin text-blue-600 shrink-0" />
+                                                                )}
+                                                            </div>
                                                         </td>
                                                         <td className="p-3">
                                                             <span
@@ -526,9 +566,19 @@ export default function AdminPage() {
                                                                     variant="ghost"
                                                                     size="icon"
                                                                     onClick={() => handleDeleteUser(user.id, user.email)}
-                                                                    title="Delete user"
+                                                                    title={
+                                                                        user.id === currentAdminId
+                                                                            ? 'Cannot delete your own account'
+                                                                            : user.role_name === 'admin' && users.filter((u) => u.role_name === 'admin').length <= 1
+                                                                            ? 'Cannot delete the last admin'
+                                                                            : 'Delete user'
+                                                                    }
                                                                     className="hover:bg-red-100 text-red-600"
-                                                                    disabled={userActionId === user.id}
+                                                                    disabled={
+                                                                        userActionId === user.id ||
+                                                                        user.id === currentAdminId ||
+                                                                        (user.role_name === 'admin' && users.filter((u) => u.role_name === 'admin').length <= 1)
+                                                                    }
                                                                 >
                                                                     {userActionId === user.id && userActionType === 'delete' ? (
                                                                         <Loader2 className="w-4 h-4 animate-spin" />
