@@ -655,7 +655,15 @@ async def list_resumes(
             processing_status=resume.get("processing_status", "pending"),
             created_at=resume.get("created_at", ""),
             updated_at=resume.get("updated_at", ""),
-            title=resume.get("title"),
+            # For master resumes with no explicit title, derive from AI-parsed
+            # personalInfo.title (the person's role/position) so the card shows
+            # the role rather than the raw filename. Falls back to filename in frontend.
+            title=resume.get("title") or (
+                (resume.get("processed_data") or {})
+                .get("personalInfo", {})
+                .get("title")
+                if resume.get("is_master") else None
+            ) or None,
         )
         for resume in resumes
     ]

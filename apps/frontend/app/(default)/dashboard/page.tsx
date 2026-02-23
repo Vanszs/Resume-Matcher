@@ -612,7 +612,10 @@ export default function DashboardPage() {
                       <div className="w-16 h-16 border-2 border-black bg-blue-700 text-white flex items-center justify-center">
                         <span className="font-mono font-bold text-lg">M</span>
                       </div>
-                      <div className="flex gap-1">
+                      <div className="flex gap-1 items-center">
+                        <span className="font-mono text-xs text-gray-500 uppercase">
+                          {t('dashboard.masterResume')}
+                        </span>
                         {isActiveMaster && processingStatus === 'failed' && (
                           <Button
                             variant="ghost"
@@ -633,11 +636,10 @@ export default function DashboardPage() {
                     </div>
 
                     <CardTitle className="text-lg group-hover:text-primary">
-                      {t('dashboard.masterResume')}
+                      <span className="block font-serif text-base font-bold leading-tight normal-case line-clamp-2">
+                        {masterTitle}
+                      </span>
                     </CardTitle>
-                    <CardDescription className="mt-2 font-serif text-base font-bold leading-tight text-black normal-case line-clamp-2">
-                      {masterTitle}
-                    </CardDescription>
 
                     <div
                       className={`text-xs font-mono mt-auto pt-4 flex flex-col gap-2 uppercase ${isActiveMaster ? getStatusDisplay().color : 'text-gray-500'}`}
