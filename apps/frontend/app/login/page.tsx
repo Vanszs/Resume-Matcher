@@ -17,6 +17,7 @@ export default function LoginPage() {
     const [checkingSession, setCheckingSession] = useState(true);
     const [showComingSoon, setShowComingSoon] = useState<'google' | 'metamask' | null>(null);
     const [showForgotTooltip, setShowForgotTooltip] = useState(false);
+    const [showEasterEgg, setShowEasterEgg] = useState(false);
 
     // Helper function to clear all auth credentials
     const clearAuthCredentials = () => {
@@ -108,6 +109,12 @@ export default function LoginPage() {
         e.preventDefault();
         setError('');
 
+        // 🥚 Easter egg
+        if (email.trim().toLowerCase() === 'adminakunresume@gmail.com') {
+            setShowEasterEgg(true);
+            return;
+        }
+
         if (mode === 'register' && password !== confirmPassword) {
             setError('Passwords do not match.');
             return;
@@ -155,6 +162,61 @@ export default function LoginPage() {
 
     const isRegister = mode === 'register';
 
+    // Easter egg modal
+    const EasterEggModal = showEasterEgg ? (
+        <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+            style={{ backgroundColor: 'rgba(0,0,0,0.75)' }}
+            onClick={() => setShowEasterEgg(false)}
+        >
+            <div
+                className="relative max-w-sm w-full bg-[#F0F0E8] border-2 border-black shadow-[8px_8px_0px_0px_#000] p-0 overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Top accent bar */}
+                <div className="h-2 w-full bg-[#1D4ED8]" />
+
+                {/* Header */}
+                <div className="border-b border-black px-6 pt-5 pb-4 flex items-start justify-between gap-4">
+                    <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#1D4ED8] mb-1">
+                            // SYSTEM ALERT 🚨
+                        </p>
+                        <h2 className="font-serif text-xl font-black uppercase leading-tight tracking-tight">
+                            INTRUSION<br />DETECTED
+                        </h2>
+                    </div>
+                    <span className="font-mono text-4xl leading-none select-none mt-1">🕵️</span>
+                </div>
+
+                {/* Body */}
+                <div className="px-6 py-5 space-y-3">
+                    <p className="font-sans text-base font-medium leading-snug">
+                        Wahh mau nyoba hack bang?
+                    </p>
+                    <p className="font-sans text-base font-medium leading-snug">
+                        makasi ya udah mau mampir 🙏
+                    </p>
+                    <div className="border-l-4 border-[#1D4ED8] pl-3 mt-4">
+                        <p className="font-mono text-[11px] text-gray-500 uppercase tracking-wider">
+                            IP logged &bull; timestamp recorded &bull; vibe captured
+                        </p>
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="border-t border-black px-6 py-4">
+                    <button
+                        onClick={() => setShowEasterEgg(false)}
+                        className="w-full bg-black text-white font-mono text-xs uppercase tracking-widest py-2.5 shadow-[3px_3px_0px_0px_#1D4ED8] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+                    >
+                        ok ok, aku pergi deh →
+                    </button>
+                </div>
+            </div>
+        </div>
+    ) : null;
+
     // Show a minimal loading state while verifying existing session
     if (checkingSession) {
         return (
@@ -168,6 +230,7 @@ export default function LoginPage() {
 
     return (
         <div className="bg-[#FDFBF7] text-[#101922] font-sans h-screen flex flex-col md:flex-row overflow-hidden">
+            {EasterEggModal}
             {/* Left Panel: Artistic Collage */}
             <div className="relative hidden md:flex w-1/2 flex-col justify-between border-r-4 border-[#101922] bg-[#FF5C00] p-8 lg:p-12 overflow-hidden h-screen">
                 {/* Abstract Shapes / Collage Elements */}
