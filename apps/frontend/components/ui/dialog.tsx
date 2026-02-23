@@ -110,10 +110,14 @@ const DialogContent: React.FC<DialogContentProps> = ({ children, className }) =>
     return () => document.removeEventListener('keydown', handleEscape);
   }, [open, onOpenChange]);
 
-  // Prevent body scroll when dialog is open
-  React.useEffect(() => {
+  // Prevent body scroll when dialog is open.
+  // useLayoutEffect fires synchronously — prevents the race condition where
+  // Next.js client-side navigation unmounts the dialog mid-animation and
+  // leaves document.body.style.overflow = 'hidden' stuck.
+  React.useLayoutEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';
+      document.body.style.pointerEvents = 'auto';
     } else {
       document.body.style.overflow = '';
     }
