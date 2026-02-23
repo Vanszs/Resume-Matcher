@@ -19,6 +19,16 @@ async def upload_job_descriptions(request: JobUploadRequest, user=Depends(get_cu
     if not request.job_descriptions:
         raise HTTPException(status_code=400, detail="No job descriptions provided")
 
+    if request.resume_id:
+        source_resume = db.get_active_resume(request.resume_id, user_id=user.id)
+        if not source_resume:
+            raise HTTPException(status_code=404, detail="Resume not found")
+        if not source_resume.get("is_master", False):
+            raise HTTPException(
+                status_code=400,
+                detail="Selected resume must be a master resume.",
+            )
+
     job_ids = []
     for jd in request.job_descriptions:
         if not jd.strip():

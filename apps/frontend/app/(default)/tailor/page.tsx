@@ -12,6 +12,8 @@ import {
   uploadJobDescriptions,
   previewImproveResume,
   confirmImproveResume,
+  fetchResumeList,
+  type ResumeListItem,
 } from '@/lib/api/resume';
 import { fetchPromptConfig, type PromptOption } from '@/lib/api/config';
 import { Dropdown } from '@/components/ui/dropdown';
@@ -27,6 +29,7 @@ export default function TailorPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [masterResumeId, setMasterResumeId] = useState<string | null>(null);
+  const [masterResumeOptions, setMasterResumeOptions] = useState<ResumeListItem[]>([]);
   const [promptOptions, setPromptOptions] = useState<PromptOption[]>([]);
   const [selectedPromptId, setSelectedPromptId] = useState('keywords');
   const [promptLoading, setPromptLoading] = useState(false);
@@ -58,12 +61,46 @@ export default function TailorPage() {
   const isLlmConfigured = !statusLoading && systemStatus?.llm_configured;
 
   useEffect(() => {
-    const storedId = localStorage.getItem('master_resume_id');
-    if (!storedId) {
-      router.push('/dashboard');
-    } else {
-      setMasterResumeId(storedId);
-    }
+    let cancelled = false;
+
+    const loadMasters = async () => {
+      try {
+        const storedId = localStorage.getItem('master_resume_id');
+        const resumes = await fetchResumeList(true);
+        const masters = resumes.filter((resume) => resume.is_master);
+
+        if (cancelled) return;
+
+        if (masters.length === 0) {
+          localStorage.removeItem('master_resume_id');
+          router.push('/dashboard');
+          return;
+        }
+
+        setMasterResumeOptions(masters);
+
+        const storedMaster = masters.find((master) => master.resume_id === storedId);
+        if (!storedMaster) {
+          localStorage.removeItem('master_resume_id');
+          router.push('/dashboard');
+          return;
+        }
+
+        localStorage.setItem('master_resume_id', storedMaster.resume_id);
+        setMasterResumeId(storedMaster.resume_id);
+      } catch (err) {
+        console.error('Failed to load master resumes', err);
+        // Do not silently fall back to a stored id — redirect to dashboard
+        // so the user can explicitly re-select a master resume.
+        router.push('/dashboard');
+      }
+    };
+
+    loadMasters();
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   useEffect(() => {
@@ -365,6 +402,22 @@ export default function TailorPage() {
 
         <div className="space-y-6">
           <Dropdown
+            options={masterResumeOptions.map((master) => ({
+              id: master.resume_id,
+              label: master.title || master.filename || t('dashboard.masterResume'),
+              description: t('dashboard.masterResume'),
+            }))}
+            value={masterResumeId || ''}
+            onChange={(value) => {
+              setMasterResumeId(value);
+              localStorage.setItem('master_resume_id', value);
+            }}
+            label={t('tailor.masterResumeLabel')}
+            description={t('tailor.masterResumeDescription')}
+            disabled={isLoading || masterResumeOptions.length === 0}
+          />
+
+          <Dropdown
             options={
               promptOptions.length > 0
                 ? promptOptions.map((opt) => ({
@@ -423,7 +476,13 @@ export default function TailorPage() {
           <Button
             size="lg"
             onClick={handleGenerate}
-            disabled={isLoading || statusLoading || !jobDescription.trim() || !isLlmConfigured}
+            disabled={
+              isLoading ||
+              statusLoading ||
+              !jobDescription.trim() ||
+              !isLlmConfigured ||
+              !masterResumeId
+            }
             className="w-full"
           >
             {isLoading ? (

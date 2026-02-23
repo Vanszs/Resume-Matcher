@@ -106,8 +106,13 @@ export async function apiDelete(endpoint: string): Promise<Response> {
 /**
  * Builds the full upload URL for file uploads.
  */
-export function getUploadUrl(): string {
-  return `${API_BASE}/resumes/upload`;
+export function getUploadUrl(asMaster = false): string {
+  const params = new URLSearchParams();
+  if (asMaster) {
+    params.set('as_master', 'true');
+  }
+  const query = params.toString();
+  return query ? `${API_BASE}/resumes/upload?${query}` : `${API_BASE}/resumes/upload`;
 }
 
 /**

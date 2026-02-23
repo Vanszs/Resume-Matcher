@@ -203,6 +203,25 @@ def _get_original_resume_data(resume: dict[str, Any]) -> dict[str, Any] | None:
     return original_data
 
 
+def _get_generation_source_resume(
+    resume_id: str,
+    user_id: str,
+) -> dict[str, Any]:
+    """Resolve and validate explicit generation source resume.
+
+    Source must be an active (non-deleted) master resume owned by the caller.
+    """
+    resume = db.get_active_resume(resume_id, user_id=user_id)
+    if not resume:
+        raise HTTPException(status_code=404, detail="Resume not found")
+    if not resume.get("is_master", False):
+        raise HTTPException(
+            status_code=400,
+            detail="Selected resume must be a master resume.",
+        )
+    return resume
+
+
 def _preserve_personal_info(
     original_data: dict[str, Any] | None,
     improved_data: dict[str, Any],
@@ -366,6 +385,7 @@ MAX_FILE_SIZE = 4 * 1024 * 1024  # 4MB
 @router.post("/upload", response_model=ResumeUploadResponse)
 async def upload_resume(
     file: UploadFile = File(...),
+    as_master: bool = Query(False),
     user=Depends(get_current_user),
 ) -> ResumeUploadResponse:
     """Upload and process a resume file (PDF/DOCX).
@@ -401,15 +421,28 @@ async def upload_resume(
             detail="Failed to parse document. Please ensure it's a valid PDF or DOCX file.",
         )
 
-    # Store in database first with "processing" status (atomic master assignment)
-    resume = await db.create_resume_atomic_master(
-        content=markdown_content,
-        content_type="md",
-        filename=file.filename,
-        processed_data=None,
-        processing_status="processing",
-        user_id=user.id,
-    )
+    # Store in database first with "processing" status.
+    # Legacy bootstrap keeps first-upload atomic master assignment;
+    # explicit as_master enables additional master resumes.
+    if as_master:
+        resume = db.create_resume(
+            content=markdown_content,
+            content_type="md",
+            filename=file.filename,
+            is_master=True,
+            processed_data=None,
+            processing_status="processing",
+            user_id=user.id,
+        )
+    else:
+        resume = await db.create_resume_atomic_master(
+            content=markdown_content,
+            content_type="md",
+            filename=file.filename,
+            processed_data=None,
+            processing_status="processing",
+            user_id=user.id,
+        )
 
     # Try to parse to structured JSON (optional, may fail if LLM not configured)
     try:
@@ -420,13 +453,18 @@ async def upload_resume(
                 "processed_data": processed_data,
                 "processing_status": "ready",
             },
+            user_id=user.id,
         )
         resume["processed_data"] = processed_data
         resume["processing_status"] = "ready"
     except Exception as e:
         # LLM parsing failed, update status to failed
         logger.warning(f"Resume parsing to JSON failed for {file.filename}: {e}")
-        db.update_resume(resume["resume_id"], {"processing_status": "failed"})
+        db.update_resume(
+            resume["resume_id"],
+            {"processing_status": "failed"},
+            user_id=user.id,
+        )
         resume["processing_status"] = "failed"
 
     # Return accurate status to client (API-001 fix)
@@ -554,7 +592,7 @@ async def get_resume(
     plus cover letter and outreach message if they exist.
     Applies lazy migration for section metadata if needed.
     """
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_active_resume(resume_id, user_id=user.id)
 
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
@@ -634,9 +672,7 @@ async def improve_resume_preview_endpoint(
 
     The response includes resume_preview data but leaves resume_id null.
     """
-    resume = db.get_resume(request.resume_id, user_id=user.id)
-    if not resume:
-        raise HTTPException(status_code=404, detail="Resume not found")
+    resume = _get_generation_source_resume(request.resume_id, user.id)
 
     job = db.get_job(request.job_id, user_id=user.id)
     if not job:
@@ -697,13 +733,8 @@ async def improve_resume_preview_endpoint(
         refinement_attempted = False
         refinement_successful = False
         try:
-            # Get master resume for alignment validation
-            master_resume = db.get_master_resume(user_id=user.id)
-            master_data = (
-                _get_original_resume_data(master_resume)
-                if master_resume
-                else _get_original_resume_data(resume)
-            )
+            # Use the explicit selected source resume for alignment validation.
+            master_data = _get_original_resume_data(resume)
             if master_data:
                 initial_match = calculate_keyword_match(improved_data, job_keywords)
                 refinement_attempted = True
@@ -821,9 +852,7 @@ async def improve_resume_confirm_endpoint(
     user=Depends(get_current_user),
 ) -> ImproveResumeResponse:
     """Confirm and persist a tailored resume."""
-    resume = db.get_resume(request.resume_id, user_id=user.id)
-    if not resume:
-        raise HTTPException(status_code=404, detail="Resume not found")
+    resume = _get_generation_source_resume(request.resume_id, user.id)
 
     job = db.get_job(request.job_id, user_id=user.id)
     if not job:
@@ -966,10 +995,8 @@ async def improve_resume_endpoint(
     message if enabled in feature configuration.
     Persists the tailored resume and returns a non-null resume_id.
     """
-    # Fetch resume
-    resume = db.get_resume(request.resume_id, user_id=user.id)
-    if not resume:
-        raise HTTPException(status_code=404, detail="Resume not found")
+    # Fetch and validate explicit source resume
+    resume = _get_generation_source_resume(request.resume_id, user.id)
 
     # Fetch job description
     job = db.get_job(request.job_id, user_id=user.id)
@@ -1011,13 +1038,8 @@ async def improve_resume_endpoint(
         refinement_attempted = False
         refinement_successful = False
         try:
-            # Get master resume for alignment validation
-            master_resume = db.get_master_resume(user_id=user.id)
-            master_data = (
-                _get_original_resume_data(master_resume)
-                if master_resume
-                else _get_original_resume_data(resume)
-            )
+            # Use the explicit selected source resume for alignment validation.
+            master_data = _get_original_resume_data(resume)
             if master_data:
                 initial_match = calculate_keyword_match(improved_data, job_keywords)
                 refinement_attempted = True
@@ -1161,7 +1183,7 @@ async def update_resume_endpoint(
     user=Depends(get_current_user),
 ) -> ResumeFetchResponse:
     """Update a resume with new structured data."""
-    existing = db.get_resume(resume_id, user_id=user.id)
+    existing = db.get_active_resume(resume_id, user_id=user.id)
     if not existing:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -1245,7 +1267,7 @@ async def download_resume_pdf(
     - showContactIcons: show icons in contact info
     - lang: locale used for print page translations
     """
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_active_resume(resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -1293,6 +1315,15 @@ async def download_resume_pdf(
 @router.delete("/{resume_id}")
 async def delete_resume(resume_id: str, user=Depends(get_current_user)) -> dict:
     """Delete a resume by ID."""
+    resume = db.get_active_resume(resume_id, user_id=user.id)
+    if not resume:
+        raise HTTPException(status_code=404, detail="Resume not found")
+
+    if resume.get("is_master", False):
+        if not db.soft_delete_resume(resume_id, user_id=user.id):
+            raise HTTPException(status_code=404, detail="Resume not found")
+        return {"message": "Resume deleted successfully"}
+
     if not db.delete_resume(resume_id, user_id=user.id):
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -1309,7 +1340,7 @@ async def retry_processing(
     Re-runs parse_resume_to_json() on the stored markdown content.
     Only works for resumes with processing_status == "failed".
     """
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_active_resume(resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -1360,7 +1391,7 @@ async def update_cover_letter(
     resume_id: str, request: UpdateCoverLetterRequest, user=Depends(get_current_user)
 ) -> dict:
     """Update the cover letter for a resume."""
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_active_resume(resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -1373,7 +1404,7 @@ async def update_outreach_message(
     resume_id: str, request: UpdateOutreachMessageRequest, user=Depends(get_current_user)
 ) -> dict:
     """Update the outreach message for a resume."""
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_active_resume(resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -1388,7 +1419,7 @@ async def update_title(
     user=Depends(get_current_user),
 ) -> dict:
     """Update the title for a resume."""
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_active_resume(resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -1412,7 +1443,7 @@ async def generate_cover_letter_endpoint(
     - The resume must have an associated job context in the improvements table
     """
     # Get the resume
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_active_resume(resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -1489,7 +1520,7 @@ async def generate_outreach_endpoint(
     - The resume must have an associated job context in the improvements table
     """
     # Get the resume
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_active_resume(resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -1564,7 +1595,7 @@ async def get_job_description_for_resume(
     to tailor a resume. Only works for tailored resumes (those with parent_id).
     """
     # Get the resume
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_active_resume(resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
@@ -1612,7 +1643,7 @@ async def download_cover_letter_pdf(
         pageSize: A4 or LETTER
         lang: locale used for print page translations
     """
-    resume = db.get_resume(resume_id, user_id=user.id)
+    resume = db.get_active_resume(resume_id, user_id=user.id)
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 

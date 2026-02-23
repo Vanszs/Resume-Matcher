@@ -81,6 +81,7 @@ class Database:
             "content_type": content_type,
             "filename": filename,
             "is_master": is_master,
+            "deleted_at": None,
             "parent_id": parent_id,
             "processed_data": processed_data,
             "processing_status": processing_status,
@@ -94,6 +95,10 @@ class Database:
         self.resumes.insert(doc)
         return doc
 
+    # LEGACY BOOTSTRAP ONLY — DO NOT USE FOR GENERATION SOURCE
+    # This method exists solely for first-upload atomic master assignment.
+    # All generation source resolution must go through _get_generation_source_resume
+    # in resumes.py, which uses get_active_resume + is_master validation.
     async def create_resume_atomic_master(
         self,
         content: str,
@@ -110,20 +115,14 @@ class Database:
         Uses an asyncio.Lock to prevent race conditions when multiple uploads
         happen concurrently and both try to become master. This avoids blocking
         the FastAPI event loop unlike threading.Lock.
+
+        LEGACY BOOTSTRAP ONLY — DO NOT USE FOR GENERATION SOURCE.
+        Used exclusively by upload route for first-upload compatibility.
+        Never called from improve, preview, confirm, or any source-resolution path.
         """
         async with self._master_resume_lock:
             current_master = self.get_master_resume(user_id=user_id)
             is_master = current_master is None
-
-            # Recovery behavior: if the current master is stuck in failed parsing
-            # state, promote the next upload to become the new master resume.
-            if current_master and current_master.get("processing_status") == "failed":
-                Resume = Query()
-                self.resumes.update(
-                    {"is_master": False},
-                    Resume.resume_id == current_master["resume_id"],
-                )
-                is_master = True
 
             return self.create_resume(
                 content=content,
@@ -146,14 +145,60 @@ class Database:
         result = self.resumes.search(query)
         return result[0] if result else None
 
-    def get_master_resume(self, user_id: str | None = None) -> dict[str, Any] | None:
-        """Get the master resume if exists."""
+    def get_active_resume(
+        self, resume_id: str, user_id: str | None = None
+    ) -> dict[str, Any] | None:
+        """Get non-deleted resume by ID."""
         Resume = Query()
-        query = Resume.is_master == True
+        active_query = (Resume.deleted_at == None) | (~Resume.deleted_at.exists())
+        query = (Resume.resume_id == resume_id) & active_query
         if user_id is not None:
             query = query & (Resume.user_id == user_id)
         result = self.resumes.search(query)
         return result[0] if result else None
+
+    # LEGACY BOOTSTRAP ONLY — DO NOT USE FOR GENERATION SOURCE
+    # Used only by: create_resume_atomic_master (bootstrap) and get_stats (status display).
+    # Generation source must always be resolved via _get_generation_source_resume in resumes.py.
+    def get_master_resume(self, user_id: str | None = None) -> dict[str, Any] | None:
+        """Get one active master resume.
+
+        LEGACY BOOTSTRAP ONLY — DO NOT USE FOR GENERATION SOURCE.
+        Permitted callers: create_resume_atomic_master, get_stats.
+        All other callers must use list_master_resumes or get_active_resume.
+        """
+        Resume = Query()
+        active_query = (Resume.deleted_at == None) | (~Resume.deleted_at.exists())
+        query = (Resume.is_master == True) & active_query
+        if user_id is not None:
+            query = query & (Resume.user_id == user_id)
+        result = self.resumes.search(query)
+        return result[0] if result else None
+
+    def list_master_resumes(self, user_id: str | None = None) -> list[dict[str, Any]]:
+        """List all non-deleted master resumes."""
+        Resume = Query()
+        active_query = (Resume.deleted_at == None) | (~Resume.deleted_at.exists())
+        query = (Resume.is_master == True) & active_query
+        if user_id is not None:
+            query = query & (Resume.user_id == user_id)
+        return list(self.resumes.search(query))
+
+    def promote_to_master(self, resume_id: str, user_id: str | None = None) -> bool:
+        """Mark an existing non-deleted resume as master."""
+        Resume = Query()
+        active_query = (Resume.deleted_at == None) | (~Resume.deleted_at.exists())
+        target_query = (Resume.resume_id == resume_id) & active_query
+        if user_id is not None:
+            target_query = target_query & (Resume.user_id == user_id)
+        updated = self.resumes.update(
+            {
+                "is_master": True,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            },
+            target_query,
+        )
+        return len(updated) > 0
 
     def update_resume(
         self, resume_id: str, updates: dict[str, Any], user_id: str | None = None
@@ -188,22 +233,48 @@ class Database:
         removed = self.resumes.remove(query)
         return len(removed) > 0
 
-    def list_resumes(self, user_id: str | None = None) -> list[dict[str, Any]]:
-        """List all resumes."""
-        if user_id is None:
-            return list(self.resumes.all())
+    def soft_delete_resume(self, resume_id: str, user_id: str | None = None) -> bool:
+        """Soft-delete resume by setting deleted_at timestamp."""
         Resume = Query()
-        return list(self.resumes.search(Resume.user_id == user_id))
+        active_query = (Resume.deleted_at == None) | (~Resume.deleted_at.exists())
+        query = (Resume.resume_id == resume_id) & active_query
+        if user_id is not None:
+            query = query & (Resume.user_id == user_id)
+        updated = self.resumes.update(
+            {
+                "deleted_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            },
+            query,
+        )
+        return len(updated) > 0
+
+    def list_resumes(
+        self, user_id: str | None = None, include_deleted: bool = False
+    ) -> list[dict[str, Any]]:
+        """List resumes with optional deleted records."""
+        Resume = Query()
+        query = None
+        if not include_deleted:
+            query = (Resume.deleted_at == None) | (~Resume.deleted_at.exists())
+        if user_id is not None:
+            user_query = Resume.user_id == user_id
+            query = user_query if query is None else (query & user_query)
+
+        if query is None:
+            return list(self.resumes.all())
+        return list(self.resumes.search(query))
 
     def set_master_resume(self, resume_id: str, user_id: str | None = None) -> bool:
-        """Set a resume as the master, unsetting any existing master.
+        """Set a resume as master.
 
         Returns False if the resume doesn't exist.
         """
         Resume = Query()
 
         # First verify the target resume exists
-        target_query = Resume.resume_id == resume_id
+        active_query = (Resume.deleted_at == None) | (~Resume.deleted_at.exists())
+        target_query = (Resume.resume_id == resume_id) & active_query
         if user_id is not None:
             target_query = target_query & (Resume.user_id == user_id)
         target = self.resumes.search(target_query)
@@ -211,16 +282,17 @@ class Database:
             logger.warning("Cannot set master: resume %s not found", resume_id)
             return False
 
-        # Unset current master
-        unset_query = Resume.is_master == True
-        if user_id is not None:
-            unset_query = unset_query & (Resume.user_id == user_id)
-        self.resumes.update({"is_master": False}, unset_query)
-        # Set new master
+        # Set target as master without mutating other masters.
         set_query = Resume.resume_id == resume_id
         if user_id is not None:
             set_query = set_query & (Resume.user_id == user_id)
-        updated = self.resumes.update({"is_master": True}, set_query)
+        updated = self.resumes.update(
+            {
+                "is_master": True,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            },
+            set_query,
+        )
         return len(updated) > 0
 
     # Job operations
@@ -307,15 +379,14 @@ class Database:
     def get_stats(self, user_id: str | None = None) -> dict[str, Any]:
         """Get database statistics."""
         if user_id is None:
-            total_resumes = len(self.resumes)
+            total_resumes = len(self.list_resumes())
             total_jobs = len(self.jobs)
             total_improvements = len(self.improvements)
             has_master_resume = self.get_master_resume() is not None
         else:
-            Resume = Query()
             Job = Query()
             Improvement = Query()
-            total_resumes = len(self.resumes.search(Resume.user_id == user_id))
+            total_resumes = len(self.list_resumes(user_id=user_id))
             total_jobs = len(self.jobs.search(Job.user_id == user_id))
             total_improvements = len(
                 self.improvements.search(Improvement.user_id == user_id)

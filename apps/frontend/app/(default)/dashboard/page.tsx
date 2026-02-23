@@ -100,6 +100,7 @@ export default function DashboardPage() {
     if (typeof window === 'undefined') return [];
     return readResumeCache()?.tailored ?? [];
   });
+  const [masterResumes, setMasterResumes] = useState<ResumeListItem[]>([]);
   // isListLoading = true only when there is NO cache at all (genuine first-ever load)
   const [isListLoading, setIsListLoading] = useState<boolean>(() => {
     if (typeof window === 'undefined') return true;
@@ -195,9 +196,11 @@ export default function DashboardPage() {
   const loadTailoredResumes = useCallback(async () => {
     try {
       const data = await fetchResumeList(true);
-      const masterFromList = data.find((r) => r.is_master);
+      const masters = data.filter((r) => r.is_master);
+      setMasterResumes(masters);
       const storedId = localStorage.getItem('master_resume_id');
-      const resolvedMasterId = masterFromList?.resume_id || storedId;
+      const storedMaster = masters.find((r) => r.resume_id === storedId);
+      const resolvedMasterId = storedMaster?.resume_id || null;
 
       if (resolvedMasterId) {
         localStorage.setItem('master_resume_id', resolvedMasterId);
@@ -210,7 +213,7 @@ export default function DashboardPage() {
         setMasterResumeId(null);
       }
 
-      const filtered = data.filter((r) => r.resume_id !== resolvedMasterId);
+      const filtered = data.filter((r) => !r.is_master);
       setTailoredResumes(filtered);
 
       // Only fetch job descriptions for resumes that are actually tailored
@@ -375,9 +378,16 @@ export default function DashboardPage() {
     setMasterResumeId(resumeId);
     // Check status after upload completes
     checkResumeStatus(resumeId);
+    loadTailoredResumes();
     // Update cached counters
     incrementResumes();
     setHasMasterResume(true);
+  };
+
+  const handleSelectMaster = (resumeId: string) => {
+    localStorage.setItem('master_resume_id', resumeId);
+    setMasterResumeId(resumeId);
+    checkResumeStatus(resumeId);
   };
 
   const handleRetryProcessing = async (e: React.MouseEvent) => {
@@ -487,7 +497,8 @@ export default function DashboardPage() {
     return Math.abs(hash);
   };
 
-  const totalCards = 1 + tailoredResumes.length + 1;
+  const masterCardCount = masterResumes.length > 0 ? masterResumes.length + 1 : 1;
+  const totalCards = masterCardCount + tailoredResumes.length + 1;
   const fillerCount = Math.max(0, (5 - (totalCards % 5)) % 5);
   const extraFillerCount = 5;
   // Use Tailwind classes for fillers now that we have them in config or use specific hex if needed
@@ -521,7 +532,7 @@ export default function DashboardPage() {
 
       <SwissGrid>
         {/* 1. Master Resume Logic */}
-        {!masterResumeId ? (
+        {masterResumes.length === 0 ? (
           // LLM Not Configured or Upload State
           !isLlmConfigured && !statusLoading ? (
             <Link href="/settings" className="block h-full">
@@ -580,75 +591,117 @@ export default function DashboardPage() {
           )
         ) : (
           // Master Resume Exists
-          <Card
-            variant="interactive"
-            className="aspect-square h-full"
-            onClick={() => router.push(`/resumes/${masterResumeId}`)}
-          >
-            <div className="flex-1 flex flex-col h-full">
-              <div className="flex justify-between items-start mb-6">
-                <div className="w-16 h-16 border-2 border-black bg-blue-700 text-white flex items-center justify-center">
-                  <span className="font-mono font-bold text-lg">M</span>
-                </div>
-                <div className="flex gap-1">
-                  {processingStatus === 'failed' && (
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 hover:bg-blue-100 hover:text-blue-700 z-10 rounded-none relative"
-                        onClick={handleRetryProcessing}
-                        disabled={isRetrying}
-                        title={t('dashboard.retryProcessing')}
-                      >
-                        {isRetrying ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <RefreshCw className="w-4 h-4" />
+          <>
+            {masterResumes.map((master) => {
+              const isActiveMaster = master.resume_id === masterResumeId;
+              const masterTitle = master.title || master.filename || t('dashboard.masterResume');
+              return (
+                <Card
+                  key={master.resume_id}
+                  variant="interactive"
+                  className={`aspect-square h-full ${isActiveMaster ? 'border-black' : ''}`}
+                  onClick={() => {
+                    if (!isActiveMaster) {
+                      handleSelectMaster(master.resume_id);
+                    }
+                    router.push(`/resumes/${master.resume_id}`);
+                  }}
+                >
+                  <div className="flex-1 flex flex-col h-full">
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="w-16 h-16 border-2 border-black bg-blue-700 text-white flex items-center justify-center">
+                        <span className="font-mono font-bold text-lg">M</span>
+                      </div>
+                      <div className="flex gap-1">
+                        {isActiveMaster && processingStatus === 'failed' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-blue-100 hover:text-blue-700 z-10 rounded-none relative"
+                            onClick={handleRetryProcessing}
+                            disabled={isRetrying}
+                            title={t('dashboard.retryProcessing')}
+                          >
+                            {isRetrying ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <RefreshCw className="w-4 h-4" />
+                            )}
+                          </Button>
                         )}
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
+                      </div>
+                    </div>
 
-              <CardTitle className="text-lg group-hover:text-primary">
-                {t('dashboard.masterResume')}
-              </CardTitle>
+                    <CardTitle className="text-lg group-hover:text-primary">
+                      {t('dashboard.masterResume')}
+                    </CardTitle>
+                    <CardDescription className="mt-2 font-serif text-base font-bold leading-tight text-black normal-case line-clamp-2">
+                      {masterTitle}
+                    </CardDescription>
 
-              <div
-                className={`text-xs font-mono mt-auto pt-4 flex flex-col gap-2 uppercase ${getStatusDisplay().color}`}
-              >
-                <div className="flex items-center gap-1">
-                  {getStatusDisplay().icon}
-                  {t('dashboard.statusLine', { status: getStatusDisplay().text })}
-                </div>
-                {processingStatus === 'failed' && (
-                  <div className="flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-7 rounded-none border-black w-full"
-                      onClick={handleRetryProcessing}
-                      disabled={isRetrying}
+                    <div
+                      className={`text-xs font-mono mt-auto pt-4 flex flex-col gap-2 uppercase ${isActiveMaster ? getStatusDisplay().color : 'text-gray-500'}`}
                     >
-                      {isRetrying
-                        ? t('dashboard.retryingProcessing')
-                        : t('dashboard.retryProcessing')}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-7 rounded-none border-red-600 text-red-600 hover:bg-red-50 w-full"
-                      onClick={handleDeleteAndReupload}
-                    >
-                      {t('dashboard.deleteAndReupload')}
-                    </Button>
+                      <div className="flex items-center gap-1">
+                        {isActiveMaster ? getStatusDisplay().icon : null}
+                        {isActiveMaster
+                          ? t('dashboard.statusLine', { status: getStatusDisplay().text })
+                          : t('dashboard.edited', {
+                              date: formatDate(master.updated_at || master.created_at),
+                            })}
+                      </div>
+                      {isActiveMaster && processingStatus === 'failed' && (
+                        <div className="flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-7 rounded-none border-black w-full"
+                            onClick={handleRetryProcessing}
+                            disabled={isRetrying}
+                          >
+                            {isRetrying
+                              ? t('dashboard.retryingProcessing')
+                              : t('dashboard.retryProcessing')}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-7 rounded-none border-red-600 text-red-600 hover:bg-red-50 w-full"
+                            onClick={handleDeleteAndReupload}
+                          >
+                            {t('dashboard.deleteAndReupload')}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
-          </Card>
+                </Card>
+              );
+            })}
+
+            <ResumeUploadDialog
+              asMaster
+              onUploadComplete={handleUploadComplete}
+              trigger={
+                <Card variant="interactive" className="aspect-square h-full hover:bg-primary hover:text-canvas">
+                  <div className="flex-1 flex flex-col justify-between pointer-events-none">
+                    <div className="w-14 h-14 border-2 border-current flex items-center justify-center mb-4">
+                      <span className="text-2xl leading-none relative top-[-2px]">+</span>
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg uppercase">
+                        {t('dashboard.addAnotherMasterResume')}
+                      </CardTitle>
+                      <CardDescription className="mt-2 opacity-60 group-hover:opacity-100 text-current">
+                        {'// '}
+                        {t('dashboard.uploadResume')}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </Card>
+              }
+            />
+          </>
         )}
 
         {/* 2. Tailored Resumes - show skeletons on first-ever load when cache is empty */}

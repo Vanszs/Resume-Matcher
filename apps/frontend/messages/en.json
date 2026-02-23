@@ -77,6 +77,7 @@
     "retrySuccess": "Processing succeeded!",
     "retryFailed": "Retry failed. Try uploading a different file.",
     "createResume": "Create Resume",
+    "addAnotherMasterResume": "Add Another Master Resume",
     "edited": "Edited {date}",
     "statusLine": "STATUS: {status}",
     "status": {
@@ -503,6 +504,8 @@
     "pasteJobDescription": "Paste Job Description",
     "pasteJobDescriptionBelow": "Paste Job Description Below",
     "jobDescriptionPlaceholder": "Paste the job description here...",
+    "masterResumeLabel": "Select Master Resume",
+    "masterResumeDescription": "Choose which master resume to use as the tailoring source.",
     "promptLabel": "Tailoring intensity",
     "promptDescription": "Choose how strongly to align your resume to the job description.",
     "promptOptions": {
