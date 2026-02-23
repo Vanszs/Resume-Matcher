@@ -447,16 +447,28 @@ async def upload_resume(
     # Try to parse to structured JSON (optional, may fail if LLM not configured)
     try:
         processed_data = await parse_resume_to_json(markdown_content, user_id=user.id)
+        # Derive and persist title from personalInfo.title so both the list
+        # endpoint and the detail page always read the same stable DB value.
+        # Only set if no title already exists (preserves manual edits).
+        derived_title = (
+            (processed_data or {})
+            .get("personalInfo", {})
+            .get("title")
+        ) or None
+        title_update = {"title": derived_title} if derived_title and not resume.get("title") else {}
         db.update_resume(
             resume["resume_id"],
             {
                 "processed_data": processed_data,
                 "processing_status": "ready",
+                **title_update,
             },
             user_id=user.id,
         )
         resume["processed_data"] = processed_data
         resume["processing_status"] = "ready"
+        if title_update:
+            resume["title"] = derived_title
     except Exception as e:
         # LLM parsing failed, update status to failed
         logger.warning(f"Resume parsing to JSON failed for {file.filename}: {e}")
@@ -620,6 +632,14 @@ async def get_resume(
         ResumeData.model_validate(processed_data) if processed_data else None
     )
 
+    # Derive title from personalInfo.title as fallback for records uploaded
+    # before title persistence was introduced (old master resumes in DB).
+    raw_title = resume.get("title") or (
+        (processed_data or {})
+        .get("personalInfo", {})
+        .get("title")
+    ) or None
+
     return ResumeFetchResponse(
         request_id=str(uuid4()),
         data=ResumeFetchData(
@@ -629,7 +649,7 @@ async def get_resume(
             cover_letter=resume.get("cover_letter"),
             outreach_message=resume.get("outreach_message"),
             parent_id=resume.get("parent_id"),
-            title=resume.get("title"),
+            title=raw_title,
         ),
     )
 
@@ -655,14 +675,12 @@ async def list_resumes(
             processing_status=resume.get("processing_status", "pending"),
             created_at=resume.get("created_at", ""),
             updated_at=resume.get("updated_at", ""),
-            # For master resumes with no explicit title, derive from AI-parsed
-            # personalInfo.title (the person's role/position) so the card shows
-            # the role rather than the raw filename. Falls back to filename in frontend.
+            # Title is persisted at upload time from personalInfo.title.
+            # This fallback covers old records uploaded before that change.
             title=resume.get("title") or (
                 (resume.get("processed_data") or {})
                 .get("personalInfo", {})
                 .get("title")
-                if resume.get("is_master") else None
             ) or None,
         )
         for resume in resumes

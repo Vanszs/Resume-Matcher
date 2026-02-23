@@ -51,6 +51,7 @@ const RESUME_LIST_CACHE_KEY = 'rm_dashboard_cache';
 interface ResumeListCache {
   masterId: string | null;
   tailored: ResumeListItem[];
+  masters: ResumeListItem[];
 }
 
 function readResumeCache(): ResumeListCache | null {
@@ -70,9 +71,9 @@ function writeResumeCache(data: ResumeListCache, masterProcessingStatus?: string
     // Don't cache while anything is still being processed —
     // on next back-navigation we want a fresh fetch instead of
     // a stale "processing" label frozen in storage.
-    const masterTransient = masterProcessingStatus
+    const masterTransient = (masterProcessingStatus
       ? TRANSIENT_STATES.has(masterProcessingStatus)
-      : false;
+      : false) || data.masters.some((r) => TRANSIENT_STATES.has(r.processing_status ?? ''));
     const tailoredTransient = data.tailored.some((r) =>
       TRANSIENT_STATES.has(r.processing_status ?? '')
     );
@@ -100,7 +101,10 @@ export default function DashboardPage() {
     if (typeof window === 'undefined') return [];
     return readResumeCache()?.tailored ?? [];
   });
-  const [masterResumes, setMasterResumes] = useState<ResumeListItem[]>([]);
+  const [masterResumes, setMasterResumes] = useState<ResumeListItem[]>(() => {
+    if (typeof window === 'undefined') return [];
+    return readResumeCache()?.masters ?? [];
+  });
   // isListLoading = true only when there is NO cache at all (genuine first-ever load)
   const [isListLoading, setIsListLoading] = useState<boolean>(() => {
     if (typeof window === 'undefined') return true;
@@ -254,7 +258,7 @@ export default function DashboardPage() {
         // Persist to sessionStorage so next render (back navigation) gets instant data.
         // Pass the current master processing status so transient states are not cached.
         writeResumeCache(
-          { masterId: resolvedMasterId ?? null, tailored: updated },
+          { masterId: resolvedMasterId ?? null, tailored: updated, masters },
           masterProcessingStatusRef.current,
         );
       }
