@@ -77,6 +77,7 @@
     "retrySuccess": "Processamento concluído com sucesso!",
     "retryFailed": "A nova tentativa falhou. Tente enviar outro arquivo.",
     "createResume": "Criar Currículo",
+    "addAnotherMasterResume": "Adicionar outro currículo principal",
     "edited": "Editado {date}",
     "statusLine": "STATUS: {status}",
     "status": {
@@ -503,6 +504,8 @@
     "pasteJobDescription": "Colar Descrição da Vaga",
     "pasteJobDescriptionBelow": "Cole a Descrição da Vaga Abaixo",
     "jobDescriptionPlaceholder": "Cole a descrição da vaga aqui...",
+    "masterResumeLabel": "Selecionar currículo principal",
+    "masterResumeDescription": "Escolha qual currículo principal usar como fonte de personalização.",
     "promptLabel": "Intensidade de personalização",
     "promptDescription": "Escolha o quanto alinhar seu currículo à descrição da vaga.",
     "promptOptions": {

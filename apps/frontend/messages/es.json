@@ -77,6 +77,7 @@
     "retrySuccess": "¡Procesamiento completado!",
     "retryFailed": "El reintento falló. Prueba a subir otro archivo.",
     "createResume": "Crear currículum",
+    "addAnotherMasterResume": "Agregar otro currículum maestro",
     "edited": "Editado {date}",
     "statusLine": "ESTADO: {status}",
     "status": {
@@ -503,6 +504,8 @@
     "pasteJobDescription": "Pegar Descripción del Trabajo",
     "pasteJobDescriptionBelow": "Pega la descripción del trabajo abajo",
     "jobDescriptionPlaceholder": "Pega la descripción del trabajo aquí...",
+    "masterResumeLabel": "Seleccionar currículum maestro",
+    "masterResumeDescription": "Elige qué currículum maestro usar como fuente de personalización.",
     "promptLabel": "Intensidad de ajuste",
     "promptDescription": "Elige qué tanto alinear tu currículum con la descripción del puesto.",
     "promptOptions": {

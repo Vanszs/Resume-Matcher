@@ -77,6 +77,7 @@
     "retrySuccess": "Pemrosesan berhasil!",
     "retryFailed": "Gagal mencoba ulang. Coba unggah file yang berbeda.",
     "createResume": "Buat Resume",
+    "addAnotherMasterResume": "Tambah Resume Master Lain",
     "edited": "Diubah {date}",
     "statusLine": "STATUS: {status}",
     "status": {
@@ -503,6 +504,8 @@
     "pasteJobDescription": "Tempel Deskripsi Pekerjaan",
     "pasteJobDescriptionBelow": "Tempel Deskripsi Pekerjaan di Bawah",
     "jobDescriptionPlaceholder": "Tempel deskripsi pekerjaan di sini...",
+    "masterResumeLabel": "Pilih Resume Master",
+    "masterResumeDescription": "Pilih resume master mana yang akan digunakan sebagai sumber penyesuaian.",
     "promptLabel": "Intensitas penyesuaian",
     "promptDescription": "Pilih seberapa kuat resume Anda diselaraskan dengan deskripsi pekerjaan.",
     "promptOptions": {

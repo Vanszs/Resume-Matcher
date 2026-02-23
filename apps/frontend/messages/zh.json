@@ -77,6 +77,7 @@
     "retrySuccess": "处理成功！",
     "retryFailed": "重试失败。请尝试上传其他文件。",
     "createResume": "创建简历",
+    "addAnotherMasterResume": "添加另一份主简历",
     "edited": "编辑于 {date}",
     "statusLine": "状态：{status}",
     "status": {
@@ -503,6 +504,8 @@
     "pasteJobDescription": "粘贴职位描述",
     "pasteJobDescriptionBelow": "在下方粘贴职位描述",
     "jobDescriptionPlaceholder": "在此粘贴职位描述...",
+    "masterResumeLabel": "选择主简历",
+    "masterResumeDescription": "选择用作定制来源的主简历。",
     "promptLabel": "匹配强度",
     "promptDescription": "选择与职位描述对齐的程度。",
     "promptOptions": {

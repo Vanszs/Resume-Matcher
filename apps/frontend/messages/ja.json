@@ -77,6 +77,7 @@
     "retrySuccess": "処理に成功しました！",
     "retryFailed": "再処理に失敗しました。別のファイルをアップロードしてください。",
     "createResume": "履歴書を作成",
+    "addAnotherMasterResume": "別のマスター履歴書を追加",
     "edited": "編集 {date}",
     "statusLine": "ステータス: {status}",
     "status": {
@@ -503,6 +504,8 @@
     "pasteJobDescription": "求人内容を貼り付け",
     "pasteJobDescriptionBelow": "下に求人内容を貼り付け",
     "jobDescriptionPlaceholder": "求人内容をここに貼り付けてください...",
+    "masterResumeLabel": "マスター履歴書を選択",
+    "masterResumeDescription": "カスタマイズのソースとして使用するマスター履歴書を選択してください。",
     "promptLabel": "調整の強さ",
     "promptDescription": "求人情報にどの程度合わせるかを選択してください。",
     "promptOptions": {
