@@ -640,6 +640,14 @@ async def get_resume(
         .get("title")
     ) or None
 
+    # Lazy-persist: if title was just derived (not already in DB), write it now
+    # so subsequent calls read it directly without re-deriving. No AI call — pure DB write.
+    if raw_title and not resume.get("title"):
+        try:
+            db.update_resume(resume_id, {"title": raw_title}, user_id=user.id)
+        except Exception:
+            pass  # Non-critical — next request will re-derive and retry
+
     return ResumeFetchResponse(
         request_id=str(uuid4()),
         data=ResumeFetchData(
@@ -677,6 +685,7 @@ async def list_resumes(
             updated_at=resume.get("updated_at", ""),
             # Title is persisted at upload time from personalInfo.title.
             # This fallback covers old records uploaded before that change.
+            # The derived value is also lazy-persisted below so it stabilizes.
             title=resume.get("title") or (
                 (resume.get("processed_data") or {})
                 .get("personalInfo", {})
@@ -685,6 +694,16 @@ async def list_resumes(
         )
         for resume in resumes
     ]
+
+    # Lazy-persist derived titles for old records that have no title in DB yet.
+    # One background write per old record — after this they read directly from DB.
+    # No AI call — reads only from already-stored processed_data.
+    for resume, summary in zip(resumes, summaries):
+        if summary.title and not resume.get("title"):
+            try:
+                db.update_resume(resume["resume_id"], {"title": summary.title}, user_id=user.id)
+            except Exception:
+                pass  # Non-critical
 
     return ResumeListResponse(request_id=str(uuid4()), data=summaries)
 
@@ -1385,11 +1404,16 @@ async def retry_processing(
 
     try:
         processed_data = await parse_resume_to_json(markdown_content, user_id=user.id)
+        derived_title = (
+            (processed_data or {}).get("personalInfo", {}).get("title")
+        ) or None
+        title_update = {"title": derived_title} if derived_title and not resume.get("title") else {}
         db.update_resume(
             resume_id,
             {
                 "processed_data": processed_data,
                 "processing_status": "ready",
+                **title_update,
             },
             user_id=user.id,
         )
