@@ -1293,6 +1293,7 @@ async def download_resume_pdf(
     showContactIcons: bool = Query(False),
     accentColor: str = Query("blue", pattern="^(blue|green|orange|red)$"),
     lang: str | None = Query(None, pattern="^[a-z]{2}(-[A-Z]{2})?$"),
+    request: Request = None,
     user=Depends(get_current_user),
 ) -> Response:
     """Generate a PDF for a resume using headless Chromium.
@@ -1337,6 +1338,11 @@ async def download_resume_pdf(
     )
     if lang:
         params = f"{params}&lang={lang}"
+    # Pass the user's JWT so the print page can authenticate its backend fetch
+    if request:
+        raw_token = request.headers.get("authorization", "").removeprefix("Bearer ").strip()
+        if raw_token:
+            params = f"{params}&token={raw_token}"
     url = f"{settings.frontend_base_url}/print/resumes/{resume_id}?{params}"
 
     # Use the exact margins provided; compact mode only affects spacing.
@@ -1684,6 +1690,7 @@ async def download_cover_letter_pdf(
     resume_id: str,
     pageSize: str = Query("A4", pattern="^(A4|LETTER)$"),
     lang: str | None = Query(None, pattern="^[a-z]{2}(-[A-Z]{2})?$"),
+    request: Request = None,
     user=Depends(get_current_user),
 ) -> Response:
     """Generate a PDF for a cover letter using headless Chromium.
@@ -1707,6 +1714,10 @@ async def download_cover_letter_pdf(
     url = f"{settings.frontend_base_url}/print/cover-letter/{resume_id}?pageSize={pageSize}"
     if lang:
         url = f"{url}&lang={lang}"
+    if request:
+        raw_token = request.headers.get("authorization", "").removeprefix("Bearer ").strip()
+        if raw_token:
+            url = f"{url}&token={raw_token}"
 
     # Render PDF with cover letter selector
     try:

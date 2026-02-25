@@ -56,6 +56,14 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
+    // Allow print pages when a short-lived token is present (used by the PDF renderer)
+    if (pathname.startsWith('/print')) {
+        const tokenParam = request.nextUrl.searchParams.get('token');
+        if (tokenParam) {
+            return NextResponse.next();
+        }
+    }
+
     // Check for auth cookie (set on login, mirrors localStorage)
     const token = request.cookies.get('auth_token')?.value;
 
