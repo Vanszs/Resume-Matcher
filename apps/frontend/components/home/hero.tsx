@@ -150,6 +150,12 @@ export default function Hero() {
             <a className="hover:bg-black hover:text-white px-2 py-1 transition-colors" href="#features">Features</a>
             <a className="hover:bg-black hover:text-white px-2 py-1 transition-colors" href="#how-it-works">How It Works</a>
             <a className="hover:bg-black hover:text-white px-2 py-1 transition-colors" href="#faq">FAQ</a>
+            <Link
+              href="/internships"
+              className="bg-[#F97316] text-white px-3 py-1 border border-black shadow-[2px_2px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all"
+            >
+              Internships 2026
+            </Link>
           </div>
           <Link
             href="/login"
