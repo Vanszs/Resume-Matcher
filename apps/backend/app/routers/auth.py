@@ -169,14 +169,14 @@ async def login(request: Request, body: LoginRequest) -> TokenResponse:
             )
 
         if not user.isActive:
-            logger.warning("Disabled user attempted login: %s", request.email)
+            logger.warning("Disabled user attempted login: %s", body.email)
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="User account is disabled",
             )
 
         if not user.isVerified:
-            logger.info("Unverified user attempted login: %s", request.email)
+            logger.info("Unverified user attempted login: %s", body.email)
             # We return a specific structure so the frontend knows to show the Verification Wall
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -185,7 +185,7 @@ async def login(request: Request, body: LoginRequest) -> TokenResponse:
             )
 
         if not user.role:
-            logger.error("User %s has no role assigned", request.email)
+            logger.error("User %s has no role assigned", body.email)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Login failed. Please contact an administrator.",
@@ -202,6 +202,7 @@ async def login(request: Request, body: LoginRequest) -> TokenResponse:
             token_type="bearer",
             user_id=user.id,
             email=user.email,
+            role=user.role.name,
         )
     except HTTPException:
         raise
