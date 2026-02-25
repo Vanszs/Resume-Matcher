@@ -190,6 +190,11 @@ echo "=== Frontend Setup ==="
 cd apps/frontend
 echo "Installing Node dependencies..."
 npm install
+
+# Write production env so NEXT_PUBLIC_API_URL bakes in the real domain,
+# not http://localhost:8000 from .env.local (which would fail in user browsers).
+echo "NEXT_PUBLIC_API_URL=https://resume.bevansatria.my.id" > .env.production.local
+echo "Wrote .env.production.local with production API URL"
 echo "Cleaning previous build artifacts..."
 if [ -d ".next" ]; then
     rm -rf .next 2>/dev/null || true
