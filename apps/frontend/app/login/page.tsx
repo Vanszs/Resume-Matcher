@@ -147,7 +147,7 @@ export default function LoginPage() {
             if (!response.ok) {
                 // Check if it's the Verification Wall trigger
                 if (response.status === 403) {
-                    const errData = await response.json();
+                    const errData = await response.json().catch(() => ({}));
                     if (errData.detail === 'EMAIL_NOT_VERIFIED') {
                         // Backend sends the user_id in headers to use for verification
                         const userId = response.headers.get('X-User-Id');
@@ -160,7 +160,7 @@ export default function LoginPage() {
                     throw new Error(errData.detail || 'Authentication failed.');
                 }
 
-                const errData = await response.json();
+                const errData = await response.json().catch(() => ({}));
                 throw new Error(errData.detail || (mode === 'login' ? 'Login failed.' : 'Registration failed.'));
             }
 
@@ -345,40 +345,27 @@ export default function LoginPage() {
     }
 
     return (
-        <div
-            className="bg-[#F0F0E8] text-[#101922] font-sans min-h-screen flex flex-col items-center justify-center p-4 relative"
-            style={{
-                backgroundImage: 'radial-gradient(#101922 1px, transparent 1px)',
-                backgroundSize: '24px 24px',
-                backgroundPosition: '-11px -11px',
-            }}
-        >
+        <div className="bg-[#FDFBF7] text-[#101922] font-sans h-screen flex flex-col overflow-hidden">
             {EasterEggModal}
 
-            {/* Back to Home Link */}
-            <div className="absolute top-6 left-6 md:top-8 md:left-8 z-10 bg-white border-2 border-[#101922] px-3 py-2 shadow-[2px_2px_0px_0px_#101922] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+            {/* Header / Logo Area */}
+            <header className="flex p-6 md:p-10 justify-between items-center border-b-2 border-[#101922]/10 shrink-0">
+                <Link href="/" className="flex items-center gap-2 select-none">
+                    <span className="text-[#1D4ED8] text-3xl font-bold">✦</span>
+                    <h1 className="text-xl font-extrabold tracking-tight uppercase">Resume Matcher</h1>
+                </Link>
                 <Link
                     href="/"
-                    className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase transition-transform"
+                    className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase hover:underline"
                 >
                     <span>←</span>
                     Back to Home
                 </Link>
-            </div>
+            </header>
 
-            {/* Auth Form Container */}
-            <div className="w-full max-w-md bg-[#FDFBF7] border-4 border-[#101922] shadow-[8px_8px_0px_0px_#101922] flex flex-col relative my-12 z-10">
-
-                {/* Header / Logo Area */}
-                <header className="p-6 md:p-8 flex justify-center items-center border-b-4 border-[#101922] bg-[#FF5C00] text-[#101922]">
-                    <Link href="/" className="flex items-center gap-2 select-none hover:scale-105 transition-transform">
-                        <span className="text-[#101922] text-3xl font-bold">✦</span>
-                        <h1 className="text-xl font-black tracking-tight uppercase">Resume Matcher</h1>
-                    </Link>
-                </header>
-
-                {/* Main Form Content */}
-                <main className="flex flex-col justify-center px-6 py-8 sm:px-10 w-full mb-2 bg-[#FDFBF7]">
+            {/* Main Form Content */}
+            <main className="flex-1 flex flex-col justify-center px-6 py-4 md:py-6 overflow-y-auto">
+                <div className="max-w-lg mx-auto w-full">
                     {/* Header */}
                     <div className="mb-4 md:mb-6">
                         <h2 className="font-serif text-4xl md:text-5xl font-normal text-[#101922] mb-2 tracking-tight">
@@ -386,7 +373,7 @@ export default function LoginPage() {
                         </h2>
                         <p className="text-[#101922]/60 font-medium text-base">
                             {verificationMode
-                                ? `We’ve sent a 6-digit verification code to ${email || 'your email'}.`
+                                ? `We've sent a 6-digit verification code to ${email || 'your email'}.`
                                 : (isRegister
                                     ? 'Create an account to get started with Resume Matcher.'
                                     : 'Enter your credentials to access your dashboard.')}
@@ -416,12 +403,6 @@ export default function LoginPage() {
                             >
                                 REGISTER
                             </button>
-                            <Link
-                                href="/"
-                                className="md:hidden ml-auto inline-flex items-center gap-1 font-mono text-xs font-bold uppercase hover:underline text-[#101922] pb-3"
-                            >
-                                <span>←</span>
-                            </Link>
                         </div>
                     )}
 
@@ -581,8 +562,8 @@ export default function LoginPage() {
                             </button>
                         </form>
                     )}
-                </main>
-            </div>
+                </div>
+            </main>
         </div>
     );
 }
