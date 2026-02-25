@@ -524,9 +524,8 @@ export default function AdminPage() {
                                                                 <span className="inline-flex items-center gap-1.5">
                                                                     {user.email}
                                                                     {user.is_verified && (
-                                                                        <span title="Email verified" className="inline-flex items-center gap-0.5 bg-[#15803D] text-white font-sans text-[10px] font-semibold px-1.5 py-0.5 border border-[#15803D] leading-none">
+                                                                        <span title="Email verified" className="inline-flex items-center justify-center bg-[#15803D] text-white w-4 h-4 border border-[#15803D]">
                                                                             <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                                                                            VERIFIED
                                                                         </span>
                                                                     )}
                                                                 </span>
