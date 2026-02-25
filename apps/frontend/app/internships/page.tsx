@@ -122,14 +122,20 @@ function parseGitHubMarkdown(html: string, source: Internship['source']): Intern
                 });
             }
         } else {
-            // Non-table part — look for section headings
-            const headingMatch = part.match(/<h[23][^>]*>(.*?)<\/h[23]>/i);
-            if (headingMatch) {
-                const headingText = stripTags(headingMatch[1]);
-                // Filter to meaningful section names
-                if (headingText && !headingText.includes('😫') && !headingText.includes('😮')) {
-                    currentSection = headingText
-                        .replace(/^[^\w]+/, '')  // strip leading emoji
+            // Non-table part — look for section headings.
+            // Raw GitHub markdown uses ## headings (not <h2> tags), so check both.
+            const htmlHeading = part.match(/<h[23][^>]*>(.*?)<\/h[23]>/i);
+            const mdHeading = part.match(/^#{1,3}\s+(.+)$/m);
+            const rawHeading = htmlHeading ? stripTags(htmlHeading[1]) : mdHeading ? mdHeading[1].trim() : null;
+            if (rawHeading) {
+                // Skip meta headings like "Browse N Roles" or emoji-only noise
+                const skipRx = /Browse\s+\d+|😫|😮|^The List/i;
+                if (!skipRx.test(rawHeading)) {
+                    currentSection = rawHeading
+                        // Strip trailing " Internship Roles" / " Internship Role"
+                        .replace(/\s+Internship Roles?$/i, '')
+                        // Strip trailing count like " (478)"
+                        .replace(/\s*\(\d+\)$/, '')
                         .trim();
                 }
             }

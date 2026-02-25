@@ -21,44 +21,66 @@ function getUniqueSections(items: Internship[]): string[] {
     return Array.from(seen).sort();
 }
 
+function getSectionCounts(items: Internship[]): Record<string, number> {
+    const counts: Record<string, number> = {};
+    items.forEach((i) => {
+        if (i.section) counts[i.section] = (counts[i.section] ?? 0) + 1;
+    });
+    return counts;
+}
+
+type FilterSource = 'active' | 'off-season' | 'inactive' | 'all';
+
+const SOURCE_POOL: Record<FilterSource, Internship['source'][]> = {
+    active:      ['active'],
+    'off-season': ['off-season'],
+    inactive:    ['inactive'],
+    all:         ['active', 'off-season', 'inactive'],
+};
+
 export default function InternshipListClient({ active, offSeason, inactive, fetchedAt }: Props) {
     const [search, setSearch] = useState('');
-    const [filterSource, setFilterSource] = useState<'all' | 'active' | 'off-season'>('all');
+    const [filterSource, setFilterSource] = useState<FilterSource>('active');
     const [filterSection, setFilterSection] = useState<string>('all');
-    const [showInactive, setShowInactive] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
 
     const allInternships = useMemo(
-        () => (showInactive ? [...active, ...offSeason, ...inactive] : [...active, ...offSeason]),
-        [active, offSeason, inactive, showInactive]
+        () => [...active, ...offSeason, ...inactive],
+        [active, offSeason, inactive]
     );
 
-    const sections = useMemo(() => getUniqueSections(allInternships), [allInternships]);
+    // Pool visible based on source tab
+    const poolBySource = useMemo(() => {
+        const allowed = SOURCE_POOL[filterSource];
+        return allInternships.filter((i) => allowed.includes(i.source));
+    }, [allInternships, filterSource]);
+
+    const sections = useMemo(() => getUniqueSections(poolBySource), [poolBySource]);
+    const sectionCounts = useMemo(() => getSectionCounts(poolBySource), [poolBySource]);
 
     const filtered = useMemo(() => {
         const q = search.toLowerCase();
-        return allInternships.filter((item) => {
+        return poolBySource.filter((item) => {
             if (q && !item.company.toLowerCase().includes(q) && !item.role.toLowerCase().includes(q) && !item.location.toLowerCase().includes(q))
                 return false;
-            if (filterSource !== 'all' && item.source !== filterSource) return false;
             if (filterSection !== 'all' && item.section !== filterSection) return false;
             return true;
         });
-    }, [allInternships, search, filterSource, filterSection]);
+    }, [poolBySource, search, filterSection]);
 
     const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
     const safePage = Math.min(currentPage, totalPages);
     const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
     function handleSearch(val: string) { setSearch(val); setCurrentPage(1); }
-    function handleFilterSource(val: typeof filterSource) { setFilterSource(val); setCurrentPage(1); }
+    function handleFilterSource(val: FilterSource) { setFilterSource(val); setFilterSection('all'); setCurrentPage(1); }
     function handleFilterSection(val: string) { setFilterSection(val); setCurrentPage(1); }
-    function handleToggleInactive() { setShowInactive((v) => !v); setCurrentPage(1); }
 
-    const sourceFilters: { id: typeof filterSource; label: string }[] = [
-        { id: 'all', label: 'All' },
-        { id: 'active', label: 'Active' },
-        { id: 'off-season', label: 'Off-Season' },
+    const sourceFilters: { id: FilterSource; label: string; count: number; color: string }[] = [
+        { id: 'active',      label: 'Active',      count: active.length,     color: 'bg-[#15803D] text-white border-[#15803D]' },
+        { id: 'off-season',  label: 'Off-Season',  count: offSeason.length,  color: 'bg-[#1D4ED8] text-white border-[#1D4ED8]' },
+        { id: 'inactive',    label: 'Inactive',    count: inactive.length,   color: 'bg-gray-500 text-white border-gray-500' },
+        { id: 'all',         label: 'All',         count: allInternships.length, color: 'bg-black text-white border-black' },
     ];
 
     return (
@@ -118,43 +140,53 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3">
-                            {/* Source filter segmented control */}
+                            {/* Source tabs with counts */}
                             <div className="flex border border-black overflow-hidden">
                                 {sourceFilters.map((f) => (
                                     <button
                                         key={f.id}
                                         type="button"
                                         onClick={() => handleFilterSource(f.id)}
-                                        className={`px-3 py-1.5 font-mono text-xs uppercase border-r last:border-r-0 border-black transition-colors ${filterSource === f.id ? 'bg-black text-white' : 'bg-white hover:bg-[#F0F0E8]'}`}
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-xs uppercase border-r last:border-r-0 border-black transition-colors ${
+                                            filterSource === f.id
+                                                ? f.color
+                                                : 'bg-white hover:bg-[#F0F0E8] text-black'
+                                        }`}
                                     >
                                         {f.label}
+                                        <span className={`font-mono text-[10px] px-1 border ${
+                                            filterSource === f.id ? 'border-white/40 bg-white/20' : 'border-black/20 bg-black/5'
+                                        }`}>
+                                            {f.count}
+                                        </span>
                                     </button>
                                 ))}
                             </div>
 
-                            {/* Category dropdown — values come directly from scraped sections */}
-                            <select
-                                value={filterSection}
-                                onChange={(e) => handleFilterSection(e.target.value)}
-                                className="h-8 px-2 border border-black bg-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-600"
-                            >
-                                <option value="all">All Categories</option>
+                            {/* Category pill buttons — populated from real section names */}
+                            <div className="flex flex-wrap gap-1.5">
+                                <button
+                                    type="button"
+                                    onClick={() => handleFilterSection('all')}
+                                    className={`px-3 py-1 border border-black font-mono text-xs uppercase transition-colors ${
+                                        filterSection === 'all' ? 'bg-black text-white' : 'bg-white hover:bg-[#F0F0E8]'
+                                    }`}
+                                >
+                                    All ({poolBySource.length})
+                                </button>
                                 {sections.map((s) => (
-                                    <option key={s} value={s}>{s}</option>
+                                    <button
+                                        key={s}
+                                        type="button"
+                                        onClick={() => handleFilterSection(s)}
+                                        className={`px-3 py-1 border border-black font-mono text-xs uppercase transition-colors ${
+                                            filterSection === s ? 'bg-black text-white' : 'bg-white hover:bg-[#F0F0E8]'
+                                        }`}
+                                    >
+                                        {s} ({sectionCounts[s] ?? 0})
+                                    </button>
                                 ))}
-                            </select>
-
-                            {/* Show inactive toggle button */}
-                            <button
-                                type="button"
-                                onClick={handleToggleInactive}
-                                className={`flex items-center gap-2 px-3 py-1.5 border border-black font-mono text-xs uppercase transition-colors ${showInactive ? 'bg-[#F97316] text-white shadow-[2px_2px_0px_0px_#000000]' : 'bg-white hover:bg-[#F0F0E8]'}`}
-                            >
-                                <span className="w-3 h-3 border border-current flex items-center justify-center shrink-0">
-                                    {showInactive && <span className="w-1.5 h-1.5 bg-white block" />}
-                                </span>
-                                Show Closed
-                            </button>
+                            </div>
                         </div>
                     </div>
 
@@ -193,7 +225,15 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                                     paged.map((item, idx) => (
                                         <tr
                                             key={`${item.company}-${item.role}-${idx}`}
-                                            className={`border-b border-black/10 transition-colors ${item.isSubRole ? 'bg-gray-50/60' : 'hover:bg-[#F5F5ED]'} ${item.isClosed ? 'opacity-50' : ''}`}
+                                            className={`border-b transition-colors ${
+                                                item.source === 'inactive'
+                                                    ? 'border-black/5 bg-gray-100 opacity-45 hover:opacity-80'
+                                                    : item.isClosed
+                                                        ? 'border-black/5 opacity-50 hover:opacity-75'
+                                                        : item.isSubRole
+                                                            ? 'border-black/10 bg-gray-50/60'
+                                                            : 'border-black/10 hover:bg-[#F5F5ED]'
+                                            }`}
                                         >
                                             {/* Company */}
                                             <td className="p-3">
@@ -214,6 +254,11 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                                                     {item.isClosed && (
                                                         <span className="inline-flex items-center gap-0.5 bg-red-50 text-red-700 text-[9px] px-1 py-0.5 font-mono uppercase font-bold border border-red-300">
                                                             <ShieldAlert className="w-2.5 h-2.5" /> Closed
+                                                        </span>
+                                                    )}
+                                                    {item.source === 'inactive' && (
+                                                        <span className="inline-flex items-center bg-gray-100 text-gray-500 text-[9px] px-1 py-0.5 font-mono uppercase font-bold border border-gray-300">
+                                                            Inactive
                                                         </span>
                                                     )}
                                                     {item.source === 'off-season' && (
