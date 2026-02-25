@@ -47,6 +47,7 @@ class UserResponse(BaseModel):
     email: str
     username: str
     is_active: bool
+    is_verified: bool
     role_name: str
     created_at: str
 
@@ -124,6 +125,7 @@ async def create_user(request: CreateUserRequest, admin=Depends(get_current_admi
             email=user.email,
             username=user.username,
             is_active=user.isActive,
+            is_verified=user.isVerified,
             role_name=user.role.name if user.role else "unknown",
             created_at=user.createdAt.isoformat(),
         )
@@ -145,6 +147,7 @@ async def list_users() -> list[UserResponse]:
                 email=u.email,
                 username=u.username,
                 is_active=u.isActive,
+                is_verified=u.isVerified,
                 role_name=u.role.name if u.role else "unknown",
                 created_at=u.createdAt.isoformat(),
             )
@@ -350,6 +353,7 @@ async def change_user_role(
             email=updated.email,
             username=updated.username,
             is_active=updated.isActive,
+            is_verified=updated.isVerified,
             role_name=updated.role.name if updated.role else new_role.name,
             created_at=updated.createdAt,
         )

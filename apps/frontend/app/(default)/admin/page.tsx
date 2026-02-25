@@ -27,6 +27,7 @@ type UserEntry = {
     email: string;
     username: string;
     is_active: boolean;
+    is_verified: boolean;
     role_name: string;
     created_at: string;
 };
@@ -519,7 +520,17 @@ export default function AdminPage() {
                                                             key={user.id}
                                                             className="border-b border-black/10 hover:bg-[#F5F5ED] transition-colors"
                                                         >
-                                                            <td className="p-3 font-mono text-sm">{user.email}</td>
+                                                            <td className="p-3 font-mono text-sm">
+                                                                <span className="inline-flex items-center gap-1.5">
+                                                                    {user.email}
+                                                                    {user.is_verified && (
+                                                                        <span title="Email verified" className="inline-flex items-center gap-0.5 bg-[#15803D] text-white font-sans text-[10px] font-semibold px-1.5 py-0.5 border border-[#15803D] leading-none">
+                                                                            <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                                            VERIFIED
+                                                                        </span>
+                                                                    )}
+                                                                </span>
+                                                            </td>
                                                             <td className="p-3 font-mono text-sm text-gray-600">{user.username}</td>
                                                             <td className="p-3">
                                                                 <div className="relative flex items-center gap-1">
