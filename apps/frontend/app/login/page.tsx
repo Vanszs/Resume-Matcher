@@ -345,92 +345,40 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="bg-[#FDFBF7] text-[#101922] font-sans h-screen flex flex-col md:flex-row overflow-hidden">
+        <div
+            className="bg-[#F0F0E8] text-[#101922] font-sans min-h-screen flex flex-col items-center justify-center p-4 relative"
+            style={{
+                backgroundImage: 'radial-gradient(#101922 1px, transparent 1px)',
+                backgroundSize: '24px 24px',
+                backgroundPosition: '-11px -11px',
+            }}
+        >
             {EasterEggModal}
-            {/* Left Panel: Artistic Collage */}
-            <div className="relative hidden md:flex w-1/2 flex-col justify-between border-r-4 border-[#101922] bg-[#FF5C00] p-8 lg:p-12 overflow-hidden h-screen">
-                {/* Abstract Shapes / Collage Elements */}
-                <div
-                    className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none"
-                    style={{
-                        backgroundImage: 'radial-gradient(#000 1px, transparent 1px)',
-                        backgroundSize: '20px 20px'
-                    }}
-                />
 
-                <div className="relative z-10 flex flex-col h-full justify-center items-center">
-                    {/* Collage Container */}
-                    <div className="relative w-[450px] h-[550px] border-4 border-[#101922] bg-[#FDFBF7] shadow-[6px_6px_0px_0px_#101922] rotate-[-2deg] overflow-hidden">
-                        {/* Image */}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src="/portrait-person-with-collage-technique-color-blocking%20(1).webp"
-                            alt="Resume Matcher Hero"
-                            className="absolute inset-0 w-full h-full object-cover"
-                            onError={(e) => {
-                                // Fallback gradient if image fails to load
-                                e.currentTarget.style.display = 'none';
-                                e.currentTarget.parentElement!.style.background = 'linear-gradient(135deg, #FF5C00 0%, #1D4ED8 100%)';
-                            }}
-                        />
-
-                        {/* Decorative elements overlay */}
-                        <div className="absolute -top-12 -right-12 w-24 h-24 bg-[#1D4ED8] rounded-full border-4 border-[#101922] z-20" />
-                        <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-yellow-400 border-4 border-[#101922] z-20 flex items-center justify-center">
-                            {/* Target/Search Icon */}
-                            <svg className="w-12 h-12 text-[#101922]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="9" />
-                                <circle cx="12" cy="12" r="3" fill="currentColor" />
-                                <line x1="12" y1="3" x2="12" y2="9" />
-                                <line x1="12" y1="15" x2="12" y2="21" />
-                                <line x1="3" y1="12" x2="9" y2="12" />
-                                <line x1="15" y1="12" x2="21" y2="12" />
-                            </svg>
-                        </div>
-
-                        {/* Sticker */}
-                        <div className="absolute top-4 right-4 bg-white border-2 border-[#101922] px-2 py-1 rotate-12 shadow-[2px_2px_0px_0px_#101922]">
-                            <p className="font-mono text-xs font-bold uppercase tracking-tighter">Verified</p>
-                        </div>
-                    </div>
-
-                    <div className="mt-16 text-center max-w-md">
-                        <h2 className="font-serif text-4xl font-bold leading-tight mb-4 text-[#101922]">
-                            Find your path.
-                        </h2>
-                        <p className="font-mono text-sm font-medium border-l-4 border-[#101922] pl-4 text-left ml-8 bg-white/50 p-2">
-                            Connect with opportunities that define your future. Join the network of professionals building the new web.
-                        </p>
-                    </div>
-                </div>
-
-                {/* Decorative corner */}
-                <div className="absolute bottom-8 left-8">
-                    <svg className="text-[#101922]" fill="none" height="64" viewBox="0 0 64 64" width="64" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M32 0V64M0 32H64" stroke="currentColor" strokeWidth="4" />
-                    </svg>
-                </div>
+            {/* Back to Home Link */}
+            <div className="absolute top-6 left-6 md:top-8 md:left-8 z-10 bg-white border-2 border-[#101922] px-3 py-2 shadow-[2px_2px_0px_0px_#101922] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+                <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase transition-transform"
+                >
+                    <span>←</span>
+                    Back to Home
+                </Link>
             </div>
 
-            {/* Right Panel: Auth Form */}
-            <div className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden bg-[#FDFBF7] relative">
+            {/* Auth Form Container */}
+            <div className="w-full max-w-md bg-[#FDFBF7] border-4 border-[#101922] shadow-[8px_8px_0px_0px_#101922] flex flex-col relative my-12 z-10">
+
                 {/* Header / Logo Area */}
-                <header className="hidden md:flex p-6 md:p-10 justify-between items-center border-b-2 border-[#101922]/10">
-                    <Link href="/" className="flex items-center gap-2 select-none">
-                        <span className="text-[#1D4ED8] text-3xl font-bold">✦</span>
-                        <h1 className="text-xl font-extrabold tracking-tight uppercase">Resume Matcher</h1>
-                    </Link>
-                    <Link
-                        href="/"
-                        className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase hover:underline"
-                    >
-                        <span>←</span>
-                        Back to Home
+                <header className="p-6 md:p-8 flex justify-center items-center border-b-4 border-[#101922] bg-[#FF5C00] text-[#101922]">
+                    <Link href="/" className="flex items-center gap-2 select-none hover:scale-105 transition-transform">
+                        <span className="text-[#101922] text-3xl font-bold">✦</span>
+                        <h1 className="text-xl font-black tracking-tight uppercase">Resume Matcher</h1>
                     </Link>
                 </header>
 
                 {/* Main Form Content */}
-                <main className="flex-1 flex flex-col justify-center px-6 py-4 md:py-6 sm:px-12 lg:px-20 max-w-2xl mx-auto w-full">
+                <main className="flex flex-col justify-center px-6 py-8 sm:px-10 w-full mb-2 bg-[#FDFBF7]">
                     {/* Header */}
                     <div className="mb-4 md:mb-6">
                         <h2 className="font-serif text-4xl md:text-5xl font-normal text-[#101922] mb-2 tracking-tight">
