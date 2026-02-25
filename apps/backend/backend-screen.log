@@ -1,7 +1,8 @@
-INFO:     Started server process [288544]
+INFO:     Started server process [290095]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     172.71.131.153:0 - "GET /api/v1/auth/register-status HTTP/1.1" 200 OK
-INFO:     162.158.193.6:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/pdf?template=swiss-single&pageSize=A4&marginTop=10&marginBottom=10&marginLeft=10&marginRight=10&sectionSpacing=3&itemSpacing=2&lineHeight=3&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=true&showContactIcons=true&accentColor=blue&lang=en HTTP/1.1" 503 Service Unavailable
-INFO:     172.71.232.44:0 - "GET /api/v1/internships HTTP/1.1" 200 OK
+INFO:     172.71.8.35:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     141.101.68.120:0 - "GET /api/v1/resumes?resume_id=3370268d-9f1f-4154-b640-f72ece78696b HTTP/1.1" 200 OK
+INFO:     172.69.63.116:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/pdf?template=swiss-single&pageSize=A4&marginTop=10&marginBottom=10&marginLeft=10&marginRight=10&sectionSpacing=3&itemSpacing=2&lineHeight=3&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=true&showContactIcons=true&accentColor=blue&lang=en HTTP/1.1" 200 OK
+INFO:     172.71.246.177:0 - "GET /api/v1/internships HTTP/1.1" 200 OK

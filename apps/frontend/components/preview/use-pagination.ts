@@ -52,7 +52,12 @@ export function usePagination({
     // Wait for fonts to load before measuring
     document.fonts.ready.then(() => {
       const contentArea = getContentAreaPx(pageSize, margins);
-      const pageHeight = contentArea.height;
+      // Subtract a 2px safety buffer to account for subpixel font-rendering
+      // differences between screen and Playwright's headless PDF mode.
+      // Without this, content that exactly fills 1 page in the browser can
+      // overflow by a few pixels in the PDF, producing a near-empty second page.
+      const SAFETY_BUFFER_PX = 2;
+      const pageHeight = contentArea.height - SAFETY_BUFFER_PX;
       const contentHeight = container.scrollHeight;
 
       setTotalContentHeight(contentHeight);

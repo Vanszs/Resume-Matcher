@@ -9,6 +9,7 @@ import {
   type AccentColor,
   DEFAULT_TEMPLATE_SETTINGS,
 } from '@/lib/types/template-settings';
+import { PAGE_DIMENSIONS } from '@/lib/constants/page-dimensions';
 import { API_BASE } from '@/lib/api/client';
 import { translate } from '@/lib/i18n/server';
 import { resolveLocale } from '@/lib/i18n/locale';
@@ -246,8 +247,20 @@ export default async function PrintResumePage({ params, searchParams }: PageProp
     margins: { top: 0, bottom: 0, left: 0, right: 0 },
   };
 
+  // Constrain print page width to match the preview measurement container width.
+  // Without this the resume renders at full page width (~793px for A4) in the
+  // PDF, while the preview measures at content-area width (~718px). The layout
+  // difference causes slight height discrepancies that make a 1-page preview
+  // produce a 2-page PDF.
+  const pageDims = PAGE_DIMENSIONS[settings.pageSize];
+  const contentWidthMm =
+    pageDims.width - settings.margins.left - settings.margins.right;
+
   return (
-    <div className="resume-print bg-white">
+    <div
+      className="resume-print bg-white mx-auto"
+      style={{ width: `${contentWidthMm}mm` }}
+    >
       <Resume
         resumeData={localizedResumeData}
         template={settings.template}
