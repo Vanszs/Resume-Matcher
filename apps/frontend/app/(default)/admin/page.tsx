@@ -57,6 +57,10 @@ export default function AdminPage() {
     const [currentAdminId, setCurrentAdminId] = useState<string | null>(null);
     const [changingRoleUserId, setChangingRoleUserId] = useState<string | null>(null);
 
+    // Pagination
+    const USERS_PER_PAGE = 10;
+    const [currentPage, setCurrentPage] = useState(1);
+
     // App settings
     const [registerEnabled, setRegisterEnabled] = useState(false);
     const [togglingRegister, setTogglingRegister] = useState(false);
@@ -93,6 +97,7 @@ export default function AdminPage() {
             const rolesData = await rolesRes.json();
 
             setUsers(usersData);
+            setCurrentPage(1); // reset to first page on reload
             setRoles(rolesData);
             if (rolesData.length > 0 && !newRoleId) {
                 setNewRoleId(rolesData[0].id);
@@ -289,8 +294,8 @@ export default function AdminPage() {
                     {feedback && (
                         <div
                             className={`p-3 border-2 font-mono text-sm flex items-center gap-2 ${feedback.type === 'success'
-                                    ? 'border-green-500 bg-green-50 text-green-700'
-                                    : 'border-red-500 bg-red-50 text-red-700'
+                                ? 'border-green-500 bg-green-50 text-green-700'
+                                : 'border-red-500 bg-red-50 text-red-700'
                                 }`}
                         >
                             {feedback.type === 'success' ? (
@@ -503,97 +508,147 @@ export default function AdminPage() {
                                                     </td>
                                                 </tr>
                                             ) : (
-                                                users.map((user) => (
-                                                    <tr
-                                                        key={user.id}
-                                                        className="border-b border-black/10 hover:bg-[#F5F5ED] transition-colors"
-                                                    >
-                                                        <td className="p-3 font-mono text-sm">{user.email}</td>
-                                                        <td className="p-3 font-mono text-sm text-gray-600">{user.username}</td>
-                                                        <td className="p-3">
-                                                            <div className="relative flex items-center gap-1">
-                                                                <select
-                                                                    value={roles.find((r) => r.name === user.role_name)?.id ?? roles[0]?.id ?? ''}
-                                                                    onChange={(e) => handleChangeRole(user.id, e.target.value)}
-                                                                    disabled={user.id === currentAdminId || changingRoleUserId === user.id || roles.length === 0}
-                                                                    title={user.id === currentAdminId ? 'Cannot change your own role' : 'Change role'}
-                                                                    className="h-7 pl-2 pr-6 border border-black bg-blue-50 text-blue-800 font-mono text-xs uppercase focus:outline-none focus:ring-2 focus:ring-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                >
-                                                                    {roles.map((role) => (
-                                                                        <option key={role.id} value={role.id}>
-                                                                            {role.name.toUpperCase()}
-                                                                        </option>
-                                                                    ))}
-                                                                </select>
-                                                                {changingRoleUserId === user.id && (
-                                                                    <Loader2 className="w-3 h-3 animate-spin text-blue-600 shrink-0" />
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                        <td className="p-3">
-                                                            <span
-                                                                className={`inline-flex items-center gap-1 px-2 py-0.5 border font-mono text-xs uppercase ${user.is_active
+                                                (() => {
+                                                    const totalPages = Math.ceil(users.length / USERS_PER_PAGE);
+                                                    const pagedUsers = users.slice(
+                                                        (currentPage - 1) * USERS_PER_PAGE,
+                                                        currentPage * USERS_PER_PAGE
+                                                    );
+                                                    return pagedUsers.map((user) => (
+                                                        <tr
+                                                            key={user.id}
+                                                            className="border-b border-black/10 hover:bg-[#F5F5ED] transition-colors"
+                                                        >
+                                                            <td className="p-3 font-mono text-sm">{user.email}</td>
+                                                            <td className="p-3 font-mono text-sm text-gray-600">{user.username}</td>
+                                                            <td className="p-3">
+                                                                <div className="relative flex items-center gap-1">
+                                                                    <select
+                                                                        value={roles.find((r) => r.name === user.role_name)?.id ?? roles[0]?.id ?? ''}
+                                                                        onChange={(e) => handleChangeRole(user.id, e.target.value)}
+                                                                        disabled={user.id === currentAdminId || changingRoleUserId === user.id || roles.length === 0}
+                                                                        title={user.id === currentAdminId ? 'Cannot change your own role' : 'Change role'}
+                                                                        className="h-7 pl-2 pr-6 border border-black bg-blue-50 text-blue-800 font-mono text-xs uppercase focus:outline-none focus:ring-2 focus:ring-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                    >
+                                                                        {roles.map((role) => (
+                                                                            <option key={role.id} value={role.id}>
+                                                                                {role.name.toUpperCase()}
+                                                                            </option>
+                                                                        ))}
+                                                                    </select>
+                                                                    {changingRoleUserId === user.id && (
+                                                                        <Loader2 className="w-3 h-3 animate-spin text-blue-600 shrink-0" />
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                            <td className="p-3">
+                                                                <span
+                                                                    className={`inline-flex items-center gap-1 px-2 py-0.5 border font-mono text-xs uppercase ${user.is_active
                                                                         ? 'border-green-500 bg-green-50 text-green-700'
                                                                         : 'border-red-500 bg-red-50 text-red-700'
-                                                                    }`}
-                                                            >
-                                                                {user.is_active ? (
-                                                                    <CheckCircle2 className="w-3 h-3" />
-                                                                ) : (
-                                                                    <XCircle className="w-3 h-3" />
-                                                                )}
-                                                                {user.is_active ? 'Active' : 'Disabled'}
-                                                            </span>
-                                                        </td>
-                                                        <td className="p-3 text-right">
-                                                            <div className="flex items-center justify-end gap-1">
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    onClick={() => handleToggleActive(user.id)}
-                                                                    title={user.is_active ? 'Disable user' : 'Enable user'}
-                                                                    disabled={userActionId === user.id}
+                                                                        }`}
                                                                 >
-                                                                    {userActionId === user.id && userActionType === 'toggle' ? (
-                                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                                    ) : user.is_active ? (
-                                                                        <ToggleRight className="w-4 h-4 text-green-600" />
+                                                                    {user.is_active ? (
+                                                                        <CheckCircle2 className="w-3 h-3" />
                                                                     ) : (
-                                                                        <ToggleLeft className="w-4 h-4 text-gray-400" />
+                                                                        <XCircle className="w-3 h-3" />
                                                                     )}
-                                                                </Button>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="icon"
-                                                                    onClick={() => handleDeleteUser(user.id, user.email)}
-                                                                    title={
-                                                                        user.id === currentAdminId
-                                                                            ? 'Cannot delete your own account'
-                                                                            : user.role_name === 'admin' && users.filter((u) => u.role_name === 'admin').length <= 1
-                                                                            ? 'Cannot delete the last admin'
-                                                                            : 'Delete user'
-                                                                    }
-                                                                    className="hover:bg-red-100 text-red-600"
-                                                                    disabled={
-                                                                        userActionId === user.id ||
-                                                                        user.id === currentAdminId ||
-                                                                        (user.role_name === 'admin' && users.filter((u) => u.role_name === 'admin').length <= 1)
-                                                                    }
-                                                                >
-                                                                    {userActionId === user.id && userActionType === 'delete' ? (
-                                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                                    ) : (
-                                                                        <Trash2 className="w-4 h-4" />
-                                                                    )}
-                                                                </Button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))
+                                                                    {user.is_active ? 'Active' : 'Disabled'}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-3 text-right">
+                                                                <div className="flex items-center justify-end gap-1">
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => handleToggleActive(user.id)}
+                                                                        title={user.is_active ? 'Disable user' : 'Enable user'}
+                                                                        disabled={userActionId === user.id}
+                                                                    >
+                                                                        {userActionId === user.id && userActionType === 'toggle' ? (
+                                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                                        ) : user.is_active ? (
+                                                                            <ToggleRight className="w-4 h-4 text-green-600" />
+                                                                        ) : (
+                                                                            <ToggleLeft className="w-4 h-4 text-gray-400" />
+                                                                        )}
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => handleDeleteUser(user.id, user.email)}
+                                                                        title={
+                                                                            user.id === currentAdminId
+                                                                                ? 'Cannot delete your own account'
+                                                                                : user.role_name === 'admin' && users.filter((u) => u.role_name === 'admin').length <= 1
+                                                                                    ? 'Cannot delete the last admin'
+                                                                                    : 'Delete user'
+                                                                        }
+                                                                        className="hover:bg-red-100 text-red-600"
+                                                                        disabled={
+                                                                            userActionId === user.id ||
+                                                                            user.id === currentAdminId ||
+                                                                            (user.role_name === 'admin' && users.filter((u) => u.role_name === 'admin').length <= 1)
+                                                                        }
+                                                                    >
+                                                                        {userActionId === user.id && userActionType === 'delete' ? (
+                                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                                        ) : (
+                                                                            <Trash2 className="w-4 h-4" />
+                                                                        )}
+                                                                    </Button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ));
+                                                })()
                                             )}
                                         </tbody>
                                     </table>
                                 </div>
+
+                                {/* Pagination Controls */}
+                            {users.length > USERS_PER_PAGE && (() => {
+                                const totalPages = Math.ceil(users.length / USERS_PER_PAGE);
+                                return (
+                                    <div className="flex items-center justify-between border border-black bg-white px-4 py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)]">
+                                        <span className="font-mono text-xs text-gray-500 uppercase tracking-wider">
+                                            Page {currentPage} of {totalPages} &nbsp;·&nbsp; {users.length} users
+                                        </span>
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                                disabled={currentPage === 1}
+                                                className="px-3 py-1 border border-black font-mono text-xs uppercase bg-white hover:bg-[#F0F0E8] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                                ← Prev
+                                            </button>
+                                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                                <button
+                                                    key={page}
+                                                    type="button"
+                                                    onClick={() => setCurrentPage(page)}
+                                                    className={`w-8 h-7 border font-mono text-xs transition-colors ${page === currentPage
+                                                        ? 'border-black bg-black text-white'
+                                                        : 'border-black bg-white hover:bg-[#F0F0E8]'
+                                                        }`}
+                                                >
+                                                    {page}
+                                                </button>
+                                            ))}
+                                            <button
+                                                type="button"
+                                                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                                disabled={currentPage === totalPages}
+                                                className="px-3 py-1 border border-black font-mono text-xs uppercase bg-white hover:bg-[#F0F0E8] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                                Next →
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                             )}
                         </section>
                     )}
