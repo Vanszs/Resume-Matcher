@@ -161,7 +161,7 @@ async def send_verification_email(email_address: str, otp_code: str) -> bool:
 
         response = resend.Emails.send({
             "from": f"Resume Matcher <{settings.resend_from_email}>",
-            "to": email_address,
+            "to": [email_address],
             "subject": f"{otp_code} is your Resume Matcher verification code",
             "html": html_content,
         })

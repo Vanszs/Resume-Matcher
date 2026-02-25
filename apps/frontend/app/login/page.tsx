@@ -169,17 +169,18 @@ export default function LoginPage() {
             }
 
             const data = await response.json();
-            storeSession(data);
 
-            // If they just registered, they STILL need to verify before accessing the dashboard
-            // The backend returns a token on register, but it's an unverified user.
-            // Let's force them to verify immediately
+            // After REGISTER: backend now returns { user_id, email, message } (no JWT).
+            // Show the Verification Wall immediately.
             if (mode === 'register') {
                 setVerificationMode(true);
                 setPendingUserId(data.user_id);
                 setError('');
                 return;
             }
+
+            // After LOGIN: store the session and redirect
+            storeSession(data);
 
             // Flush the Next.js router cache so middleware re-evaluates cookies
             router.refresh();

@@ -1,6 +1,7 @@
 """Authentication endpoints."""
 
 import logging
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -11,12 +12,14 @@ from app.dependencies import get_current_user
 from app.prisma_db import prisma
 from app.schemas.auth import (
     LoginRequest,
+    RegisterResponse,
     TokenResponse,
     UserResponse,
     VerifyEmailRequest,
     ResendVerifyRequest,
 )
 from app.services.auth import create_access_token, get_password_hash, verify_password
+from app.services.email import create_verification_token, send_verification_email
 from app.config import load_config_file
 
 logger = logging.getLogger(__name__)
@@ -41,6 +44,7 @@ async def get_current_user_info(
         username=user.username,
         role=user.role.name if user.role else "user",
         is_active=user.isActive,
+        is_verified=user.isVerified,
     )
 
 
@@ -51,13 +55,14 @@ async def get_register_status() -> dict:
     return {"enabled": bool(cfg.get("register_enabled", False))}
 
 
-@router.post("/auth/register", response_model=TokenResponse)
+@router.post("/auth/register", response_model=RegisterResponse)
 @limiter.limit("5/minute")
-async def register(request: Request, body: LoginRequest) -> TokenResponse:
+async def register(request: Request, body: LoginRequest) -> RegisterResponse:
     """Self-register a new account.
 
     Only works when the admin has enabled registration via the admin panel.
     New accounts are assigned the default 'user' role automatically.
+    Does NOT return an access token — users must verify their email first.
     """
     cfg = load_config_file()
     if not cfg.get("register_enabled", False):
@@ -102,28 +107,19 @@ async def register(request: Request, body: LoginRequest) -> TokenResponse:
             include={"role": True},
         )
 
-        access_token = create_access_token(
-            data={"sub": new_user.id, "email": new_user.email, "role": new_user.role.name}
-        )
-
         logger.info("New user registered: %s", new_user.email)
 
-        # Generate OTP and send email
-        from app.services.email import create_verification_token, send_verification_email
+        # Generate OTP and send email — do not block response on email failure
         otp_code = await create_verification_token(new_user.id)
-        # We don't block the response if sending email fails, just log it. 
-        # But we do await it because asyncio background tasks require router setup.
-        # Alternatively, use FastAPI BackgroundTasks for proper async non-blocking execution.
-        from fastapi import BackgroundTasks
-        # Note: Since BackgroundTasks is not in scope here, we just await it (takes ~500ms for Resend API)
-        await send_verification_email(new_user.email, otp_code)
+        email_sent = await send_verification_email(new_user.email, otp_code)
+        if not email_sent:
+            logger.warning("Registration OTP email failed to send for %s", new_user.email)
 
-        return TokenResponse(
-            access_token=access_token,
-            token_type="bearer",
+        # Return user_id only — no JWT. User must verify email before accessing the app.
+        return RegisterResponse(
             user_id=new_user.id,
             email=new_user.email,
-            role=new_user.role.name,
+            message="Account created. Please check your email for a verification code.",
         )
     except HTTPException:
         raise
@@ -177,11 +173,12 @@ async def login(request: Request, body: LoginRequest) -> TokenResponse:
 
         if not user.isVerified:
             logger.info("Unverified user attempted login: %s", body.email)
-            # We return a specific structure so the frontend knows to show the Verification Wall
+            # Return a specific detail so the frontend knows to show the Verification Wall.
+            # Pass user_id in a custom header so the frontend can call resend-verification.
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="EMAIL_NOT_VERIFIED",
-                headers={"X-User-Id": user.id} # Pass user_id for the frontend to resend OTP
+                headers={"X-User-Id": user.id},
             )
 
         if not user.role:
@@ -218,9 +215,17 @@ async def login(request: Request, body: LoginRequest) -> TokenResponse:
 @limiter.limit("10/minute")
 async def verify_email(request: Request, body: VerifyEmailRequest) -> dict:
     """Verify a user's email using a 6-digit OTP code."""
-    from datetime import datetime, timezone
 
-    # Complete token retrieval and checking
+    # Validate the user exists and is not already verified
+    user = await prisma.user.find_unique(where={"id": body.user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if not user.isActive:
+        raise HTTPException(status_code=403, detail="User account is disabled.")
+    if user.isVerified:
+        return {"message": "Email is already verified."}
+
+    # Retrieve matching token
     token_record = await prisma.verificationtoken.find_first(
         where={
             "userId": body.user_id,
@@ -241,7 +246,7 @@ async def verify_email(request: Request, body: VerifyEmailRequest) -> dict:
         )
         raise HTTPException(status_code=400, detail="Verification code expired. Please request a new one.")
 
-    # Success! Mark user as verified and revoke the token
+    # Success! Mark user as verified and revoke the token atomically
     await prisma.user.update(
         where={"id": body.user_id},
         data={"isVerified": True},
@@ -258,26 +263,27 @@ async def verify_email(request: Request, body: VerifyEmailRequest) -> dict:
 @limiter.limit("3/minute")
 async def resend_verification(request: Request, body: ResendVerifyRequest) -> dict:
     """Resend a 6-digit OTP code to the user's email."""
-    # Find the user
     user = await prisma.user.find_unique(where={"id": body.user_id})
-    
+
     if not user:
-        # We don't want to leak if a user_id exists or not for this specific flow generally,
-        # but since user_id is a UUID, it's virtually unguessable.
         raise HTTPException(status_code=404, detail="User not found.")
-        
+
     if user.isVerified:
         raise HTTPException(status_code=400, detail="Email is already verified.")
 
-    # Generate OTP and send
-    from app.services.email import create_verification_token, send_verification_email
+    # Generate the new OTP first
     otp_code = await create_verification_token(user.id)
-    
+
+    # Attempt to send. If it fails, we still have the new OTP in the DB.
+    # The user can try resending again (rate-limited to 3/minute).
     success = await send_verification_email(user.email, otp_code)
-    
+
     if not success:
-        logger.error("Attempted to resend verification to %s but Resend API failed.", user.email)
-        raise HTTPException(status_code=500, detail="Failed to send verification email. Please try again later.")
+        logger.error("Resend verification failed for %s", user.email)
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to send verification email. Please try again later.",
+        )
 
     logger.info("Resent OTP verification email to user %s.", user.email)
     return {"message": "Verification code sent."}

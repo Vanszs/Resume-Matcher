@@ -282,6 +282,7 @@ def get_model_name(config: LLMConfig) -> str:
         "gemini": "gemini/",
         "deepseek": "deepseek/",
         "ollama": "ollama/",
+        "novita": "openai/",  # Novita uses OpenAI-compatible protocol
     }
 
     prefix = provider_prefixes.get(config.provider, "")
@@ -301,7 +302,7 @@ def get_model_name(config: LLMConfig) -> str:
         return f"openai/{config.model}"
 
     # For other providers, don't add prefix if model already has a known prefix
-    known_prefixes = ["openrouter/", "anthropic/", "gemini/", "deepseek/", "ollama/", "openai/"]
+    known_prefixes = ["openrouter/", "anthropic/", "gemini/", "deepseek/", "ollama/", "openai/", "novita/"]
     if any(config.model.startswith(p) for p in known_prefixes):
         return config.model
 
@@ -485,7 +486,7 @@ async def complete(
 def _supports_json_mode(provider: str, model: str) -> bool:
     """Check if the model supports JSON mode."""
     # Models that support response_format={"type": "json_object"}
-    json_mode_providers = ["openai", "anthropic", "gemini", "deepseek"]
+    json_mode_providers = ["openai", "anthropic", "gemini", "deepseek", "novita"]
     if provider in json_mode_providers:
         return True
     # LLM-004: OpenRouter models - use explicit allowlist instead of substring matching
