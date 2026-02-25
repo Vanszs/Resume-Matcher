@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Eye, EyeOff } from 'lucide-react';
 import { apiPost, apiFetch, API_BASE } from '@/lib/api/client';
 
 export default function LoginPage() {
@@ -24,6 +25,8 @@ export default function LoginPage() {
     const [showComingSoon, setShowComingSoon] = useState<'google' | 'metamask' | null>(null);
     const [showForgotTooltip, setShowForgotTooltip] = useState(false);
     const [showEasterEgg, setShowEasterEgg] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     // Helper function to clear all auth credentials
     const clearAuthCredentials = () => {
@@ -530,14 +533,25 @@ export default function LoginPage() {
                                         </div>
                                     )}
                                 </div>
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full h-14 bg-white border-2 border-[#101922] rounded-lg px-4 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_0px_#101922] transition-shadow"
-                                    placeholder="********"
-                                    required
-                                />
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? 'text' : 'password'}
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="w-full h-14 bg-white border-2 border-[#101922] rounded-lg px-4 pr-12 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_0px_#101922] transition-shadow"
+                                        placeholder="********"
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#101922] transition-colors p-1"
+                                        tabIndex={-1}
+                                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                    >
+                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Confirm Password Input (Register only) */}
@@ -546,14 +560,25 @@ export default function LoginPage() {
                                     <label className="font-mono text-sm font-bold uppercase tracking-wider text-[#101922]">
                                         Confirm Password
                                     </label>
-                                    <input
-                                        type="password"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        className="w-full h-14 bg-white border-2 border-[#101922] rounded-lg px-4 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_0px_#101922] transition-shadow"
-                                        placeholder="********"
-                                        required
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showConfirmPassword ? 'text' : 'password'}
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            className="w-full h-14 bg-white border-2 border-[#101922] rounded-lg px-4 pr-12 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_0px_#101922] transition-shadow"
+                                            placeholder="********"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#101922] transition-colors p-1"
+                                            tabIndex={-1}
+                                            aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                                        >
+                                            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                        </button>
+                                    </div>
                                 </div>
                             )}
 
