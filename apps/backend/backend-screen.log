@@ -1,11 +1,4 @@
-INFO:     Started server process [278668]
+INFO:     Started server process [284409]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     162.159.110.52:0 - "GET /api/v1/status HTTP/1.1" 200 OK
-INFO:     162.159.110.52:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     162.159.110.52:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     162.159.110.130:0 - "GET /api/v1/admin/users HTTP/1.1" 200 OK
-INFO:     162.159.110.131:0 - "GET /api/v1/admin/app-settings HTTP/1.1" 200 OK
-INFO:     162.159.110.131:0 - "GET /api/v1/admin/me HTTP/1.1" 200 OK
-INFO:     162.159.110.131:0 - "GET /api/v1/admin/roles HTTP/1.1" 200 OK
