@@ -181,36 +181,46 @@ async function fetchInternships(): Promise<{
     offSeason: Internship[];
     fetchedAt: string;
 }> {
-    // Call our own backend — it handles GitHub fetching, 24h caching, and key protection.
-    // INTERNSHIP_API_KEY is a server-side env var, never exposed to the browser.
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
     const internalKey = process.env.INTERNSHIP_API_KEY || '';
 
-    let activeText = '';
-    let offSeasonText = '';
-    let fetchedAt = new Date().toISOString();
-
+    // Try backend first — it returns pre-parsed structured JSON (no markdown).
     try {
         const res = await fetch(`${backendUrl}/api/v1/internships`, {
-            headers: { 'X-Internal-Key': internalKey },
+            headers: internalKey ? { 'X-Internal-Key': internalKey } : {},
             next: { revalidate: 86400 },
         });
         if (res.ok) {
             const data = await res.json();
-            activeText = data.active ?? '';
-            offSeasonText = data.off_season ?? '';
-            fetchedAt = new Date((data.fetched_at ?? 0) * 1000).toISOString();
-        } else {
-            console.error('Internship backend returned', res.status);
+            // Backend already parsed the markdown — use typed data directly.
+            return {
+                active: (data.active ?? []) as Internship[],
+                offSeason: (data.off_season ?? []) as Internship[],
+                fetchedAt: new Date((data.fetched_at ?? 0) * 1000).toISOString(),
+            };
         }
+        console.warn('Backend internship endpoint returned', res.status, '— falling back to GitHub');
     } catch (err) {
-        console.error('Internship fetch failed', err);
+        console.warn('Backend unreachable — falling back to GitHub', err);
     }
+
+    // Fallback: fetch directly from GitHub
+    const URLS = {
+        active: 'https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/refs/heads/dev/README.md',
+        offSeason: 'https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/refs/heads/dev/README-Off-Season.md',
+    };
+    const [activeRes, offSeasonRes] = await Promise.allSettled([
+        fetch(URLS.active, { next: { revalidate: 86400 } }),
+        fetch(URLS.offSeason, { next: { revalidate: 86400 } }),
+    ]);
+    const getText = async (r: PromiseSettledResult<Response>) =>
+        r.status === 'fulfilled' && r.value.ok ? r.value.text() : '';
+    const [activeText, offSeasonText] = await Promise.all([getText(activeRes), getText(offSeasonRes)]);
 
     return {
         active: parseGitHubMarkdown(activeText, 'active'),
         offSeason: parseGitHubMarkdown(offSeasonText, 'off-season'),
-        fetchedAt,
+        fetchedAt: new Date().toISOString(),
     };
 }
 

@@ -101,25 +101,43 @@ export default function InternshipListClient({ active, offSeason, fetchedAt }: P
             }}
         >
             {/* ── Navbar ── */}
-            <nav className="sticky top-0 z-50 w-full border-b border-black bg-white shadow-[0px_2px_0px_0px_#000000]">
-                <div className="max-w-6xl mx-auto px-4 sm:px-8 h-12 flex items-center justify-between gap-4">
+            <nav className="sticky top-0 z-50 bg-[#F0F0E8] border-b-[3px] border-black px-6 md:px-12 lg:px-16 py-4 w-full">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <Link
                         href="/"
-                        className="font-serif font-bold text-base sm:text-lg tracking-tight uppercase hover:text-[#1D4ED8] transition-colors"
+                        className="font-serif font-bold text-xl md:text-2xl tracking-tight flex items-center gap-2 text-black hover:text-[#1D4ED8] transition-colors"
                     >
-                        Resume Matcher
+                        <span className="text-orange-600 text-2xl">✳</span> Resume Matcher
                     </Link>
-                    <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="hidden sm:block font-sans text-[10px] text-gray-400 uppercase tracking-widest">
+                    <div className="hidden md:flex items-center gap-8 font-mono font-medium text-sm">
+                        <Link
+                            href="/#features"
+                            className="hover:bg-black hover:text-white px-2 py-1 transition-colors"
+                        >
+                            Features
+                        </Link>
+                        <Link
+                            href="/#how-it-works"
+                            className="hover:bg-black hover:text-white px-2 py-1 transition-colors"
+                        >
+                            How It Works
+                        </Link>
+                        <Link
+                            href="/#faq"
+                            className="hover:bg-black hover:text-white px-2 py-1 transition-colors"
+                        >
+                            FAQ
+                        </Link>
+                        <span className="bg-[#F97316] text-white px-3 py-1 border border-black shadow-[2px_2px_0px_0px_#000000] font-mono font-medium text-sm">
                             Internships 2026
                         </span>
-                        <Link
-                            href="/login"
-                            className="font-sans font-semibold text-xs uppercase px-3 py-1 border border-black bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] hover:bg-[#1D4ED8] hover:border-[#1D4ED8] transition-colors"
-                        >
-                            Sign In
-                        </Link>
                     </div>
+                    <Link
+                        href="/login"
+                        className="bg-white text-black font-mono text-sm font-bold px-6 py-2 border-[2px] border-black shadow-[2px_2px_0px_0px_#000000] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-none transition-all flex items-center gap-2"
+                    >
+                        Sign In →
+                    </Link>
                 </div>
             </nav>
 
