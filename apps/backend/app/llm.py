@@ -282,7 +282,7 @@ def get_model_name(config: LLMConfig) -> str:
         "gemini": "gemini/",
         "deepseek": "deepseek/",
         "ollama": "ollama/",
-        "novita": "openai/",  # Novita uses OpenAI-compatible protocol
+        "novita": "novita/",  # LiteLLM has native Novita AI support
     }
 
     prefix = provider_prefixes.get(config.provider, "")

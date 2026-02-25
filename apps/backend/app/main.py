@@ -91,6 +91,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-User-Id"],  # Allow frontend to read custom headers from 403 responses
 )
 
 # Include routers

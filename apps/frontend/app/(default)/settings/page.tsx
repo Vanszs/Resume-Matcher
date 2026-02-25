@@ -70,6 +70,7 @@ const PROVIDERS: LLMProvider[] = [
   'openrouter',
   'gemini',
   'deepseek',
+  'novita',
   // 'ollama', // Commented out - not available for hosted version
 ];
 
@@ -139,8 +140,8 @@ export default function SettingsPage() {
   // Danger Zone state
   const [showClearApiKeysDialog, setShowClearApiKeysDialog] = useState(false);
   const [showResetDatabaseDialog, setShowResetDatabaseDialog] = useState(false);
-    const [showClearApiKeysScopeDialog, setShowClearApiKeysScopeDialog] = useState(false);
-    const [showResetDatabaseScopeDialog, setShowResetDatabaseScopeDialog] = useState(false);
+  const [showClearApiKeysScopeDialog, setShowClearApiKeysScopeDialog] = useState(false);
+  const [showResetDatabaseScopeDialog, setShowResetDatabaseScopeDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successMessage, setSuccessDialogMessage] = useState({ title: '', description: '' });
   const [isResetting, setIsResetting] = useState(false);
@@ -794,9 +795,8 @@ export default function SettingsPage() {
                     <button
                       key={p}
                       onClick={() => handleProviderChange(p)}
-                      className={`px-3 py-2 text-xs uppercase ${SEGMENTED_BUTTON_BASE} ${
-                        provider === p ? SEGMENTED_BUTTON_ACTIVE : SEGMENTED_BUTTON_INACTIVE
-                      }`}
+                      className={`px-3 py-2 text-xs uppercase ${SEGMENTED_BUTTON_BASE} ${provider === p ? SEGMENTED_BUTTON_ACTIVE : SEGMENTED_BUTTON_INACTIVE
+                        }`}
                     >
                       {PROVIDER_INFO[p].name.split(' ')[0]}
                     </button>
@@ -923,11 +923,10 @@ export default function SettingsPage() {
               {/* Health Check Result */}
               {healthCheck && (
                 <div
-                  className={`border p-4 ${
-                    healthCheck.healthy
+                  className={`border p-4 ${healthCheck.healthy
                       ? 'border-green-300 bg-green-50'
                       : 'border-red-300 bg-red-50'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     {healthCheck.healthy ? (

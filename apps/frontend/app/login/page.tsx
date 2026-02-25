@@ -155,10 +155,6 @@ export default function LoginPage() {
 
                         setVerificationMode(true);
                         setError(''); // Clear errors
-                        // Note: If they just registered, we could also automatically show the wall
-                        // but currently the backend just returns the token if login is bypassed. 
-                        // Wait, our backend register flow sends the email but DOES return a token right now.
-                        // Let's handle it purely on the login endpoint 403 as designed.
                         return;
                     }
                     throw new Error(errData.detail || 'Authentication failed.');
