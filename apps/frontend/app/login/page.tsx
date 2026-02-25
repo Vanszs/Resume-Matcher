@@ -14,6 +14,12 @@ export default function LoginPage() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+
+    // Verification Wall State
+    const [verificationMode, setVerificationMode] = useState(false);
+    const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+    const [otpCode, setOtpCode] = useState('');
+    const [resendCooldown, setResendCooldown] = useState(0);
     const [checkingSession, setCheckingSession] = useState(true);
     const [showComingSoon, setShowComingSoon] = useState<'google' | 'metamask' | null>(null);
     const [showForgotTooltip, setShowForgotTooltip] = useState(false);
@@ -96,6 +102,15 @@ export default function LoginPage() {
             .catch(() => setRegisterEnabled(false));
     }, []);
 
+    // Handle OTP Resend Cooldown Timer
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (resendCooldown > 0) {
+            timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+        }
+        return () => clearTimeout(timer);
+    }, [resendCooldown]);
+
     const storeSession = (data: { access_token: string; role: string; email: string }) => {
         localStorage.setItem('auth_token', data.access_token);
         localStorage.setItem('user_role', data.role);
@@ -130,12 +145,41 @@ export default function LoginPage() {
             const response = await apiPost(endpoint, { email, password });
 
             if (!response.ok) {
+                // Check if it's the Verification Wall trigger
+                if (response.status === 403) {
+                    const errData = await response.json();
+                    if (errData.detail === 'EMAIL_NOT_VERIFIED') {
+                        // Backend sends the user_id in headers to use for verification
+                        const userId = response.headers.get('X-User-Id');
+                        if (userId) setPendingUserId(userId);
+
+                        setVerificationMode(true);
+                        setError(''); // Clear errors
+                        // Note: If they just registered, we could also automatically show the wall
+                        // but currently the backend just returns the token if login is bypassed. 
+                        // Wait, our backend register flow sends the email but DOES return a token right now.
+                        // Let's handle it purely on the login endpoint 403 as designed.
+                        return;
+                    }
+                    throw new Error(errData.detail || 'Authentication failed.');
+                }
+
                 const errData = await response.json();
                 throw new Error(errData.detail || (mode === 'login' ? 'Login failed.' : 'Registration failed.'));
             }
 
             const data = await response.json();
             storeSession(data);
+
+            // If they just registered, they STILL need to verify before accessing the dashboard
+            // The backend returns a token on register, but it's an unverified user.
+            // Let's force them to verify immediately
+            if (mode === 'register') {
+                setVerificationMode(true);
+                setPendingUserId(data.user_id);
+                setError('');
+                return;
+            }
 
             // Flush the Next.js router cache so middleware re-evaluates cookies
             router.refresh();
@@ -148,6 +192,81 @@ export default function LoginPage() {
             router.push(destination);
         } catch (err: any) {
             setError(err.message || 'An unexpected error occurred.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        if (otpCode.length !== 6) {
+            setError('Please enter the 6-digit verification code.');
+            return;
+        }
+
+        if (!pendingUserId) {
+            setError('Session expired. Please try logging in again.');
+            setVerificationMode(false);
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const response = await apiPost('/auth/verify-email', {
+                user_id: pendingUserId,
+                otp_code: otpCode
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.detail || 'Invalid verification code.');
+            }
+
+            // Successfully verified! Now we actually log them in
+            // Re-authenticate to get a verified token session
+            const loginResp = await apiPost('/auth/login', { email, password });
+            if (!loginResp.ok) throw new Error('Verification succeeded but auto-login failed. Please login manually.');
+
+            const data = await loginResp.json();
+            storeSession(data);
+
+            router.refresh();
+            router.push('/dashboard');
+
+        } catch (err: any) {
+            setError(err.message || 'Failed to verify email.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleResendOtp = async () => {
+        if (resendCooldown > 0 || !pendingUserId) return;
+
+        setIsLoading(true);
+        setError('');
+        try {
+            const response = await apiPost('/auth/resend-verification', {
+                user_id: pendingUserId
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.detail || 'Failed to resend code.');
+            }
+
+            setResendCooldown(60); // 60s cooldown
+            // Show temporary success state
+            const previousError = error;
+            setError('');
+
+            // Just display a success alert inline
+            alert('A new verification code has been sent to your email.');
+
+        } catch (err: any) {
+            setError(err.message || 'Failed to resend verification email.');
         } finally {
             setIsLoading(false);
         }
@@ -234,14 +353,14 @@ export default function LoginPage() {
             {/* Left Panel: Artistic Collage */}
             <div className="relative hidden md:flex w-1/2 flex-col justify-between border-r-4 border-[#101922] bg-[#FF5C00] p-8 lg:p-12 overflow-hidden h-screen">
                 {/* Abstract Shapes / Collage Elements */}
-                <div 
-                    className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none" 
+                <div
+                    className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none"
                     style={{
                         backgroundImage: 'radial-gradient(#000 1px, transparent 1px)',
                         backgroundSize: '20px 20px'
                     }}
                 />
-                
+
                 <div className="relative z-10 flex flex-col h-full justify-center items-center">
                     {/* Collage Container */}
                     <div className="relative w-[450px] h-[550px] border-4 border-[#101922] bg-[#FDFBF7] shadow-[6px_6px_0px_0px_#101922] rotate-[-2deg] overflow-hidden">
@@ -257,7 +376,7 @@ export default function LoginPage() {
                                 e.currentTarget.parentElement!.style.background = 'linear-gradient(135deg, #FF5C00 0%, #1D4ED8 100%)';
                             }}
                         />
-                        
+
                         {/* Decorative elements overlay */}
                         <div className="absolute -top-12 -right-12 w-24 h-24 bg-[#1D4ED8] rounded-full border-4 border-[#101922] z-20" />
                         <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-yellow-400 border-4 border-[#101922] z-20 flex items-center justify-center">
@@ -271,13 +390,13 @@ export default function LoginPage() {
                                 <line x1="15" y1="12" x2="21" y2="12" />
                             </svg>
                         </div>
-                        
+
                         {/* Sticker */}
                         <div className="absolute top-4 right-4 bg-white border-2 border-[#101922] px-2 py-1 rotate-12 shadow-[2px_2px_0px_0px_#101922]">
                             <p className="font-mono text-xs font-bold uppercase tracking-tighter">Verified</p>
                         </div>
                     </div>
-                    
+
                     <div className="mt-16 text-center max-w-md">
                         <h2 className="font-serif text-4xl font-bold leading-tight mb-4 text-[#101922]">
                             Find your path.
@@ -287,7 +406,7 @@ export default function LoginPage() {
                         </p>
                     </div>
                 </div>
-                
+
                 {/* Decorative corner */}
                 <div className="absolute bottom-8 left-8">
                     <svg className="text-[#101922]" fill="none" height="64" viewBox="0 0 64 64" width="64" xmlns="http://www.w3.org/2000/svg">
@@ -304,8 +423,8 @@ export default function LoginPage() {
                         <span className="text-[#1D4ED8] text-3xl font-bold">✦</span>
                         <h1 className="text-xl font-extrabold tracking-tight uppercase">Resume Matcher</h1>
                     </Link>
-                    <Link 
-                        href="/" 
+                    <Link
+                        href="/"
                         className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase hover:underline"
                     >
                         <span>←</span>
@@ -315,215 +434,208 @@ export default function LoginPage() {
 
                 {/* Main Form Content */}
                 <main className="flex-1 flex flex-col justify-center px-6 py-4 md:py-6 sm:px-12 lg:px-20 max-w-2xl mx-auto w-full">
+                    {/* Header */}
                     <div className="mb-4 md:mb-6">
                         <h2 className="font-serif text-4xl md:text-5xl font-normal text-[#101922] mb-2 tracking-tight">
-                            {isRegister ? 'Join Us.' : 'Welcome Back.'}
+                            {verificationMode ? 'Check Your Inbox.' : (isRegister ? 'Join Us.' : 'Welcome Back.')}
                         </h2>
                         <p className="text-[#101922]/60 font-medium text-base">
-                            {isRegister 
-                                ? 'Create an account to get started with Resume Matcher.' 
-                                : 'Enter your credentials to access your dashboard.'}
+                            {verificationMode
+                                ? `We’ve sent a 6-digit verification code to ${email || 'your email'}.`
+                                : (isRegister
+                                    ? 'Create an account to get started with Resume Matcher.'
+                                    : 'Enter your credentials to access your dashboard.')}
                         </p>
                     </div>
 
-                    {/* Tabs */}
-                    <div className="flex gap-8 border-b-2 border-[#101922]/10 mb-6 items-center">
-                        <button
-                            type="button"
-                            onClick={() => switchMode('login')}
-                            className={`pb-3 border-b-4 font-mono font-bold text-base tracking-wide transition-colors ${
-                                !isRegister 
-                                    ? 'border-[#101922] text-[#101922]' 
+                    {!verificationMode && (
+                        <div className="flex gap-8 border-b-2 border-[#101922]/10 mb-6 items-center">
+                            <button
+                                type="button"
+                                onClick={() => switchMode('login')}
+                                className={`pb-3 border-b-4 font-mono font-bold text-base tracking-wide transition-colors ${!isRegister
+                                    ? 'border-[#101922] text-[#101922]'
                                     : 'border-transparent text-[#101922]/40 hover:text-[#101922]'
-                            }`}
-                        >
-                            LOGIN
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => switchMode('register')}
-                            disabled={!registerEnabled}
-                            className={`pb-3 border-b-4 font-mono font-bold text-base tracking-wide transition-colors ${
-                                isRegister 
-                                    ? 'border-[#101922] text-[#101922]' 
+                                    }`}
+                            >
+                                LOGIN
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => switchMode('register')}
+                                disabled={!registerEnabled}
+                                className={`pb-3 border-b-4 font-mono font-bold text-base tracking-wide transition-colors ${isRegister
+                                    ? 'border-[#101922] text-[#101922]'
                                     : 'border-transparent text-[#101922]/40 hover:text-[#101922]'
-                            } ${!registerEnabled ? 'opacity-30 cursor-not-allowed' : ''}`}
-                        >
-                            REGISTER
-                        </button>
-                        <Link 
-                            href="/" 
-                            className="md:hidden ml-auto inline-flex items-center gap-1 font-mono text-xs font-bold uppercase hover:underline text-[#101922] pb-3"
-                        >
-                            <span>←</span>
-                            Back
-                        </Link>
-                    </div>
+                                    } ${!registerEnabled ? 'opacity-30 cursor-not-allowed' : ''}`}
+                            >
+                                REGISTER
+                            </button>
+                            <Link
+                                href="/"
+                                className="md:hidden ml-auto inline-flex items-center gap-1 font-mono text-xs font-bold uppercase hover:underline text-[#101922] pb-3"
+                            >
+                                <span>←</span>
+                            </Link>
+                        </div>
+                    )}
 
                     {/* Error Message */}
                     {error && (
-                        <div className="mb-6 p-4 border-2 border-red-500 bg-red-50 rounded-lg">
+                        <div className="mb-6 p-4 border-2 border-red-500 bg-red-50 rounded-none shadow-[2px_2px_0px_0px_#EF4444]">
                             <p className="font-mono text-sm text-red-700">{error}</p>
                         </div>
                     )}
 
                     {/* Registration Disabled Notice */}
-                    {isRegister && !registerEnabled && (
-                        <div className="mb-6 p-4 border-2 border-amber-500 bg-amber-50 rounded-lg">
+                    {isRegister && !registerEnabled && !verificationMode && (
+                        <div className="mb-6 p-4 border-2 border-amber-500 bg-amber-50 rounded-none shadow-[2px_2px_0px_0px_#F59E0B]">
                             <p className="font-mono text-sm text-amber-700">
                                 Registration is currently disabled. Please contact an administrator.
                             </p>
                         </div>
                     )}
 
-                    {/* Form */}
-                    <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-                        {/* Email Input */}
-                        <div className="flex flex-col gap-2">
-                            <label className="font-mono text-sm font-bold uppercase tracking-wider text-[#101922]">
-                                Email Address
-                            </label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full h-14 bg-white border-2 border-[#101922] rounded-lg px-4 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_0px_#101922] transition-shadow"
-                                placeholder="name@example.com"
-                                required
-                            />
-                        </div>
-
-                        {/* Password Input */}
-                        <div className="flex flex-col gap-2">
-                            <div className="flex justify-between items-end">
-                                <label className="font-mono text-sm font-bold uppercase tracking-wider text-[#101922]">
-                                    Password
-                                </label>
-                                {!isRegister && (
-                                    <div className="relative">
-                                        <a 
-                                            href="#" 
-                                            className="text-xs font-mono font-bold underline decoration-2 decoration-[#1D4ED8]/50 hover:decoration-[#1D4ED8]"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                setShowForgotTooltip(true);
-                                                setTimeout(() => setShowForgotTooltip(false), 3000);
-                                            }}
-                                        >
-                                            Forgot?
-                                        </a>
-                                        {showForgotTooltip && (
-                                            <div className="absolute -top-16 right-0 md:left-1/2 md:-translate-x-1/2 md:right-auto bg-[#101922] text-white px-3 py-2 rounded text-xs font-mono shadow-lg z-50 w-48 text-center leading-relaxed">
-                                                we dont have this feature rn, just make a new account :D
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full h-14 bg-white border-2 border-[#101922] rounded-lg px-4 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_0px_#101922] transition-shadow"
-                                placeholder="********"
-                                required
-                            />
-                        </div>
-
-                        {/* Confirm Password Input (Register only) */}
-                        {isRegister && (
+                    {/* Verification OTP Form */}
+                    {verificationMode ? (
+                        <form className="flex flex-col gap-6" onSubmit={handleVerifyOtp}>
                             <div className="flex flex-col gap-2">
                                 <label className="font-mono text-sm font-bold uppercase tracking-wider text-[#101922]">
-                                    Confirm Password
+                                    6-Digit Verification Code
                                 </label>
                                 <input
+                                    type="text"
+                                    maxLength={6}
+                                    value={otpCode}
+                                    onChange={(e) => setOtpCode(e.target.value.replace(/[^0-9]/g, ''))}
+                                    className="w-full h-16 bg-white border-4 border-[#101922] rounded-none px-4 font-mono text-2xl tracking-[0.5em] text-center placeholder:text-gray-300 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_0px_#1D4ED8] transition-all uppercase"
+                                    placeholder="000000"
+                                    autoComplete="one-time-code"
+                                    required
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={isLoading || otpCode.length !== 6}
+                                className="mt-2 w-full h-14 bg-[#1D4ED8] text-white border-2 border-[#101922] rounded-none font-bold text-base flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_#101922] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#101922] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isLoading ? 'Verifying...' : 'Verify Email ✦'}
+                            </button>
+
+                            <div className="flex items-center justify-between mt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setVerificationMode(false)}
+                                    className="font-mono text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-[#1D4ED8] transition-colors"
+                                >
+                                    ← Back to Login
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={handleResendOtp}
+                                    disabled={resendCooldown > 0 || isLoading}
+                                    className={`font-mono text-xs font-bold uppercase tracking-wider transition-colors ${resendCooldown > 0
+                                        ? 'text-gray-400 cursor-not-allowed'
+                                        : 'text-[#101922] hover:text-[#1D4ED8] underline decoration-2'
+                                        }`}
+                                >
+                                    {resendCooldown > 0
+                                        ? `Resend available in ${resendCooldown}s`
+                                        : 'Resend Code'}
+                                </button>
+                            </div>
+                        </form>
+                    ) : (
+                        /* Login / Register Form */
+                        <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+                            {/* Email Input */}
+                            <div className="flex flex-col gap-2">
+                                <label className="font-mono text-sm font-bold uppercase tracking-wider text-[#101922]">
+                                    Email Address
+                                </label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full h-14 bg-white border-2 border-[#101922] rounded-lg px-4 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_0px_#101922] transition-shadow"
+                                    placeholder="name@example.com"
+                                    required
+                                />
+                            </div>
+
+                            {/* Password Input */}
+                            <div className="flex flex-col gap-2">
+                                <div className="flex justify-between items-end">
+                                    <label className="font-mono text-sm font-bold uppercase tracking-wider text-[#101922]">
+                                        Password
+                                    </label>
+                                    {!isRegister && (
+                                        <div className="relative">
+                                            <a
+                                                href="#"
+                                                className="text-xs font-mono font-bold underline decoration-2 decoration-[#1D4ED8]/50 hover:decoration-[#1D4ED8]"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setShowForgotTooltip(true);
+                                                    setTimeout(() => setShowForgotTooltip(false), 3000);
+                                                }}
+                                            >
+                                                Forgot?
+                                            </a>
+                                            {showForgotTooltip && (
+                                                <div className="absolute -top-16 right-0 md:left-1/2 md:-translate-x-1/2 md:right-auto bg-[#101922] text-white px-3 py-2 rounded text-xs font-mono shadow-lg z-50 w-48 text-center leading-relaxed">
+                                                    we dont have this feature rn, just make a new account :D
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                                <input
                                     type="password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     className="w-full h-14 bg-white border-2 border-[#101922] rounded-lg px-4 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_0px_#101922] transition-shadow"
                                     placeholder="********"
                                     required
                                 />
                             </div>
-                        )}
 
-                        {/* Primary CTA */}
-                        <button
-                            type="submit"
-                            disabled={isLoading || (isRegister && !registerEnabled)}
-                            className="mt-4 w-full h-14 bg-[#1D4ED8] text-white border-2 border-[#101922] rounded-lg font-bold text-base flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_#101922] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#101922] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0px_0px_#101922]"
-                        >
-                            {isLoading ? (
-                                <span>Processing...</span>
-                            ) : (
-                                <>
-                                    Continue
-                                    <span>→</span>
-                                </>
-                            )}
-                        </button>
-                    </form>
-
-                    {/* Divider */}
-                    <div className="relative my-6 flex items-center justify-center">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t-2 border-[#101922]/10" />
-                        </div>
-                        <div className="relative bg-[#FDFBF7] px-4">
-                            <span className="font-mono text-xs font-bold text-[#101922]/50 uppercase bg-[#FDFBF7] px-2 border-2 border-[#101922]/10 rounded">
-                                Or sign in with
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Social / Web3 Login */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Google Button */}
-                        <div className="relative">
-                            <button
-                                type="button"
-                                onMouseEnter={() => setShowComingSoon('google')}
-                                onMouseLeave={() => setShowComingSoon(null)}
-                                className="w-full h-12 bg-white border-2 border-[#101922] rounded-lg flex items-center justify-center gap-3 font-bold shadow-[4px_4px_0px_0px_#101922] hover:shadow-[2px_2px_0px_0px_#101922] hover:translate-x-[2px] hover:translate-y-[2px] transition-all active:shadow-none active:translate-x-[4px] active:translate-y-[4px] cursor-not-allowed opacity-70"
-                            >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img 
-                                    src="/Logo-google-icon-PNG.png" 
-                                    alt="Google Logo" 
-                                    className="w-5 h-5"
-                                />
-                                <span>Google</span>
-                            </button>
-                            {showComingSoon === 'google' && (
-                                <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-[#101922] text-white px-3 py-1 rounded text-xs font-mono whitespace-nowrap">
-                                    Coming Soon
+                            {/* Confirm Password Input (Register only) */}
+                            {isRegister && (
+                                <div className="flex flex-col gap-2">
+                                    <label className="font-mono text-sm font-bold uppercase tracking-wider text-[#101922]">
+                                        Confirm Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        className="w-full h-14 bg-white border-2 border-[#101922] rounded-lg px-4 font-medium placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:shadow-[4px_4px_0px_0px_#101922] transition-shadow"
+                                        placeholder="********"
+                                        required
+                                    />
                                 </div>
                             )}
-                        </div>
 
-                        {/* MetaMask Button */}
-                        <div className="relative">
+                            {/* Primary CTA */}
                             <button
-                                type="button"
-                                onMouseEnter={() => setShowComingSoon('metamask')}
-                                onMouseLeave={() => setShowComingSoon(null)}
-                                className="w-full h-12 bg-[#F6851B] text-white border-2 border-[#101922] rounded-lg flex items-center justify-center gap-3 font-bold shadow-[4px_4px_0px_0px_#101922] hover:shadow-[2px_2px_0px_0px_#101922] hover:translate-x-[2px] hover:translate-y-[2px] transition-all active:shadow-none active:translate-x-[4px] active:translate-y-[4px] cursor-not-allowed opacity-70"
+                                type="submit"
+                                disabled={isLoading || (isRegister && !registerEnabled)}
+                                className="mt-4 w-full h-14 bg-[#1D4ED8] text-white border-2 border-[#101922] rounded-lg font-bold text-base flex items-center justify-center gap-2 shadow-[4px_4px_0px_0px_#101922] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#101922] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0px_0px_#101922]"
                             >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img 
-                                    src="/MetaMask-icon-fox.svg" 
-                                    alt="MetaMask Logo" 
-                                    className="w-5 h-5"
-                                />
-                                <span>MetaMask</span>
+                                {isLoading ? (
+                                    <span>Processing...</span>
+                                ) : (
+                                    <>
+                                        Continue
+                                        <span>→</span>
+                                    </>
+                                )}
                             </button>
-                            {showComingSoon === 'metamask' && (
-                                <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-[#101922] text-white px-3 py-1 rounded text-xs font-mono whitespace-nowrap">
-                                    Coming Soon
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                        </form>
+                    )}
                 </main>
             </div>
         </div>

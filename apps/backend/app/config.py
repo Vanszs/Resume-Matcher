@@ -150,6 +150,10 @@ class Settings(BaseSettings):
     default_admin_password: str = "changeme123"
     default_admin_username: str = "admin"
 
+    # Email / Resend Configuration
+    resend_api_key: str | None = None
+    resend_from_email: str = "no-reply@bevansatria.my.id"
+
     # CORS Configuration
     cors_origins: list[str] = [
         "http://localhost:3000",

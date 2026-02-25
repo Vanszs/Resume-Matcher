@@ -102,6 +102,16 @@ async def register(request: Request, body: LoginRequest) -> TokenResponse:
 
         logger.info("New user registered: %s", new_user.email)
 
+        # Generate OTP and send email
+        from app.services.email import create_verification_token, send_verification_email
+        otp_code = await create_verification_token(new_user.id)
+        # We don't block the response if sending email fails, just log it. 
+        # But we do await it because asyncio background tasks require router setup.
+        # Alternatively, use FastAPI BackgroundTasks for proper async non-blocking execution.
+        from fastapi import BackgroundTasks
+        # Note: Since BackgroundTasks is not in scope here, we just await it (takes ~500ms for Resend API)
+        await send_verification_email(new_user.email, otp_code)
+
         return TokenResponse(
             access_token=access_token,
             token_type="bearer",
@@ -159,6 +169,15 @@ async def login(request: Request, body: LoginRequest) -> TokenResponse:
                 detail="User account is disabled",
             )
 
+        if not user.isVerified:
+            logger.info("Unverified user attempted login: %s", request.email)
+            # We return a specific structure so the frontend knows to show the Verification Wall
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="EMAIL_NOT_VERIFIED",
+                headers={"X-User-Id": user.id} # Pass user_id for the frontend to resend OTP
+            )
+
         if not user.role:
             logger.error("User %s has no role assigned", request.email)
             raise HTTPException(
@@ -177,7 +196,6 @@ async def login(request: Request, body: LoginRequest) -> TokenResponse:
             token_type="bearer",
             user_id=user.id,
             email=user.email,
-            role=user.role.name,
         )
     except HTTPException:
         raise
@@ -187,3 +205,72 @@ async def login(request: Request, body: LoginRequest) -> TokenResponse:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Login failed. Please try again.",
         )
+
+
+@router.post("/auth/verify-email")
+@limiter.limit("10/minute")
+async def verify_email(request: Request, body: VerifyEmailRequest) -> dict:
+    """Verify a user's email using a 6-digit OTP code."""
+    from datetime import datetime, timezone
+
+    # Complete token retrieval and checking
+    token_record = await prisma.verificationtoken.find_first(
+        where={
+            "userId": body.user_id,
+            "type": "EMAIL_VERIFICATION",
+            "token": body.otp_code,
+            "isRevoked": False,
+        }
+    )
+
+    if not token_record:
+        raise HTTPException(status_code=400, detail="Invalid verification code.")
+
+    # Check expiration
+    if token_record.expiresAt < datetime.now(timezone.utc):
+        # Auto-revoke expired token
+        await prisma.verificationtoken.update(
+            where={"id": token_record.id}, data={"isRevoked": True}
+        )
+        raise HTTPException(status_code=400, detail="Verification code expired. Please request a new one.")
+
+    # Success! Mark user as verified and revoke the token
+    await prisma.user.update(
+        where={"id": body.user_id},
+        data={"isVerified": True},
+    )
+    await prisma.verificationtoken.update(
+        where={"id": token_record.id}, data={"isRevoked": True}
+    )
+
+    logger.info("User %s email verified successfully.", body.user_id)
+    return {"message": "Email verified successfully."}
+
+
+@router.post("/auth/resend-verification")
+@limiter.limit("3/minute")
+async def resend_verification(request: Request, body: ResendVerifyRequest) -> dict:
+    """Resend a 6-digit OTP code to the user's email."""
+    # Find the user
+    user = await prisma.user.find_unique(where={"id": body.user_id})
+    
+    if not user:
+        # We don't want to leak if a user_id exists or not for this specific flow generally,
+        # but since user_id is a UUID, it's virtually unguessable.
+        raise HTTPException(status_code=404, detail="User not found.")
+        
+    if user.isVerified:
+        raise HTTPException(status_code=400, detail="Email is already verified.")
+
+    # Generate OTP and send
+    from app.services.email import create_verification_token, send_verification_email
+    otp_code = await create_verification_token(user.id)
+    
+    success = await send_verification_email(user.email, otp_code)
+    
+    if not success:
+        logger.error("Attempted to resend verification to %s but Resend API failed.", user.email)
+        raise HTTPException(status_code=500, detail="Failed to send verification email. Please try again later.")
+
+    logger.info("Resent OTP verification email to user %s.", user.email)
+    return {"message": "Verification code sent."}

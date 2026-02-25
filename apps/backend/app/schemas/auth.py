@@ -18,3 +18,11 @@ class UserResponse(BaseModel):
     username: str
     role: str
     is_active: bool
+    is_verified: bool
+
+class VerifyEmailRequest(BaseModel):
+    user_id: str
+    otp_code: str
+
+class ResendVerifyRequest(BaseModel):
+    user_id: str
