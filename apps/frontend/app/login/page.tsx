@@ -111,6 +111,13 @@ export default function LoginPage() {
         return () => clearTimeout(timer);
     }, [resendCooldown]);
 
+    // When verification wall appears, auto-start 60s cooldown
+    useEffect(() => {
+        if (verificationMode) {
+            setResendCooldown(60);
+        }
+    }, [verificationMode]);
+
     const storeSession = (data: { access_token: string; role: string; email: string }) => {
         localStorage.setItem('auth_token', data.access_token);
         localStorage.setItem('user_role', data.role);
@@ -155,6 +162,11 @@ export default function LoginPage() {
 
                         setVerificationMode(true);
                         setError(''); // Clear errors
+
+                        // On LOGIN path, backend did NOT send a fresh OTP — auto-trigger resend now
+                        if (mode === 'login' && userId) {
+                            apiPost('/auth/resend-verification', { user_id: userId }).catch(() => null);
+                        }
                         return;
                     }
                     throw new Error(errData.detail || 'Authentication failed.');
