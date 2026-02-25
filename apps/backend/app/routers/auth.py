@@ -9,7 +9,13 @@ from slowapi.util import get_remote_address
 
 from app.dependencies import get_current_user
 from app.prisma_db import prisma
-from app.schemas.auth import LoginRequest, TokenResponse, UserResponse
+from app.schemas.auth import (
+    LoginRequest,
+    TokenResponse,
+    UserResponse,
+    VerifyEmailRequest,
+    ResendVerifyRequest,
+)
 from app.services.auth import create_access_token, get_password_hash, verify_password
 from app.config import load_config_file
 
