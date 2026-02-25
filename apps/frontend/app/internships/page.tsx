@@ -27,143 +27,100 @@ export type Internship = {
     requiresAdvancedDegree: boolean;
 };
 
-// Decode HTML entities in text
-function decodeHtml(html: string): string {
-    return html
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'")
-        .replace(/&nbsp;/g, ' ');
+const ENTITIES: Record<string, string> = {
+    '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ',
+};
+function decodeHtml(s: string): string {
+    return s.replace(/&(?:amp|lt|gt|quot|#39|nbsp);/g, (m) => ENTITIES[m] ?? m);
+}
+function stripTags(s: string): string {
+    return decodeHtml(s.replace(/<[^>]+>/g, '').trim());
 }
 
-// Strip all HTML tags from a string
-function stripTags(html: string): string {
-    return decodeHtml(html.replace(/<[^>]+>/g, '').trim());
-}
+const SKIP_HEADING = /Browse\s+\d+|See Full List|😫|😮|^The List/i;
 
-function parseGitHubMarkdown(html: string, source: Internship['source']): Internship[] {
+/** Parse a GitHub HTML-table internship README into structured records.
+ *  Format: <table><thead><th>…</th></thead><tbody><tr><td>…</td></tr></tbody></table>
+ *  Active (5 cols):     Company | Role | Location | Application | Age
+ *  Off-Season (6 cols): Company | Role | Location | Terms | Application | Age */
+function parseGitHubMarkdown(text: string, source: Internship['source']): Internship[] {
     const internships: Internship[] = [];
     let currentSection = 'General';
     let currentCompany = '';
     let currentCompanyUrl = '';
 
-    // Extract section headers + their tables
-    // sections are <h2> or <h3> elements
-    const sectionRx = /<h[23][^>]*>(.*?)<\/h[23]>/gi;
-    const tableRx = /<table[\s\S]*?<\/table>/gi;
-
-    // Split by tables, keeping track of headers between them
-    const parts = html.split(/(<table[\s\S]*?<\/table>)/i);
+    const parts = text.split(/(<table[\s\S]*?<\/table>)/i);
 
     for (const part of parts) {
         if (/<table/i.test(part)) {
-            // It's a table — parse its rows
-            const tbodyMatch = part.match(/<tbody>([\s\S]*?)<\/tbody>/i);
-            if (!tbodyMatch) continue;
+            // Detect column layout from <thead>
+            let hasTermsCol = false;
+            const theadM = part.match(/<thead>([\s\S]*?)<\/thead>/i);
+            if (theadM) {
+                const headers = [...theadM[1].matchAll(/<th[^>]*>(.*?)<\/th>/gi)]
+                    .map(m => stripTags(m[1]));
+                hasTermsCol = headers.some(h => h.toLowerCase() === 'terms');
+            }
 
-            const tbody = tbodyMatch[1];
-            const rows = tbody.match(/<tr>([\s\S]*?)<\/tr>/gi) || [];
+            const tbodyM = part.match(/<tbody>([\s\S]*?)<\/tbody>/i);
+            if (!tbodyM) continue;
 
-            for (const row of rows) {
-                const cells = row.match(/<td[^>]*>([\s\S]*?)<\/td>/gi) || [];
+            for (const rowM of tbodyM[1].matchAll(/<tr>([\s\S]*?)<\/tr>/gi)) {
+                const cells = [...rowM[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(m => m[1]);
                 if (cells.length < 4) continue;
 
-                const cell0 = (cells[0] ?? '').replace(/<td[^>]*>|<\/td>/gi, '');
-                const cell1 = (cells[1] ?? '').replace(/<td[^>]*>|<\/td>/gi, '');
-                const cell2 = (cells[2] ?? '').replace(/<td[^>]*>|<\/td>/gi, '');
-                const cell3 = cells[3] ? cells[3].replace(/<td[^>]*>|<\/td>/gi, '') : '';
-                const cell4 = cells[4] ? cells[4].replace(/<td[^>]*>|<\/td>/gi, '') : '';
+                const c0 = cells[0], c1 = cells[1], c2 = cells[2];
+                const c3 = hasTermsCol ? (cells[4] ?? '') : (cells[3] ?? '');
+                const c4 = hasTermsCol ? (cells[5] ?? '') : (cells[4] ?? '');
 
-                const rawCompany = stripTags(cell0);
-                const isSubRole = rawCompany === '↳' || rawCompany === '' && cell0.trim() === '<td>↳</td>';
-                const isSub = cell0.includes('↳') || stripTags(cell0) === '↳';
+                const rawCompany = stripTags(c0);
+                const isSub = c0.includes('↳') || rawCompany === '↳';
 
-                // Determine company info
-                let company = isSubRole || isSub ? currentCompany : stripTags(cell0);
+                let company = isSub ? currentCompany : rawCompany.replace('↳', '').trim();
                 let companyUrl = currentCompanyUrl;
-
                 if (!isSub) {
-                    // Extract company URL
-                    const companyUrlMatch = cell0.match(/href="([^"]+)"/);
-                    if (companyUrlMatch) {
-                        companyUrl = companyUrlMatch[1];
-                        currentCompanyUrl = companyUrl;
-                    }
-                    company = stripTags(cell0).replace('↳', '').trim();
+                    const hrefM = c0.match(/href="([^"]+)"/);
+                    if (hrefM) { companyUrl = hrefM[1]; currentCompanyUrl = companyUrl; }
                     if (company) currentCompany = company;
                 }
 
-                const rawRole = stripTags(cell1);
-                const location = stripTags(cell2);
-
-                // Extract special flags from role text
+                const rawRole = stripTags(c1);
                 const noSponsorship = rawRole.includes('🛂');
-                const requiresCitizenship = rawRole.includes('🇺🇸');
+                const requiresCitizenship = c1.includes('🇺🇸');
                 const isFaang = rawRole.includes('🔥');
                 const requiresAdvancedDegree = rawRole.includes('🎓');
+                const isClosed = rawRole.includes('🔒') || c3.includes('🔒');
+                const role = rawRole.replace(/[🛂🔥🎓🔒]/gu, '').replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, '').trim();
 
-                // Strip flag icons from displayed role name
-                const role = rawRole.replace(/[🛂🇺🇸🔥🎓]/gu, '').trim();
+                if (!role || role.toLowerCase() === 'role') continue;
 
-                // Extract apply URL (first link with img alt="Apply")
-                const applyMatch = cell3.match(/href="([^"]+)"[^>]*>[\s\S]*?alt="Apply"/i);
-                const applyUrl = applyMatch ? applyMatch[1] : '';
-
-                // Extract Simplify URL
-                const simplifyMatch = cell3.match(/href="([^"]+)"[^>]*>[\s\S]*?alt="Simplify"/i);
-                const simplifyUrl = simplifyMatch ? simplifyMatch[1] : '';
-
-                const age = stripTags(cell4);
-                const isClosed = cell3.includes('🔒') || rawRole.includes('🔒');
-
-                if (!role || role === 'Role') continue; // skip header rows
+                const location = stripTags(c2);
+                const applyM = c3.match(/href="([^"]+)"[^>]*>[\s\S]*?alt="Apply"/i);
+                const applyUrl = applyM ? applyM[1] : '';
+                const simpM = c3.match(/href="([^"]+)"[^>]*>[\s\S]*?alt="Simplify"/i);
+                const simplifyUrl = simpM ? simpM[1] : '';
+                const age = stripTags(c4);
 
                 internships.push({
                     company: company || currentCompany,
-                    companyUrl: companyUrl || currentCompanyUrl,
-                    role,
-                    location,
-                    applyUrl,
-                    simplifyUrl,
-                    age,
-                    isClosed,
-                    isSubRole: isSub,
-                    section: currentSection,
-                    source,
-                    noSponsorship,
-                    requiresCitizenship,
-                    isFaang,
-                    requiresAdvancedDegree,
+                    companyUrl,
+                    role, location, applyUrl, simplifyUrl, age,
+                    isClosed, isSubRole: isSub, section: currentSection, source,
+                    noSponsorship, requiresCitizenship, isFaang, requiresAdvancedDegree,
                 });
             }
         } else {
-            // Non-table part — scan ALL headings in order.
-            // Raw GitHub markdown uses ## headings; some sections also use <h2> HTML tags.
-            // We must process every heading (not just the first) because multiple headings
-            // can appear in the same text block (e.g. "Browse N roles" then "💻 Software Engineering").
-            const skipRx = /Browse\s+\d+|See Full List|😫|😮|^The List/i;
-
-            const htmlHeadingRx = /<h[23][^>]*>(.*?)<\/h[23]>/gi;
-            const mdHeadingRx = /^#{1,3}\s+(.+)$/gm;
-
-            // Collect all headings in document order
-            type HeadingMatch = { index: number; text: string };
-            const headings: HeadingMatch[] = [];
-
-            let m: RegExpExecArray | null;
-            while ((m = htmlHeadingRx.exec(part)) !== null) {
-                headings.push({ index: m.index, text: stripTags(m[1]) });
-            }
-            while ((m = mdHeadingRx.exec(part)) !== null) {
-                headings.push({ index: m.index, text: m[1].trim() });
-            }
-            // Sort by position in the string
+            // Non-table: collect all headings in document order
+            type HMatch = { index: number; text: string };
+            const headings: HMatch[] = [];
+            for (const m of part.matchAll(/<h[23][^>]*>(.*?)<\/h[23]>/gi))
+                headings.push({ index: m.index!, text: stripTags(m[1]) });
+            for (const m of part.matchAll(/^#{1,3}\s+(.+)$/gm))
+                headings.push({ index: m.index!, text: m[1].trim() });
             headings.sort((a, b) => a.index - b.index);
 
             for (const { text } of headings) {
-                if (skipRx.test(text)) continue;
+                if (SKIP_HEADING.test(text)) continue;
                 const cleaned = text
                     .replace(/\s+Internship Roles?$/i, '')
                     .replace(/\s*\(\d+\)$/, '')

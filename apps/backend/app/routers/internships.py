@@ -90,10 +90,16 @@ _SKIP_HEADING_RE = re.compile(r"Browse\s+\d+|See Full List|😫|😮|^The List",
 _ROLE_SUFFIX_RE = re.compile(r"\s+Internship Roles?$", re.I)
 _COUNT_SUFFIX_RE = re.compile(r"\s*\(\d+\)$")
 _HTML_H_RE = re.compile(r"<h[23][^>]*>(.*?)</h[23]>", re.I | re.S)
+_MD_H_RE = re.compile(r"^#{1,3}\s+(.+)$", re.M)
 _HREF_RE = re.compile(r'href="([^"]+)"')
 _APPLY_RE = re.compile(r'href="([^"]+)"[^>]*>[\s\S]*?alt="Apply"', re.I)
 _SIMPLIFY_RE = re.compile(r'href="([^"]+)"[^>]*>[\s\S]*?alt="Simplify"', re.I)
-_PIPE_SEP_RE = re.compile(r"^\s*\|?[\s:|-]+\|[\s:|-|]*$")
+_TABLE_SPLIT_RE = re.compile(r"(<table[\s\S]*?</table>)", re.I)
+_TBODY_RE = re.compile(r"<tbody>([\s\S]*?)</tbody>", re.I)
+_THEAD_RE = re.compile(r"<thead>([\s\S]*?)</thead>", re.I)
+_TR_RE = re.compile(r"<tr>([\s\S]*?)</tr>", re.I)
+_TD_RE = re.compile(r"<td[^>]*>([\s\S]*?)</td>", re.I)
+_TH_RE = re.compile(r"<th[^>]*>(.*?)</th>", re.I | re.S)
 
 # Flag emojis
 _FLAG_NO_SPONSOR = "🛂"
@@ -101,7 +107,6 @@ _FLAG_US_CITIZEN = "🇺🇸"
 _FLAG_FAANG = "🔥"
 _FLAG_ADV_DEGREE = "🎓"
 _FLAG_CLOSED = "🔒"
-# Strip all flag emojis from displayed role name
 _FLAGS_ALL = {_FLAG_NO_SPONSOR, _FLAG_US_CITIZEN, _FLAG_FAANG, _FLAG_ADV_DEGREE, _FLAG_CLOSED}
 
 
@@ -110,173 +115,116 @@ def _clean_role(raw: str) -> str:
     out = raw
     for f in _FLAGS_ALL:
         out = out.replace(f, "")
-    # 🇺🇸 is two codepoints — also strip via regex
     out = re.sub(r"[\U0001F1E6-\U0001F1FF]{2}", "", out)
     return out.strip()
 
 
-def _parse_pipe_cells(line: str) -> list[str]:
-    """Split a markdown pipe-table row into cells, preserving inner HTML."""
-    # Strip leading/trailing pipes then split on | that are NOT inside <...>
-    line = line.strip().strip("|")
-    cells: list[str] = []
-    depth = 0
-    buf: list[str] = []
-    for ch in line:
-        if ch == "<":
-            depth += 1
-            buf.append(ch)
-        elif ch == ">":
-            depth = max(0, depth - 1)
-            buf.append(ch)
-        elif ch == "|" and depth == 0:
-            cells.append("".join(buf).strip())
-            buf = []
-        else:
-            buf.append(ch)
-    cells.append("".join(buf).strip())
-    return cells
-
-
-def _cell_href(cell: str) -> str:
-    """Return the first href in a cell (handles both markdown links and HTML)."""
-    m = _HREF_RE.search(cell)
-    if m:
-        return m.group(1)
-    m = _MD_LINK_RE.search(cell)
-    if m:
-        return m.group(2)
-    return ""
-
-
-def _cell_apply_url(cell: str) -> str:
-    m = _APPLY_RE.search(cell)
-    if m:
-        return m.group(1)
-    # fallback: first href in markdown link
-    m2 = _MD_LINK_RE.search(cell)
-    return m2.group(2) if m2 else ""
-
-
-def _cell_simplify_url(cell: str) -> str:
-    m = _SIMPLIFY_RE.search(cell)
-    return m.group(1) if m else ""
-
-
 def parse_markdown(text: str, source: str) -> list[InternshipItem]:
-    """Parse a GitHub markdown pipe-table internship file into structured records."""
+    """Parse a GitHub HTML-table internship file into structured records.
+    Format: <table><thead><tr><th>...</th></tr></thead><tbody><tr><td>...</td></tr></tbody></table>
+    Active:     Company | Role | Location | Application | Age  (5 cols)
+    Off-Season: Company | Role | Location | Terms | Application | Age  (6 cols)
+    """
     results: list[InternshipItem] = []
     current_section = "General"
     current_company = ""
     current_company_url = ""
-    in_table = False
-    has_terms_col = False  # off-season tables have an extra Terms column
 
-    lines = text.splitlines()
-    i = 0
-    while i < len(lines):
-        raw = lines[i]
-        stripped = raw.strip()
+    parts = _TABLE_SPLIT_RE.split(text)
 
-        # ── Heading detection ──
-        if not stripped.startswith("|"):
-            in_table = False
-            # Markdown heading
-            hm = re.match(r"^#{1,3}\s+(.+)$", stripped)
-            heading_text: str | None = None
-            if hm:
-                heading_text = hm.group(1).strip()
-            else:
-                # HTML heading on same line
-                hh = _HTML_H_RE.search(stripped)
-                if hh:
-                    heading_text = _strip_tags(hh.group(1))
-            if heading_text and not _SKIP_HEADING_RE.search(heading_text):
+    for part in parts:
+        if re.search(r"<table", part, re.I):
+            # ── Detect column layout from <thead> ──
+            has_terms_col = False
+            thead_m = _THEAD_RE.search(part)
+            if thead_m:
+                headers = [_strip_tags(h) for h in _TH_RE.findall(thead_m.group(1))]
+                has_terms_col = any(h.lower() == "terms" for h in headers)
+
+            # ── Parse data rows from <tbody> ──
+            tbody_m = _TBODY_RE.search(part)
+            if not tbody_m:
+                continue
+
+            for row in _TR_RE.findall(tbody_m.group(1)):
+                cells = _TD_RE.findall(row)
+                if len(cells) < 4:
+                    continue
+
+                c0, c1, c2 = cells[0], cells[1], cells[2]
+                if has_terms_col:
+                    # Off-season: Company | Role | Location | Terms | Application | Age
+                    c3 = cells[4] if len(cells) > 4 else ""
+                    c4 = cells[5] if len(cells) > 5 else ""
+                else:
+                    # Active: Company | Role | Location | Application | Age
+                    c3 = cells[3] if len(cells) > 3 else ""
+                    c4 = cells[4] if len(cells) > 4 else ""
+
+                raw_company = _strip_tags(c0)
+                is_sub = "↳" in c0 or raw_company.strip() == "↳" or raw_company.strip() == ""
+
+                if is_sub:
+                    company = current_company
+                    company_url = current_company_url
+                else:
+                    href_m = _HREF_RE.search(c0)
+                    company_url = href_m.group(1) if href_m else current_company_url
+                    current_company_url = company_url
+                    company = raw_company.replace("↳", "").strip() or current_company
+                    current_company = company
+
+                raw_role = _strip_tags(c1)
+                no_sponsorship = _FLAG_NO_SPONSOR in raw_role
+                requires_citizenship = _FLAG_US_CITIZEN in c1
+                is_faang = _FLAG_FAANG in raw_role
+                requires_adv_degree = _FLAG_ADV_DEGREE in raw_role
+                is_closed = _FLAG_CLOSED in raw_role or _FLAG_CLOSED in c3
+                role = _clean_role(raw_role)
+
+                if not role or role.lower() == "role":
+                    continue
+
+                location = _strip_tags(c2)
+                apply_m = _APPLY_RE.search(c3)
+                apply_url = apply_m.group(1) if apply_m else ""
+                simp_m = _SIMPLIFY_RE.search(c3)
+                simplify_url = simp_m.group(1) if simp_m else ""
+                age = _strip_tags(c4)
+
+                results.append(InternshipItem(
+                    company=company or current_company,
+                    companyUrl=company_url,
+                    role=role,
+                    location=location,
+                    applyUrl=apply_url,
+                    simplifyUrl=simplify_url,
+                    age=age,
+                    isClosed=is_closed,
+                    isSubRole=is_sub,
+                    section=current_section,
+                    source=source,
+                    noSponsorship=no_sponsorship,
+                    requiresCitizenship=requires_citizenship,
+                    isFaang=is_faang,
+                    requiresAdvancedDegree=requires_adv_degree,
+                ))
+
+        else:
+            # ── Non-table segment: collect all headings in position order ──
+            headings: list[tuple[int, str]] = []
+            for m in _HTML_H_RE.finditer(part):
+                headings.append((m.start(), _strip_tags(m.group(1))))
+            for m in _MD_H_RE.finditer(part):
+                headings.append((m.start(), m.group(1).strip()))
+            headings.sort(key=lambda x: x[0])
+
+            for _, heading_text in headings:
+                if _SKIP_HEADING_RE.search(heading_text):
+                    continue
                 cleaned = _COUNT_SUFFIX_RE.sub("", _ROLE_SUFFIX_RE.sub("", heading_text)).strip()
                 if cleaned:
                     current_section = cleaned
-            i += 1
-            continue
-
-        # ── Pipe table row ──
-        # Skip header separator rows (e.g. |---|---|)
-        if _PIPE_SEP_RE.match(stripped):
-            in_table = True
-            i += 1
-            continue
-
-        cells = _parse_pipe_cells(stripped)
-        if len(cells) < 4:
-            i += 1
-            continue
-
-        # Detect header row — determine column layout
-        c0_text = _strip_tags(cells[0]).lower()
-        if c0_text in ("company", ""):
-            in_table = True
-            # Off-season tables have "Terms" as the 4th header (index 3)
-            has_terms_col = len(cells) > 3 and _strip_tags(cells[3]).lower() == "terms"
-            i += 1
-            continue
-
-        c0, c1, c2 = cells[0], cells[1], cells[2]
-        if has_terms_col:
-            # Off-season: Company | Role | Location | Terms | Application | Age
-            c3 = cells[4] if len(cells) > 4 else ""
-            c4 = cells[5] if len(cells) > 5 else ""
-        else:
-            # Active:     Company | Role | Location | Application | Age
-            c3 = cells[3] if len(cells) > 3 else ""
-            c4 = cells[4] if len(cells) > 4 else ""
-
-        raw_company = _strip_tags(c0)
-        is_sub = "↳" in raw_company or raw_company.strip() == ""
-
-        if is_sub:
-            company = current_company
-            company_url = current_company_url
-        else:
-            company_url = _cell_href(c0) or current_company_url
-            current_company_url = company_url
-            company = raw_company.replace("↳", "").strip() or current_company
-            current_company = company
-
-        # Role cell may be raw text or contain flag emojis
-        raw_role_text = _strip_tags(c1)
-        no_sponsorship = _FLAG_NO_SPONSOR in raw_role_text
-        requires_citizenship = _FLAG_US_CITIZEN in c1
-        is_faang = _FLAG_FAANG in raw_role_text
-        requires_adv_degree = _FLAG_ADV_DEGREE in raw_role_text
-        is_closed = _FLAG_CLOSED in raw_role_text or _FLAG_CLOSED in c3
-        role = _clean_role(raw_role_text)
-
-        if not role or role.lower() == "role":
-            i += 1
-            continue
-
-        location = _strip_tags(c2)
-        apply_url = _cell_apply_url(c3)
-        simplify_url = _cell_simplify_url(c3)
-        age = _strip_tags(c4)
-
-        results.append(InternshipItem(
-            company=company or current_company,
-            companyUrl=company_url,
-            role=role,
-            location=location,
-            applyUrl=apply_url,
-            simplifyUrl=simplify_url,
-            age=age,
-            isClosed=is_closed,
-            isSubRole=is_sub,
-            section=current_section,
-            source=source,
-            noSponsorship=no_sponsorship,
-            requiresCitizenship=requires_citizenship,
-            isFaang=is_faang,
-            requiresAdvancedDegree=requires_adv_degree,
-        ))
-        i += 1
 
     return results
 
