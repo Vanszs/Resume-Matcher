@@ -51,6 +51,13 @@ async def init_pdf_renderer() -> None:
         _browser = await _launch_browser(_playwright)
 
 
+# Paper widths in pixels at 96 DPI (matches mmToPx in frontend)
+_PAPER_WIDTH_PX = {
+    "A4": 794,      # 210mm @ 96dpi
+    "Letter": 816,  # 215.9mm @ 96dpi
+}
+
+
 def _resolve_pdf_format(page_size: str) -> str:
     format_map = {
         "A4": "A4",
@@ -150,7 +157,14 @@ async def _render_with_browser(
     pdf_format: str,
     pdf_margins: dict,
 ) -> bytes:
-    page: Page = await browser.new_page()
+    # Set viewport width to match the PDF paper width so Chrome's text-layout
+    # engine uses the same line lengths as the frontend preview (which sizes
+    # the hidden measurement div to the content-area width).  Without this,
+    # the default 1280px viewport causes a different reflow than the PDF pass.
+    paper_width = _PAPER_WIDTH_PX.get(pdf_format, 794)
+    page: Page = await browser.new_page(
+        viewport={"width": paper_width, "height": 1123}  # 1123px ≈ A4 height
+    )
     try:
         return await _render_page_to_pdf(page, url, selector, pdf_format, pdf_margins)
     finally:
