@@ -560,6 +560,66 @@ export default function LoginPage() {
                                     </>
                                 )}
                             </button>
+
+                            {/* Divider */}
+                            {!isRegister && (
+                                <>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex-1 h-px bg-[#101922]/10" />
+                                        <span className="font-mono text-xs text-[#101922]/40 uppercase tracking-wider">or</span>
+                                        <div className="flex-1 h-px bg-[#101922]/10" />
+                                    </div>
+
+                                    {/* Social / Web3 Login */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {/* Google Button */}
+                                        <div className="relative">
+                                            <button
+                                                type="button"
+                                                onMouseEnter={() => setShowComingSoon('google')}
+                                                onMouseLeave={() => setShowComingSoon(null)}
+                                                className="w-full h-12 bg-white border-2 border-[#101922] rounded-lg flex items-center justify-center gap-3 font-bold shadow-[4px_4px_0px_0px_#101922] hover:shadow-[2px_2px_0px_0px_#101922] hover:translate-x-[2px] hover:translate-y-[2px] transition-all active:shadow-none active:translate-x-[4px] active:translate-y-[4px] cursor-not-allowed opacity-70"
+                                            >
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                    src="https://www.google.com/favicon.ico"
+                                                    alt="Google Logo"
+                                                    className="w-5 h-5"
+                                                />
+                                                <span className="font-mono text-sm font-bold">Google</span>
+                                            </button>
+                                            {showComingSoon === 'google' && (
+                                                <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-[#101922] text-white px-3 py-1 rounded text-xs font-mono whitespace-nowrap z-10">
+                                                    Coming Soon
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* MetaMask Button */}
+                                        <div className="relative">
+                                            <button
+                                                type="button"
+                                                onMouseEnter={() => setShowComingSoon('metamask')}
+                                                onMouseLeave={() => setShowComingSoon(null)}
+                                                className="w-full h-12 bg-white border-2 border-[#101922] rounded-lg flex items-center justify-center gap-3 font-bold shadow-[4px_4px_0px_0px_#101922] hover:shadow-[2px_2px_0px_0px_#101922] hover:translate-x-[2px] hover:translate-y-[2px] transition-all active:shadow-none active:translate-x-[4px] active:translate-y-[4px] cursor-not-allowed opacity-70"
+                                            >
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                    src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
+                                                    alt="MetaMask Logo"
+                                                    className="w-5 h-5"
+                                                />
+                                                <span className="font-mono text-sm font-bold">MetaMask</span>
+                                            </button>
+                                            {showComingSoon === 'metamask' && (
+                                                <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-[#101922] text-white px-3 py-1 rounded text-xs font-mono whitespace-nowrap z-10">
+                                                    Coming Soon
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </form>
                     )}
                 </div>
