@@ -324,11 +324,26 @@ sleep 2
 # Check if port is free before starting
 free_port $BACKEND_PORT "Backend"
 
-source venv/bin/activate
-screen -dmS resume-backend python -m uvicorn app.main:app --host 127.0.0.1 --port $BACKEND_PORT
+BACKEND_VENV_PYTHON="$(pwd)/venv/bin/python"
+BACKEND_ENV_FILE="$(cd ../.. && pwd)/.env"
+BACKEND_LOG="$(pwd)/backend-screen.log"
+: > "$BACKEND_LOG"
+# Screen daemon has a minimal PATH - 'python' is not found. Use absolute path to venv python.
+# Also source .env so RESEND_API_KEY and other secrets reach the backend process.
+screen -dmS resume-backend bash -c "
+  cd '$(pwd)' && \
+  if [ -f '$BACKEND_ENV_FILE' ]; then set -a; source '$BACKEND_ENV_FILE'; set +a; fi && \
+  '$BACKEND_VENV_PYTHON' -m uvicorn app.main:app --host 127.0.0.1 --port $BACKEND_PORT \
+  >> '$BACKEND_LOG' 2>&1
+"
 cd ../..
 
 # Wait for backend port to be up
-wait_for_port "$BACKEND_PORT" "Backend" 30
+if ! wait_for_port "$BACKEND_PORT" "Backend" 30; then
+    echo "--- Backend startup log ---"
+    cat "$BACKEND_LOG" 2>/dev/null || echo "(no backend log found)"
+    echo "--- End backend log ---"
+    exit 1
+fi
 
 echo "Deployment completed successfully! Both apps are running in background screen sessions."
