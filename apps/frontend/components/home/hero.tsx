@@ -44,7 +44,7 @@ const FEATURES = [
   {
     icon: TrendingUp,
     title: 'Match Score',
-    body: 'Get a numeric match score. Know exactly how well you fit the role before hitting \'Apply\'.', 
+    body: 'Get a numeric match score. Know exactly how well you fit the role before hitting \'Apply\'.',
     decorations: [],
   },
   {
@@ -118,7 +118,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
     <details className="group bg-white border-2 border-black shadow-[4px_4px_0px_0px_#000000] cursor-pointer" open={open}>
-      <summary 
+      <summary
         className="flex justify-between items-center p-4 font-bold font-sans text-lg list-none cursor-pointer"
         onClick={(e) => { e.preventDefault(); setOpen(!open); }}
       >
@@ -165,12 +165,12 @@ export default function Hero() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-10 relative z-10 w-full">
           <div className="md:w-1/2 text-left pr-0 md:pr-8">
             <h1 className="font-serif font-extrabold text-5xl sm:text-6xl md:text-5xl lg:text-6xl leading-[1.0] text-black mb-6 md:mb-6 tracking-tight">
-              Finding a job is <br/>
+              Finding a job is <br />
               <span className="bg-black text-white px-2 inline-block font-serif italic border-2 border-transparent relative mt-1 mb-1">
                 Hard.
-              </span> <br/>
-              We make it <br/>
-              <span className="bg-blue-600 text-white px-2 inline-block shadow-[4px_4px_0px_0px_#000000] font-serif italic border-2 border-black relative mt-1">
+              </span> <br />
+              We make it <br />
+              <span className="bg-indigo-600 text-white px-2 inline-block shadow-[4px_4px_0px_0px_#000000] font-serif italic border-2 border-black relative mt-1">
                 easier.
               </span>
             </h1>
@@ -225,7 +225,7 @@ export default function Hero() {
               </div>
             </div>
             <div className="absolute -bottom-4 -right-4 md:-bottom-6 md:-right-6 lg:-bottom-8 lg:-right-8 w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 bg-orange-600 border-[3px] border-black rounded-full flex items-center justify-center transform rotate-12 z-30 shadow-[4px_4px_0px_0px_#000000] hover:scale-110 transition-transform cursor-pointer">
-              <span className="font-serif font-bold text-white text-sm md:text-base lg:text-xl leading-none text-center italic">Watch<br/>Now!</span>
+              <span className="font-serif font-bold text-white text-sm md:text-base lg:text-xl leading-none text-center italic">Watch<br />Now!</span>
             </div>
           </div>
         </div>
@@ -238,7 +238,7 @@ export default function Hero() {
             <h2 className="font-serif text-4xl md:text-5xl text-black leading-tight">
               The <span className="line-through text-gray-400">joy</span>{' '}
               <span className="bg-blue-600 text-white px-2 inline-block border-2 border-black transform -rotate-2 relative z-10">pain</span>{' '}
-              of manually <br/> editing resumes
+              of manually <br /> editing resumes
             </h2>
           </div>
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
@@ -258,13 +258,13 @@ export default function Hero() {
               {PAIN_POINTS.map((p, i) => (
                 <div key={i} className="flex gap-6 group">
                   <div className="shrink-0">
-                    <div className="w-14 h-14 bg-orange-600 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] flex items-center justify-center font-mono font-bold text-xl text-white group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none transition-all">
+                    <div className="w-14 h-14 bg-orange-600 border-[3px] border-black shadow-[4px_4px_0px_0px_#000000] flex items-center justify-center font-mono font-bold text-xl text-white">
                       {p.num}
                     </div>
                   </div>
                   <div>
                     <h3 className="font-serif font-bold text-2xl mb-3 text-black">{p.title}</h3>
-                    <p className="font-mono text-base text-gray-600 leading-relaxed">
+                    <p className="font-sans text-base text-gray-600 leading-relaxed">
                       {p.body}
                     </p>
                   </div>
@@ -279,9 +279,9 @@ export default function Hero() {
       <section className="w-full py-24 px-6 md:px-12 lg:px-16 bg-yellow-400 border-b-[3px] border-black relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiMwMDAiLz48L3N2Zz4=')]"></div>
         <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="inline-block bg-white border-[3px] border-black px-4 py-1 font-mono font-bold mb-6 shadow-[2px_2px_0px_0px_#000000] transform -rotate-2 text-base">// SOLUTION</div>
+          <div className="inline-block bg-white border-[3px] border-black px-4 py-1 font-mono font-bold mb-6 transform -rotate-2 text-base">// SOLUTION</div>
           <h2 className="font-serif font-bold text-4xl md:text-5xl mb-8 leading-tight">
-            Stop guessing what recruiters want. <br/>
+            Stop guessing what recruiters want. <br />
             <span className="italic text-white" style={{ textShadow: '2px 2px 0px #000' }}>Tailor every application in seconds.</span>
           </h2>
           <Link
@@ -330,7 +330,7 @@ export default function Hero() {
                   <feature.icon className="w-6 h-6" strokeWidth={2.5} />
                 </div>
                 <h3 className="font-serif font-bold text-2xl mb-3">{feature.title}</h3>
-                <p className="font-mono text-sm text-gray-600">{feature.body}</p>
+                <p className="font-sans text-sm text-gray-600">{feature.body}</p>
               </div>
             ))}
           </div>
@@ -351,24 +351,24 @@ export default function Hero() {
               {STEPS.map((step, idx) => {
                 // Only apply indent on desktop (md+)
                 const desktopMargin = step.indent === 0 ? '0' : step.indent === 1 ? 'clamp(0rem, 5vw, 2rem)' : 'clamp(0rem, 8vw, 4rem)';
-                
+
                 return (
                   <div
                     key={idx}
                     className="flex items-center gap-6 p-4 border-2 border-black bg-[#F0F0E8] shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] relative md:ml-[var(--step-indent)]"
                     style={{ '--step-indent': desktopMargin } as React.CSSProperties}
                   >
-                  <div className={`font-serif text-4xl font-bold ${step.color} opacity-50`}>{step.num}</div>
-                  <div className="flex-1">
-                    <h3 className="font-bold font-sans text-xl uppercase">{step.label}</h3>
-                    <p className="font-mono text-sm text-gray-600">{step.desc}</p>
-                  </div>
-                  {idx === STEPS.length - 1 && (
-                    <div className="absolute -top-2 -right-2 md:-top-4 md:-right-4 transform w-14 h-14 md:w-20 md:h-20 bg-gray-100 border-2 border-black rotate-12 shadow-[4px_4px_0px_0px_#000000] hidden md:flex flex-col items-center justify-center p-1 z-10">
-                      <span className="text-2xl md:text-3xl">👍</span>
+                    <div className={`font-serif text-4xl font-bold ${step.color} opacity-50`}>{step.num}</div>
+                    <div className="flex-1">
+                      <h3 className="font-bold font-sans text-xl uppercase">{step.label}</h3>
+                      <p className="font-mono text-sm text-gray-600">{step.desc}</p>
                     </div>
-                  )}
-                </div>
+                    {idx === STEPS.length - 1 && (
+                      <div className="absolute -top-2 -right-2 md:-top-4 md:-right-4 transform w-14 h-14 md:w-20 md:h-20 bg-gray-100 border-2 border-black rotate-12 shadow-[4px_4px_0px_0px_#000000] hidden md:flex flex-col items-center justify-center p-1 z-10">
+                        <span className="text-2xl md:text-3xl">👍</span>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -399,7 +399,7 @@ export default function Hero() {
             ● OPEN SOURCE
           </div>
           <h2 className="font-serif font-bold text-6xl md:text-8xl mb-8">
-            Try Resume Matcher.<br/>
+            Try Resume Matcher.<br />
             <span className="text-blue-600 italic">It's free.</span>
           </h2>
           <div className="flex flex-col sm:flex-row justify-center gap-6 mt-12">
@@ -418,9 +418,9 @@ export default function Hero() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-mono text-gray-500">
           <div>
             © {new Date().getFullYear()}{' '}
-            <a 
-              href="https://bevansatria.my.id" 
-              target="_blank" 
+            <a
+              href="https://bevansatria.my.id"
+              target="_blank"
               rel="noopener noreferrer"
               className="hover:text-black transition-colors"
             >
@@ -430,9 +430,9 @@ export default function Hero() {
           </div>
           <div>
             based on{' '}
-            <a 
-              href="https://github.com/srbhr/Resume-Matcher" 
-              target="_blank" 
+            <a
+              href="https://github.com/srbhr/Resume-Matcher"
+              target="_blank"
               rel="noopener noreferrer"
               className="hover:text-black transition-colors"
             >
