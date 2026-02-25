@@ -245,7 +245,7 @@ echo "Installing Python dependencies..."
 source venv/bin/activate
 pip install -r requirements.txt
 echo "Installing Playwright browsers..."
-python -m playwright install chromium --with-deps
+python -m playwright install chromium
 cd ../..
 
 # Resolve the full path to node so screen daemon sessions (which run with
