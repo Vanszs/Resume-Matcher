@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Routes that don't require authentication
-const PUBLIC_PATHS = ['/', '/login'];
+const PUBLIC_PATHS = ['/', '/login', '/internships'];
 
 // Routes that additionally require admin role (stored in cookie)
 const ADMIN_PATHS = ['/admin'];
@@ -49,6 +49,11 @@ export function middleware(request: NextRequest) {
         // Prevent caching of login page
         response.headers.set('Cache-Control', 'no-store, must-revalidate');
         return response;
+    }
+
+    // Public pages — no auth required
+    if (pathname.startsWith('/internships')) {
+        return NextResponse.next();
     }
 
     // Check for auth cookie (set on login, mirrors localStorage)

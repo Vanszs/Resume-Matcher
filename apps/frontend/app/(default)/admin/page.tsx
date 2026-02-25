@@ -476,7 +476,7 @@ export default function AdminPage() {
                                     <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
                                 </div>
                             ) : (
-                                <div className="border border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] overflow-x-auto">
+                                <>
                                     <table className="w-full">
                                         <thead>
                                             <tr className="border-b border-black bg-[#E5E5E0]">
@@ -605,55 +605,54 @@ export default function AdminPage() {
                                             )}
                                         </tbody>
                                     </table>
-                                </div>
 
-                                {/* Pagination Controls */}
-                            {users.length > USERS_PER_PAGE && (() => {
-                                const totalPages = Math.ceil(users.length / USERS_PER_PAGE);
-                                return (
-                                    <div className="flex items-center justify-between border border-black bg-white px-4 py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)]">
-                                        <span className="font-mono text-xs text-gray-500 uppercase tracking-wider">
-                                            Page {currentPage} of {totalPages} &nbsp;·&nbsp; {users.length} users
-                                        </span>
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                type="button"
-                                                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                                disabled={currentPage === 1}
-                                                className="px-3 py-1 border border-black font-mono text-xs uppercase bg-white hover:bg-[#F0F0E8] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                            >
-                                                ← Prev
-                                            </button>
-                                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                                <button
-                                                    key={page}
-                                                    type="button"
-                                                    onClick={() => setCurrentPage(page)}
-                                                    className={`w-8 h-7 border font-mono text-xs transition-colors ${page === currentPage
-                                                        ? 'border-black bg-black text-white'
-                                                        : 'border-black bg-white hover:bg-[#F0F0E8]'
-                                                        }`}
-                                                >
-                                                    {page}
-                                                </button>
-                                            ))}
-                                            <button
-                                                type="button"
-                                                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                                disabled={currentPage === totalPages}
-                                                className="px-3 py-1 border border-black font-mono text-xs uppercase bg-white hover:bg-[#F0F0E8] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                                            >
-                                                Next →
-                                            </button>
-                                        </div>
-                                    </div>
-                                );
-                            })()}
+                                    {/* Pagination Controls */}
+                                    {users.length > USERS_PER_PAGE && (() => {
+                                        const totalPages = Math.ceil(users.length / USERS_PER_PAGE);
+                                        return (
+                                            <div className="flex items-center justify-between border border-black bg-white px-4 py-2 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)]">
+                                                <span className="font-mono text-xs text-gray-500 uppercase tracking-wider">
+                                                    Page {currentPage} of {totalPages} &nbsp;·&nbsp; {users.length} users
+                                                </span>
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                                        disabled={currentPage === 1}
+                                                        className="px-3 py-1 border border-black font-mono text-xs uppercase bg-white hover:bg-[#F0F0E8] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                    >
+                                                        ← Prev
+                                                    </button>
+                                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                                        <button
+                                                            key={page}
+                                                            type="button"
+                                                            onClick={() => setCurrentPage(page)}
+                                                            className={`w-8 h-7 border font-mono text-xs transition-colors ${page === currentPage
+                                                                ? 'border-black bg-black text-white'
+                                                                : 'border-black bg-white hover:bg-[#F0F0E8]'
+                                                                }`}
+                                                        >
+                                                            {page}
+                                                        </button>
+                                                    ))}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                                        disabled={currentPage === totalPages}
+                                                        className="px-3 py-1 border border-black font-mono text-xs uppercase bg-white hover:bg-[#F0F0E8] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                    >
+                                                        Next →
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
+                                </>
                             )}
                         </section>
                     )}
 
-                    {/* Roles Section */}
                     {status !== 'error' && (
                         <section className="space-y-4">
                             <div className="flex items-center gap-2 border-b border-black/10 pb-2">
@@ -692,13 +691,13 @@ export default function AdminPage() {
                             </div>
                         </section>
                     )}
+                </div>
 
-                    {/* Footer */}
-                    <div className="border-t border-black/10 pt-4">
-                        <p className="font-mono text-xs text-gray-400 text-center uppercase tracking-wider">
-                            Admin Panel — Resume Matcher
-                        </p>
-                    </div>
+                {/* Footer */}
+                <div className="border-t border-black/10 pt-4">
+                    <p className="font-mono text-xs text-gray-400 text-center uppercase tracking-wider">
+                        Admin Panel — Resume Matcher
+                    </p>
                 </div>
             </div>
         </div>
