@@ -85,7 +85,7 @@ export default function InternshipListClient({ active, offSeason, fetchedAt }: P
     function handleFilterSection(val: string) { setFilterSection(val); setCurrentPage(1); }
 
     const sourceFilters: { id: FilterSource; label: string; count: number; activeClass: string }[] = [
-        { id: 'active',      label: 'ACTIVE',     count: active.length,         activeClass: 'bg-[#15803D] text-white border-[#15803D]' },
+        { id: 'active',      label: 'SUMMER',     count: active.length,         activeClass: 'bg-[#15803D] text-white border-[#15803D]' },
         { id: 'off-season',  label: 'OFF-SEASON', count: offSeason.length,      activeClass: 'bg-[#1D4ED8] text-white border-[#1D4ED8]' },
         { id: 'all',         label: 'ALL',        count: allInternships.length, activeClass: 'bg-black text-white border-black' },
     ];
@@ -159,7 +159,7 @@ export default function InternshipListClient({ active, offSeason, fetchedAt }: P
                         <div className="flex flex-wrap items-center gap-3 font-mono text-xs text-gray-500 uppercase">
                             <span className="inline-flex items-center gap-1">
                                 <span className="w-2 h-2 bg-[#15803D] inline-block border border-black"></span>
-                                {active.length} Active
+                                {active.length} Summer
                             </span>
                             <span className="inline-flex items-center gap-1">
                                 <span className="w-2 h-2 bg-[#1D4ED8] inline-block border border-black"></span>

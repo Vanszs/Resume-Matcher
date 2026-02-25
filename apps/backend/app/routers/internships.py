@@ -170,6 +170,7 @@ def parse_markdown(text: str, source: str) -> list[InternshipItem]:
     current_company = ""
     current_company_url = ""
     in_table = False
+    has_terms_col = False  # off-season tables have an extra Terms column
 
     lines = text.splitlines()
     i = 0
@@ -209,14 +210,24 @@ def parse_markdown(text: str, source: str) -> list[InternshipItem]:
             i += 1
             continue
 
-        # Skip header rows — detect by "Company" in first cell
-        if _strip_tags(cells[0]).lower() in ("company", ""):
+        # Detect header row — determine column layout
+        c0_text = _strip_tags(cells[0]).lower()
+        if c0_text in ("company", ""):
             in_table = True
+            # Off-season tables have "Terms" as the 4th header (index 3)
+            has_terms_col = len(cells) > 3 and _strip_tags(cells[3]).lower() == "terms"
             i += 1
             continue
 
-        c0, c1, c2, c3 = cells[0], cells[1], cells[2], cells[3]
-        c4 = cells[4] if len(cells) > 4 else ""
+        c0, c1, c2 = cells[0], cells[1], cells[2]
+        if has_terms_col:
+            # Off-season: Company | Role | Location | Terms | Application | Age
+            c3 = cells[4] if len(cells) > 4 else ""
+            c4 = cells[5] if len(cells) > 5 else ""
+        else:
+            # Active:     Company | Role | Location | Application | Age
+            c3 = cells[3] if len(cells) > 3 else ""
+            c4 = cells[4] if len(cells) > 4 else ""
 
         raw_company = _strip_tags(c0)
         is_sub = "↳" in raw_company or raw_company.strip() == ""
