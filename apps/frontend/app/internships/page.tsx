@@ -21,6 +21,10 @@ export type Internship = {
     isSubRole: boolean;
     section: string;
     source: 'active' | 'off-season' | 'inactive';
+    noSponsorship: boolean;
+    requiresCitizenship: boolean;
+    isFaang: boolean;
+    requiresAdvancedDegree: boolean;
 };
 
 // Decode HTML entities in text
@@ -91,8 +95,17 @@ function parseGitHubMarkdown(html: string, source: Internship['source']): Intern
                     if (company) currentCompany = company;
                 }
 
-                const role = stripTags(cell1);
+                const rawRole = stripTags(cell1);
                 const location = stripTags(cell2);
+
+                // Extract special flags from role text
+                const noSponsorship = rawRole.includes('🛂');
+                const requiresCitizenship = rawRole.includes('🇺🇸');
+                const isFaang = rawRole.includes('🔥');
+                const requiresAdvancedDegree = rawRole.includes('🎓');
+
+                // Strip flag icons from displayed role name
+                const role = rawRole.replace(/[🛂🇺🇸🔥🎓]/gu, '').trim();
 
                 // Extract apply URL (first link with img alt="Apply")
                 const applyMatch = cell3.match(/href="([^"]+)"[^>]*>[\s\S]*?alt="Apply"/i);
@@ -103,7 +116,7 @@ function parseGitHubMarkdown(html: string, source: Internship['source']): Intern
                 const simplifyUrl = simplifyMatch ? simplifyMatch[1] : '';
 
                 const age = stripTags(cell4);
-                const isClosed = cell3.includes('🔒') || role.includes('🔒');
+                const isClosed = cell3.includes('🔒') || rawRole.includes('🔒');
 
                 if (!role || role === 'Role') continue; // skip header rows
 
@@ -119,25 +132,43 @@ function parseGitHubMarkdown(html: string, source: Internship['source']): Intern
                     isSubRole: isSub,
                     section: currentSection,
                     source,
+                    noSponsorship,
+                    requiresCitizenship,
+                    isFaang,
+                    requiresAdvancedDegree,
                 });
             }
         } else {
-            // Non-table part — look for section headings.
-            // Raw GitHub markdown uses ## headings (not <h2> tags), so check both.
-            const htmlHeading = part.match(/<h[23][^>]*>(.*?)<\/h[23]>/i);
-            const mdHeading = part.match(/^#{1,3}\s+(.+)$/m);
-            const rawHeading = htmlHeading ? stripTags(htmlHeading[1]) : mdHeading ? mdHeading[1].trim() : null;
-            if (rawHeading) {
-                // Skip meta headings like "Browse N Roles" or emoji-only noise
-                const skipRx = /Browse\s+\d+|😫|😮|^The List/i;
-                if (!skipRx.test(rawHeading)) {
-                    currentSection = rawHeading
-                        // Strip trailing " Internship Roles" / " Internship Role"
-                        .replace(/\s+Internship Roles?$/i, '')
-                        // Strip trailing count like " (478)"
-                        .replace(/\s*\(\d+\)$/, '')
-                        .trim();
-                }
+            // Non-table part — scan ALL headings in order.
+            // Raw GitHub markdown uses ## headings; some sections also use <h2> HTML tags.
+            // We must process every heading (not just the first) because multiple headings
+            // can appear in the same text block (e.g. "Browse N roles" then "💻 Software Engineering").
+            const skipRx = /Browse\s+\d+|See Full List|😫|😮|^The List/i;
+
+            const htmlHeadingRx = /<h[23][^>]*>(.*?)<\/h[23]>/gi;
+            const mdHeadingRx = /^#{1,3}\s+(.+)$/gm;
+
+            // Collect all headings in document order
+            type HeadingMatch = { index: number; text: string };
+            const headings: HeadingMatch[] = [];
+
+            let m: RegExpExecArray | null;
+            while ((m = htmlHeadingRx.exec(part)) !== null) {
+                headings.push({ index: m.index, text: stripTags(m[1]) });
+            }
+            while ((m = mdHeadingRx.exec(part)) !== null) {
+                headings.push({ index: m.index, text: m[1].trim() });
+            }
+            // Sort by position in the string
+            headings.sort((a, b) => a.index - b.index);
+
+            for (const { text } of headings) {
+                if (skipRx.test(text)) continue;
+                const cleaned = text
+                    .replace(/\s+Internship Roles?$/i, '')
+                    .replace(/\s*\(\d+\)$/, '')
+                    .trim();
+                if (cleaned) currentSection = cleaned;
             }
         }
     }
@@ -148,48 +179,48 @@ function parseGitHubMarkdown(html: string, source: Internship['source']): Intern
 async function fetchInternships(): Promise<{
     active: Internship[];
     offSeason: Internship[];
-    inactive: Internship[];
     fetchedAt: string;
 }> {
-    const URLS = {
-        active: 'https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/refs/heads/dev/README.md',
-        offSeason: 'https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/refs/heads/dev/README-Off-Season.md',
-        inactive: 'https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/refs/heads/dev/README-Inactive.md',
-    };
+    // Call our own backend — it handles GitHub fetching, 24h caching, and key protection.
+    // INTERNSHIP_API_KEY is a server-side env var, never exposed to the browser.
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+    const internalKey = process.env.INTERNSHIP_API_KEY || '';
 
-    const [activeRes, offSeasonRes, inactiveRes] = await Promise.allSettled([
-        fetch(URLS.active, { next: { revalidate: 86400 } }),
-        fetch(URLS.offSeason, { next: { revalidate: 86400 } }),
-        fetch(URLS.inactive, { next: { revalidate: 86400 } }),
-    ]);
+    let activeText = '';
+    let offSeasonText = '';
+    let fetchedAt = new Date().toISOString();
 
-    const getText = async (res: PromiseSettledResult<Response>) => {
-        if (res.status === 'fulfilled' && res.value.ok) return res.value.text();
-        return '';
-    };
-
-    const [activeText, offSeasonText, inactiveText] = await Promise.all([
-        getText(activeRes),
-        getText(offSeasonRes),
-        getText(inactiveRes),
-    ]);
+    try {
+        const res = await fetch(`${backendUrl}/api/v1/internships`, {
+            headers: { 'X-Internal-Key': internalKey },
+            next: { revalidate: 86400 },
+        });
+        if (res.ok) {
+            const data = await res.json();
+            activeText = data.active ?? '';
+            offSeasonText = data.off_season ?? '';
+            fetchedAt = new Date((data.fetched_at ?? 0) * 1000).toISOString();
+        } else {
+            console.error('Internship backend returned', res.status);
+        }
+    } catch (err) {
+        console.error('Internship fetch failed', err);
+    }
 
     return {
         active: parseGitHubMarkdown(activeText, 'active'),
         offSeason: parseGitHubMarkdown(offSeasonText, 'off-season'),
-        inactive: parseGitHubMarkdown(inactiveText, 'inactive'),
-        fetchedAt: new Date().toISOString(),
+        fetchedAt,
     };
 }
 
 export default async function InternshipsPage() {
-    const { active, offSeason, inactive, fetchedAt } = await fetchInternships();
+    const { active, offSeason, fetchedAt } = await fetchInternships();
 
     return (
         <InternshipListClient
             active={active}
             offSeason={offSeason}
-            inactive={inactive}
             fetchedAt={fetchedAt}
         />
     );

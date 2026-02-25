@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { Internship } from '@/app/internships/page';
 import { ExternalLink, Search, ShieldAlert, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
 
 type Props = {
     active: Internship[];
     offSeason: Internship[];
-    inactive: Internship[];
     fetchedAt: string;
 };
 
@@ -15,10 +15,14 @@ const PAGE_SIZE = 50;
 
 function getUniqueSections(items: Internship[]): string[] {
     const seen = new Set<string>();
+    const order = new Map<string, number>();
     items.forEach((i) => {
-        if (i.section && i.section !== 'General') seen.add(i.section);
+        if (i.section && i.section !== 'General' && !seen.has(i.section)) {
+            order.set(i.section, seen.size);
+            seen.add(i.section);
+        }
     });
-    return Array.from(seen).sort();
+    return Array.from(seen).sort((a, b) => (order.get(a) ?? 0) - (order.get(b) ?? 0));
 }
 
 function getSectionCounts(items: Internship[]): Record<string, number> {
@@ -29,25 +33,29 @@ function getSectionCounts(items: Internship[]): Record<string, number> {
     return counts;
 }
 
-type FilterSource = 'active' | 'off-season' | 'inactive' | 'all';
+type FilterSource = 'active' | 'off-season' | 'all';
 
 const SOURCE_POOL: Record<FilterSource, Internship['source'][]> = {
-    active:      ['active'],
+    active:       ['active'],
     'off-season': ['off-season'],
-    inactive:    ['inactive'],
-    all:         ['active', 'off-season', 'inactive'],
+    all:          ['active', 'off-season'],
 };
 
-export default function InternshipListClient({ active, offSeason, inactive, fetchedAt }: Props) {
+const LEGEND = [
+    { icon: '🔒', label: 'Application closed' },
+    { icon: '🛂', label: 'Does NOT offer sponsorship' },
+    { icon: '🇺🇸', label: 'Requires U.S. Citizenship' },
+    { icon: '🔥', label: 'FAANG+ company' },
+    { icon: '🎓', label: 'Advanced degree required (Master\'s, PhD, MBA)' },
+];
+
+export default function InternshipListClient({ active, offSeason, fetchedAt }: Props) {
     const [search, setSearch] = useState('');
     const [filterSource, setFilterSource] = useState<FilterSource>('active');
     const [filterSection, setFilterSection] = useState<string>('all');
     const [currentPage, setCurrentPage] = useState(1);
 
-    const allInternships = useMemo(
-        () => [...active, ...offSeason, ...inactive],
-        [active, offSeason, inactive]
-    );
+    const allInternships = useMemo(() => [...active, ...offSeason], [active, offSeason]);
 
     // Pool visible based on source tab
     const poolBySource = useMemo(() => {
@@ -76,22 +84,47 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
     function handleFilterSource(val: FilterSource) { setFilterSource(val); setFilterSection('all'); setCurrentPage(1); }
     function handleFilterSection(val: string) { setFilterSection(val); setCurrentPage(1); }
 
-    const sourceFilters: { id: FilterSource; label: string; count: number; color: string }[] = [
-        { id: 'active',      label: 'Active',      count: active.length,     color: 'bg-[#15803D] text-white border-[#15803D]' },
-        { id: 'off-season',  label: 'Off-Season',  count: offSeason.length,  color: 'bg-[#1D4ED8] text-white border-[#1D4ED8]' },
-        { id: 'inactive',    label: 'Inactive',    count: inactive.length,   color: 'bg-gray-500 text-white border-gray-500' },
-        { id: 'all',         label: 'All',         count: allInternships.length, color: 'bg-black text-white border-black' },
+    const sourceFilters: { id: FilterSource; label: string; count: number; activeClass: string }[] = [
+        { id: 'active',      label: 'ACTIVE',     count: active.length,         activeClass: 'bg-[#15803D] text-white border-[#15803D]' },
+        { id: 'off-season',  label: 'OFF-SEASON', count: offSeason.length,      activeClass: 'bg-[#1D4ED8] text-white border-[#1D4ED8]' },
+        { id: 'all',         label: 'ALL',        count: allInternships.length, activeClass: 'bg-black text-white border-black' },
     ];
 
     return (
         <div
-            className="flex flex-col items-center justify-start p-4 md:p-10 min-h-screen overflow-y-auto"
+            className="flex flex-col min-h-screen"
             style={{
+                background: '#F0F0E8',
                 backgroundImage:
-                    'linear-gradient(rgba(29, 78, 216, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(29, 78, 216, 0.05) 1px, transparent 1px)',
+                    'linear-gradient(rgba(29,78,216,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(29,78,216,0.04) 1px,transparent 1px)',
                 backgroundSize: '40px 40px',
             }}
         >
+            {/* ── Navbar ── */}
+            <nav className="sticky top-0 z-50 w-full border-b border-black bg-white shadow-[0px_2px_0px_0px_#000000]">
+                <div className="max-w-6xl mx-auto px-4 sm:px-8 h-12 flex items-center justify-between gap-4">
+                    <Link
+                        href="/"
+                        className="font-serif font-bold text-base sm:text-lg tracking-tight uppercase hover:text-[#1D4ED8] transition-colors"
+                    >
+                        Resume Matcher
+                    </Link>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <span className="hidden sm:block font-sans text-[10px] text-gray-400 uppercase tracking-widest">
+                            Internships 2026
+                        </span>
+                        <Link
+                            href="/login"
+                            className="font-sans font-semibold text-xs uppercase px-3 py-1 border border-black bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] hover:bg-[#1D4ED8] hover:border-[#1D4ED8] transition-colors"
+                        >
+                            Sign In
+                        </Link>
+                    </div>
+                </div>
+            </nav>
+
+            {/* ── Main content ── */}
+            <div className="flex flex-col items-center px-4 md:px-10 py-8">
             <div className="w-full max-w-6xl border border-black bg-[#F0F0E8] shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)]">
                 {/* Header */}
                 <div className="border-b border-black p-6 sm:p-8 bg-white flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -104,8 +137,8 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                             </span>
                         </h1>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
-                        <div className="flex items-center gap-3 font-mono text-xs text-gray-500 uppercase">
+                    <div className="flex flex-col items-start md:items-end gap-1">
+                        <div className="flex flex-wrap items-center gap-3 font-mono text-xs text-gray-500 uppercase">
                             <span className="inline-flex items-center gap-1">
                                 <span className="w-2 h-2 bg-[#15803D] inline-block border border-black"></span>
                                 {active.length} Active
@@ -113,10 +146,6 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                             <span className="inline-flex items-center gap-1">
                                 <span className="w-2 h-2 bg-[#1D4ED8] inline-block border border-black"></span>
                                 {offSeason.length} Off-Season
-                            </span>
-                            <span className="inline-flex items-center gap-1">
-                                <span className="w-2 h-2 bg-gray-400 inline-block border border-black"></span>
-                                {inactive.length} Inactive
                             </span>
                         </div>
                         <p className="font-mono text-[10px] text-gray-400 uppercase">
@@ -135,26 +164,26 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                                 placeholder="Search companies, roles, locations..."
                                 value={search}
                                 onChange={(e) => handleSearch(e.target.value)}
-                                className="w-full h-10 pl-10 pr-4 border border-black bg-[#F5F5ED] font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                className="w-full h-10 pl-10 pr-4 border border-black bg-[#F5F5ED] font-sans text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
                             />
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-3">
-                            {/* Source tabs with counts */}
+                        <div className="flex flex-wrap items-start gap-3">
+                            {/* Source tab buttons */}
                             <div className="flex border border-black overflow-hidden">
                                 {sourceFilters.map((f) => (
                                     <button
                                         key={f.id}
                                         type="button"
                                         onClick={() => handleFilterSource(f.id)}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-xs uppercase border-r last:border-r-0 border-black transition-colors ${
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 font-sans text-xs font-semibold uppercase border-r last:border-r-0 border-black transition-colors ${
                                             filterSource === f.id
-                                                ? f.color
+                                                ? f.activeClass
                                                 : 'bg-white hover:bg-[#F0F0E8] text-black'
                                         }`}
                                     >
                                         {f.label}
-                                        <span className={`font-mono text-[10px] px-1 border ${
+                                        <span className={`font-sans text-[10px] px-1 border ${
                                             filterSource === f.id ? 'border-white/40 bg-white/20' : 'border-black/20 bg-black/5'
                                         }`}>
                                             {f.count}
@@ -163,12 +192,12 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                                 ))}
                             </div>
 
-                            {/* Category pill buttons — populated from real section names */}
+                            {/* Section pill filters */}
                             <div className="flex flex-wrap gap-1.5">
                                 <button
                                     type="button"
                                     onClick={() => handleFilterSection('all')}
-                                    className={`px-3 py-1 border border-black font-mono text-xs uppercase transition-colors ${
+                                    className={`px-3 py-1 border border-black font-sans text-xs font-semibold uppercase transition-colors ${
                                         filterSection === 'all' ? 'bg-black text-white' : 'bg-white hover:bg-[#F0F0E8]'
                                     }`}
                                 >
@@ -179,7 +208,7 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                                         key={s}
                                         type="button"
                                         onClick={() => handleFilterSection(s)}
-                                        className={`px-3 py-1 border border-black font-mono text-xs uppercase transition-colors ${
+                                        className={`px-3 py-1 border border-black font-sans text-xs font-semibold uppercase transition-colors ${
                                             filterSection === s ? 'bg-black text-white' : 'bg-white hover:bg-[#F0F0E8]'
                                         }`}
                                     >
@@ -192,7 +221,7 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
 
                     {/* Results bar */}
                     <div className="flex items-center justify-between border-b-2 border-black pb-2">
-                        <span className="font-mono text-sm font-bold uppercase tracking-wider">
+                        <span className="font-sans text-sm font-bold uppercase tracking-wider">
                             {filtered.length} Roles Found
                         </span>
                         {totalPages > 1 && (
@@ -207,17 +236,17 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="border-b-2 border-black bg-[#E5E5E0]">
-                                    <th className="p-3 font-mono text-xs uppercase tracking-wider">Company</th>
-                                    <th className="p-3 font-mono text-xs uppercase tracking-wider">Role / Category</th>
-                                    <th className="p-3 font-mono text-xs uppercase tracking-wider hidden md:table-cell">Location</th>
-                                    <th className="p-3 font-mono text-xs uppercase tracking-wider hidden lg:table-cell">Posted</th>
-                                    <th className="p-3 font-mono text-xs uppercase tracking-wider text-right">Apply</th>
+                                    <th className="p-3 font-sans text-xs font-bold uppercase tracking-wider">Company</th>
+                                    <th className="p-3 font-sans text-xs font-bold uppercase tracking-wider">Role</th>
+                                    <th className="p-3 font-sans text-xs font-bold uppercase tracking-wider hidden md:table-cell">Location</th>
+                                    <th className="p-3 font-sans text-xs font-bold uppercase tracking-wider hidden lg:table-cell">Posted</th>
+                                    <th className="p-3 font-sans text-xs font-bold uppercase tracking-wider text-right">Apply</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {paged.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="p-12 text-center font-mono text-gray-400 uppercase text-xs">
+                                        <td colSpan={5} className="p-12 text-center font-sans text-gray-400 uppercase text-xs">
                                             No internships found.
                                         </td>
                                     </tr>
@@ -226,13 +255,11 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                                         <tr
                                             key={`${item.company}-${item.role}-${idx}`}
                                             className={`border-b transition-colors ${
-                                                item.source === 'inactive'
-                                                    ? 'border-black/5 bg-gray-100 opacity-45 hover:opacity-80'
-                                                    : item.isClosed
-                                                        ? 'border-black/5 opacity-50 hover:opacity-75'
-                                                        : item.isSubRole
-                                                            ? 'border-black/10 bg-gray-50/60'
-                                                            : 'border-black/10 hover:bg-[#F5F5ED]'
+                                                item.isClosed
+                                                    ? 'border-black/5 bg-red-50/30 opacity-60 hover:opacity-80'
+                                                    : item.isSubRole
+                                                        ? 'border-black/10 bg-gray-50/60 hover:bg-[#F5F5ED]'
+                                                        : 'border-black/10 hover:bg-[#F5F5ED]'
                                             }`}
                                         >
                                             {/* Company */}
@@ -251,29 +278,33 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                                                     ) : (
                                                         <span className="font-bold text-sm">{item.company}</span>
                                                     )}
-                                                    {item.isClosed && (
-                                                        <span className="inline-flex items-center gap-0.5 bg-red-50 text-red-700 text-[9px] px-1 py-0.5 font-mono uppercase font-bold border border-red-300">
-                                                            <ShieldAlert className="w-2.5 h-2.5" /> Closed
-                                                        </span>
-                                                    )}
-                                                    {item.source === 'inactive' && (
-                                                        <span className="inline-flex items-center bg-gray-100 text-gray-500 text-[9px] px-1 py-0.5 font-mono uppercase font-bold border border-gray-300">
-                                                            Inactive
-                                                        </span>
+                                                    {item.isFaang && (
+                                                        <span title="FAANG+ company" className="text-base leading-none">🔥</span>
                                                     )}
                                                     {item.source === 'off-season' && (
-                                                        <span className="inline-flex items-center bg-blue-50 text-blue-700 text-[9px] px-1 py-0.5 font-mono uppercase font-bold border border-blue-300">
+                                                        <span className="inline-flex items-center bg-blue-50 text-blue-700 text-[9px] px-1 py-0.5 font-sans font-bold uppercase border border-blue-300">
                                                             Off-Season
+                                                        </span>
+                                                    )}
+                                                    {item.isClosed && (
+                                                        <span className="inline-flex items-center gap-0.5 bg-red-50 text-red-700 text-[9px] px-1 py-0.5 font-sans font-bold uppercase border border-red-300">
+                                                            <ShieldAlert className="w-2.5 h-2.5" /> Closed
                                                         </span>
                                                     )}
                                                 </div>
                                             </td>
 
-                                            {/* Role + section tag */}
-                                            <td className="p-3">
-                                                <span className="font-medium text-sm">{item.role}</span>
+                                            {/* Role + flags + section */}
+                                            <td className="p-3 max-w-[240px]">
+                                                <div className="flex flex-wrap items-start gap-1">
+                                                    <span className="font-medium text-sm leading-snug">{item.role}</span>
+                                                    {item.isClosed && <span title="Application closed" className="text-base leading-none">🔒</span>}
+                                                    {item.noSponsorship && <span title="Does NOT offer sponsorship" className="text-base leading-none">🛂</span>}
+                                                    {item.requiresCitizenship && <span title="Requires U.S. Citizenship" className="text-base leading-none">🇺🇸</span>}
+                                                    {item.requiresAdvancedDegree && <span title="Advanced degree required" className="text-base leading-none">🎓</span>}
+                                                </div>
                                                 {item.section && item.section !== 'General' && (
-                                                    <div className="font-mono text-[10px] text-gray-400 mt-0.5 uppercase tracking-wider">
+                                                    <div className="font-mono text-[9px] text-gray-400 mt-0.5 uppercase tracking-wider">
                                                         {item.section}
                                                     </div>
                                                 )}
@@ -296,7 +327,7 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                                                 )}
                                             </td>
 
-                                            {/* Apply + Simplify links */}
+                                            {/* Apply + Simplify */}
                                             <td className="p-3 text-right">
                                                 <div className="flex items-center justify-end gap-1.5">
                                                     {item.simplifyUrl && (
@@ -304,7 +335,7 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                                                             href={item.simplifyUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="inline-flex items-center h-7 px-2 border border-[#1D4ED8] bg-blue-50 text-[#1D4ED8] font-mono text-[10px] uppercase hover:bg-[#1D4ED8] hover:text-white transition-colors"
+                                                            className="inline-flex items-center h-7 px-2 border border-[#1D4ED8] bg-blue-50 text-[#1D4ED8] font-sans font-semibold text-[10px] uppercase hover:bg-[#1D4ED8] hover:text-white transition-colors"
                                                         >
                                                             Simplify
                                                         </a>
@@ -314,12 +345,12 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                                                             href={item.applyUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
-                                                            className="inline-flex items-center gap-1 h-7 px-2.5 border border-black bg-black text-white font-mono text-[10px] uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] hover:bg-[#1D4ED8] hover:border-[#1D4ED8] transition-colors"
+                                                            className="inline-flex items-center gap-1 h-7 px-2.5 border border-black bg-black text-white font-sans font-semibold text-[10px] uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,0.3)] hover:bg-[#1D4ED8] hover:border-[#1D4ED8] transition-colors"
                                                         >
                                                             Apply <ExternalLink className="w-2.5 h-2.5" />
                                                         </a>
                                                     ) : (
-                                                        <span className="text-gray-300 font-mono text-[10px] uppercase">No Link</span>
+                                                        <span className="text-gray-300 font-sans text-[10px] uppercase">No Link</span>
                                                     )}
                                                 </div>
                                             </td>
@@ -341,7 +372,7 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                                     type="button"
                                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                                     disabled={safePage === 1}
-                                    className="flex items-center gap-1 px-3 py-1 border border-black font-mono text-xs uppercase bg-white hover:bg-[#F0F0E8] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    className="flex items-center gap-1 px-3 py-1 border border-black font-sans text-xs font-semibold uppercase bg-white hover:bg-[#F0F0E8] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                 >
                                     <ChevronLeft className="w-3 h-3" /> Prev
                                 </button>
@@ -363,7 +394,7 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                                     type="button"
                                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                                     disabled={safePage === totalPages}
-                                    className="flex items-center gap-1 px-3 py-1 border border-black font-mono text-xs uppercase bg-white hover:bg-[#F0F0E8] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                    className="flex items-center gap-1 px-3 py-1 border border-black font-sans text-xs font-semibold uppercase bg-white hover:bg-[#F0F0E8] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                                 >
                                     Next <ChevronRight className="w-3 h-3" />
                                 </button>
@@ -371,9 +402,23 @@ export default function InternshipListClient({ active, offSeason, inactive, fetc
                         </div>
                     )}
 
-                    <p className="font-mono text-[10px] text-gray-400 text-center uppercase tracking-wider">
-                        Data source: github.com/SimplifyJobs/Summer2026-Internships · Refreshed every 24h
-                    </p>
+                        {/* Legend */}
+                        <div className="bg-white border border-black p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.08)]">
+                            <p className="font-sans text-xs font-bold uppercase tracking-wider mb-2 text-gray-700">Legend</p>
+                            <div className="flex flex-wrap gap-x-6 gap-y-1.5">
+                                {LEGEND.map(({ icon, label }) => (
+                                    <span key={icon} className="inline-flex items-center gap-1.5 font-sans text-xs text-gray-600">
+                                        <span className="text-base leading-none">{icon}</span>
+                                        {label}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        <p className="font-mono text-[10px] text-gray-400 text-center uppercase tracking-wider">
+                            Data source: github.com/SimplifyJobs/Summer2026-Internships · Refreshed every 24h
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

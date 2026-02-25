@@ -155,6 +155,11 @@ class Settings(BaseSettings):
     resend_api_key: str | None = None
     resend_from_email: str = "no-reply@bevansatria.my.id"
 
+    # Internship proxy – key shared only between Next.js server and this backend
+    # Set the same value in both INTERNSHIP_API_KEY env vars.
+    # If empty, the endpoint is open (dev mode).
+    internship_api_key: str = ""
+
     # CORS Configuration
     cors_origins: list[str] = [
         "http://localhost:3000",
