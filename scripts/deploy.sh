@@ -325,9 +325,7 @@ sleep 2
 free_port $BACKEND_PORT "Backend"
 
 source venv/bin/activate
-REPO_ROOT="$(pwd)"
-BACKEND_ENV_FILE="$REPO_ROOT/.env"
-screen -dmS resume-backend bash -c "cd '$REPO_ROOT/apps/backend' && source venv/bin/activate && if [ -f '$BACKEND_ENV_FILE' ]; then set -a; source '$BACKEND_ENV_FILE'; set +a; fi && python -m uvicorn app.main:app --host 127.0.0.1 --port $BACKEND_PORT"
+screen -dmS resume-backend python -m uvicorn app.main:app --host 127.0.0.1 --port $BACKEND_PORT
 cd ../..
 
 # Wait for backend port to be up
