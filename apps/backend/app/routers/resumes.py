@@ -374,7 +374,6 @@ async def _generate_auxiliary_messages(
 
 router = APIRouter(prefix="/resumes", tags=["Resumes"], dependencies=[Depends(get_current_user)])
 
-ALLOWED_TYPES = {
 
 async def _process_resume_background(resume_id: str, markdown_content: str, user_id: str) -> None:
     """Background task: run LLM parse and update DB record."""
@@ -427,9 +426,9 @@ MAX_FILE_SIZE = 4 * 1024 * 1024  # 4MB
 
 @router.post("/upload", response_model=ResumeUploadResponse)
 async def upload_resume(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     as_master: bool = Query(False),
-    background_tasks: BackgroundTasks,
     user=Depends(get_current_user),
 ) -> ResumeUploadResponse:
     """Upload and process a resume file (PDF/DOCX).

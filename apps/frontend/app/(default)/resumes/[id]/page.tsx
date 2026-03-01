@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import Resume, { ResumeData } from '@/components/dashboard/resume-component';
+
 import {
   fetchResume,
   fetchResumeList,
@@ -14,6 +15,7 @@ import {
   retryProcessing,
   renameResume,
 } from '@/lib/api/resume';
+
 import { useStatusCache } from '@/lib/context/status-cache';
 import { ArrowLeft, Edit, Download, Loader2, AlertCircle, Sparkles, Pencil } from 'lucide-react';
 import { EnrichmentModal } from '@/components/enrichment/enrichment-modal';
