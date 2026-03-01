@@ -380,6 +380,23 @@ async def _process_resume_background(resume_id: str, markdown_content: str, user
     """Background task: run LLM parse and update DB record."""
     try:
         processed_data = await parse_resume_to_json(markdown_content, user_id=user_id)
+
+        # Treat empty or null LLM output as a failure — don't mark "ready"
+        # with no data that would render a blank resume on the frontend.
+        has_content = bool(
+            processed_data
+            and (
+                (processed_data.get("personalInfo") or {}).get("name")
+                or processed_data.get("workExperience")
+                or processed_data.get("education")
+                or processed_data.get("sectionMeta")
+            )
+        )
+        if not has_content:
+            logger.warning(f"Background processing returned empty data for resume {resume_id}")
+            db.update_resume(resume_id, {"processing_status": "failed"}, user_id=user_id)
+            return
+
         derived_title = (
             (processed_data or {}).get("personalInfo", {}).get("title")
         ) or None
@@ -1406,6 +1423,27 @@ async def retry_processing(
 
     try:
         processed_data = await parse_resume_to_json(markdown_content, user_id=user.id)
+
+        # Treat empty output as a failure rather than saving blank resume data.
+        has_content = bool(
+            processed_data
+            and (
+                (processed_data.get("personalInfo") or {}).get("name")
+                or processed_data.get("workExperience")
+                or processed_data.get("education")
+                or processed_data.get("sectionMeta")
+            )
+        )
+        if not has_content:
+            db.update_resume(resume_id, {"processing_status": "failed"}, user_id=user.id)
+            return ResumeUploadResponse(
+                message="Retry processing returned empty data",
+                request_id=str(uuid4()),
+                resume_id=resume_id,
+                processing_status="failed",
+                is_master=resume.get("is_master", False),
+            )
+
         derived_title = (
             (processed_data or {}).get("personalInfo", {}).get("title")
         ) or None

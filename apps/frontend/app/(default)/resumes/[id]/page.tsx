@@ -119,6 +119,8 @@ export default function ResumeViewerPage() {
 
   // Auto-poll every 3 s while background LLM processing is in progress.
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollStartRef = useRef<number>(0);
+  const POLL_TIMEOUT_MS = 10 * 60 * 1000; // stop after 10 minutes — treat as stuck
   useEffect(() => {
     if (processingStatus !== 'processing') {
       if (pollingRef.current) {
@@ -127,7 +129,16 @@ export default function ResumeViewerPage() {
       }
       return;
     }
+    pollStartRef.current = Date.now();
     pollingRef.current = setInterval(async () => {
+      // Stop polling if record is stuck for too long — let user retry manually.
+      if (Date.now() - pollStartRef.current > POLL_TIMEOUT_MS) {
+        clearInterval(pollingRef.current!);
+        pollingRef.current = null;
+        setProcessingStatus('failed');
+        setError(t('resumeViewer.errors.processingFailed'));
+        return;
+      }
       try {
         const data = await fetchResume(resumeId);
         const newStatus = (data.raw_resume?.processing_status || 'pending') as ProcessingStatus;
@@ -172,6 +183,11 @@ export default function ResumeViewerPage() {
 
   const handleRetryProcessing = async () => {
     if (!resumeId) return;
+    // Stop the background polling before triggering a manual retry.
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
     setIsRetrying(true);
     try {
       const result = await retryProcessing(resumeId);
@@ -179,6 +195,7 @@ export default function ResumeViewerPage() {
         // Reload the page to show the processed resume
         window.location.reload();
       } else {
+        setProcessingStatus('failed');
         setError(t('resumeViewer.errors.processingFailed'));
       }
     } catch (err) {
@@ -221,8 +238,19 @@ export default function ResumeViewerPage() {
     try {
       const data = await fetchResume(resumeId);
       if (data.processed_resume) {
-        setResumeData(data.processed_resume as ResumeData);
-        setError(null);
+        const pd = data.processed_resume as ResumeData;
+        const hasContent =
+          pd.personalInfo?.name ||
+          (Array.isArray(pd.workExperience) && pd.workExperience.length > 0) ||
+          (Array.isArray(pd.sectionMeta) && pd.sectionMeta.length > 0) ||
+          (Array.isArray(pd.education) && pd.education.length > 0);
+        if (hasContent) {
+          setResumeData(pd);
+          setError(null);
+        } else {
+          setProcessingStatus('failed');
+          setError(t('resumeViewer.errors.processingFailed'));
+        }
       }
     } catch (err) {
       console.error('Failed to reload resume:', err);
