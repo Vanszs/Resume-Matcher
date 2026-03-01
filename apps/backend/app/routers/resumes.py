@@ -12,7 +12,7 @@ from typing import Any, NoReturn
 from uuid import uuid4
 
 import jwt as pyjwt
-from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import Response, StreamingResponse
 
 from app.database import db
@@ -375,6 +375,32 @@ async def _generate_auxiliary_messages(
 router = APIRouter(prefix="/resumes", tags=["Resumes"], dependencies=[Depends(get_current_user)])
 
 ALLOWED_TYPES = {
+
+async def _process_resume_background(resume_id: str, markdown_content: str, user_id: str) -> None:
+    """Background task: run LLM parse and update DB record."""
+    try:
+        processed_data = await parse_resume_to_json(markdown_content, user_id=user_id)
+        derived_title = (
+            (processed_data or {}).get("personalInfo", {}).get("title")
+        ) or None
+        resume = db.get_active_resume(resume_id, user_id=user_id)
+        title_update = {"title": derived_title} if derived_title and resume and not resume.get("title") else {}
+        db.update_resume(
+            resume_id,
+            {
+                "processed_data": processed_data,
+                "processing_status": "ready",
+                **title_update,
+            },
+            user_id=user_id,
+        )
+        logger.info(f"Background processing completed for resume {resume_id}")
+    except Exception as e:
+        logger.warning(f"Background processing failed for resume {resume_id}: {e}")
+        db.update_resume(resume_id, {"processing_status": "failed"}, user_id=user_id)
+
+
+ALLOWED_TYPES = {
     "application/pdf",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -386,6 +412,7 @@ MAX_FILE_SIZE = 4 * 1024 * 1024  # 4MB
 async def upload_resume(
     file: UploadFile = File(...),
     as_master: bool = Query(False),
+    background_tasks: BackgroundTasks,
     user=Depends(get_current_user),
 ) -> ResumeUploadResponse:
     """Upload and process a resume file (PDF/DOCX).
@@ -444,51 +471,20 @@ async def upload_resume(
             user_id=user.id,
         )
 
-    # Try to parse to structured JSON (optional, may fail if LLM not configured)
-    try:
-        processed_data = await parse_resume_to_json(markdown_content, user_id=user.id)
-        # Derive and persist title from personalInfo.title so both the list
-        # endpoint and the detail page always read the same stable DB value.
-        # Only set if no title already exists (preserves manual edits).
-        derived_title = (
-            (processed_data or {})
-            .get("personalInfo", {})
-            .get("title")
-        ) or None
-        title_update = {"title": derived_title} if derived_title and not resume.get("title") else {}
-        db.update_resume(
-            resume["resume_id"],
-            {
-                "processed_data": processed_data,
-                "processing_status": "ready",
-                **title_update,
-            },
-            user_id=user.id,
-        )
-        resume["processed_data"] = processed_data
-        resume["processing_status"] = "ready"
-        if title_update:
-            resume["title"] = derived_title
-    except Exception as e:
-        # LLM parsing failed, update status to failed
-        logger.warning(f"Resume parsing to JSON failed for {file.filename}: {e}")
-        db.update_resume(
-            resume["resume_id"],
-            {"processing_status": "failed"},
-            user_id=user.id,
-        )
-        resume["processing_status"] = "failed"
+    # Kick off LLM parsing in the background so the HTTP response returns
+    # immediately and is not killed by Cloudflare's edge timeout (524).
+    background_tasks.add_task(
+        _process_resume_background,
+        resume["resume_id"],
+        markdown_content,
+        user.id,
+    )
 
-    # Return accurate status to client (API-001 fix)
     return ResumeUploadResponse(
-        message=(
-            f"File {file.filename} uploaded successfully"
-            if resume["processing_status"] == "ready"
-            else f"File {file.filename} uploaded but parsing failed"
-        ),
+        message=f"File {file.filename} uploaded — AI parsing in progress",
         request_id=str(uuid4()),
         resume_id=resume["resume_id"],
-        processing_status=resume["processing_status"],
+        processing_status="processing",
         is_master=resume.get("is_master", False),
     )
 
@@ -1395,10 +1391,10 @@ async def retry_processing(
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
-    if resume.get("processing_status") != "failed":
+    if resume.get("processing_status") not in ("failed", "processing"):
         raise HTTPException(
             status_code=400,
-            detail="Only resumes with 'failed' processing status can be retried.",
+            detail="Only resumes with 'failed' or 'processing' status can be retried.",
         )
 
     markdown_content = resume.get("content", "")

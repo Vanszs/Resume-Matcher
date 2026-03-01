@@ -100,7 +100,8 @@
       "dropzoneTitle": "クリックまたはファイルをドラッグ",
       "dropzoneSubtitle": "PDF、DOC、DOCX（最大 4MB）",
       "tryDifferentFile": "別のファイルを試す",
-      "parsingFailedKeepOpen": "AI 解析に失敗しました。別のファイルを試すか、このダイアログを閉じてください。"
+      "parsingFailedKeepOpen": "AI 解析に失敗しました。別のファイルを試すか、このダイアログを閉じてください。",
+      "aiProcessing": "AI があなたの職務経歴書を解析中… しばらくお待ちください。"
     }
   },
   "builder": {

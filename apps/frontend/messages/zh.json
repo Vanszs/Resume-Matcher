@@ -100,7 +100,8 @@
       "dropzoneTitle": "点击或拖拽文件",
       "dropzoneSubtitle": "PDF、DOC、DOCX（最大 4MB）",
       "tryDifferentFile": "尝试其他文件",
-      "parsingFailedKeepOpen": "AI 解析失败。请尝试其他文件，或关闭此对话框。"
+      "parsingFailedKeepOpen": "AI 解析失败。请尝试其他文件，或关闭此对话框。",
+      "aiProcessing": "AI 正在解析您的简历… 请稍候。"
     }
   },
   "builder": {

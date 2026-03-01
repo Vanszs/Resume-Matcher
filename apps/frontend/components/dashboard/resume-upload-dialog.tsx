@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
 import { useFileUpload, formatBytes } from '@/hooks/use-file-upload';
 import { getUploadUrl } from '@/lib/api/client';
 import { useTranslations } from '@/lib/i18n';
-import { retryProcessing } from '@/lib/api/resume';
+import { retryProcessing, fetchResume, deleteResume } from '@/lib/api/resume';
 
 interface ResumeUploadDialogProps {
   trigger?: React.ReactNode;
@@ -53,6 +53,16 @@ export function ResumeUploadDialog({
   } | null>(null);
   const [failedResumeId, setFailedResumeId] = useState<string | null>(null);
   const [isRetryingProcessing, setIsRetryingProcessing] = useState(false);
+  // Tracks a resume whose AI parsing is still running in the background.
+  // While set, the dialog stays open showing a processing indicator.
+  const [pendingResumeId, setPendingResumeId] = useState<string | null>(null);
+  const [isAwaitingProcessing, setIsAwaitingProcessing] = useState(false);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Ref copy so stale closures inside hook callbacks can always read current value.
+  const pendingResumeIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    pendingResumeIdRef.current = pendingResumeId;
+  }, [pendingResumeId]);
   const isControlled = controlledOpen !== undefined;
   const isOpen = isControlled ? controlledOpen : internalOpen;
   const setIsOpen = (nextOpen: boolean) => {
@@ -61,6 +71,29 @@ export function ResumeUploadDialog({
     }
     onOpenChange?.(nextOpen);
   };
+
+  // Stop polling and optionally delete the pending record (when user cancels).
+  const stopPolling = (deleteId?: string) => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+    if (deleteId) {
+      deleteResume(deleteId).catch(() => {});
+    }
+    setPendingResumeId(null);
+    setIsAwaitingProcessing(false);
+  };
+
+  // Cleanup polling when component unmounts.
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+    };
+  }, []);
 
   const UPLOAD_URL = getUploadUrl(asMaster);
 
@@ -128,6 +161,48 @@ export function ResumeUploadDialog({
           setFailedResumeId(data.resume_id);
           return;
         }
+        // Backend returns 'processing' immediately (async background parsing).
+        // Keep dialog open and poll until AI finishes.
+        if (data.processing_status === 'processing') {
+          setPendingResumeId(data.resume_id);
+          setIsAwaitingProcessing(true);
+          setUploadFeedback({
+            type: 'success',
+            message: t('dashboard.uploadDialog.aiProcessing'),
+          });
+          const pending_id = data.resume_id;
+          const file_id = uploadedFile.id;
+          pollingRef.current = setInterval(async () => {
+            try {
+              const res = await fetchResume(pending_id);
+              const newStatus = res.raw_resume?.processing_status;
+              if (newStatus === 'ready') {
+                clearInterval(pollingRef.current!);
+                pollingRef.current = null;
+                setPendingResumeId(null);
+                setIsAwaitingProcessing(false);
+                handleUploadSuccess({
+                  resumeId: pending_id,
+                  fileId: file_id,
+                  message: successMessage,
+                });
+              } else if (newStatus === 'failed') {
+                clearInterval(pollingRef.current!);
+                pollingRef.current = null;
+                setIsAwaitingProcessing(false);
+                setUploadFeedback({
+                  type: 'error',
+                  message: t('dashboard.uploadDialog.parsingFailedKeepOpen'),
+                });
+                setFailedResumeId(pending_id);
+                setPendingResumeId(null);
+              }
+            } catch {
+              // ignore transient poll errors
+            }
+          }, 3000);
+          return;
+        }
         handleUploadSuccess({
           resumeId: data.resume_id,
           fileId: uploadedFile.id,
@@ -152,6 +227,8 @@ export function ResumeUploadDialog({
       if (currentFiles.length === 0) {
         setUploadFeedback(null);
         setFailedResumeId(null);
+        // If user removes the file while processing is pending, delete the orphaned record.
+        stopPolling(pendingResumeIdRef.current ?? undefined);
       }
     },
   });
@@ -189,7 +266,17 @@ export function ResumeUploadDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(nextOpen) => {
+        // If dialog is being closed while AI parsing is still in progress,
+        // delete the orphaned backend record so dashboard stays clean.
+        if (!nextOpen && pendingResumeIdRef.current) {
+          stopPolling(pendingResumeIdRef.current);
+        }
+        setIsOpen(nextOpen);
+      }}
+    >
       <DialogTrigger asChild>
         {trigger || (
           <Button className="rounded-none border border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all">
@@ -215,10 +302,10 @@ export function ResumeUploadDialog({
                             ${isRetryingProcessing ? 'opacity-70' : ''}
                         `}
             onClick={!currentFile && !isRetryingProcessing ? openFileDialog : undefined}
-            onDragEnter={isRetryingProcessing ? preventDropzoneInteraction : handleDragEnter}
-            onDragLeave={isRetryingProcessing ? preventDropzoneInteraction : handleDragLeave}
-            onDragOver={isRetryingProcessing ? preventDropzoneInteraction : handleDragOver}
-            onDrop={isRetryingProcessing ? preventDropzoneInteraction : handleDrop}
+            onDragEnter={(isRetryingProcessing || isAwaitingProcessing) ? preventDropzoneInteraction : handleDragEnter}
+            onDragLeave={(isRetryingProcessing || isAwaitingProcessing) ? preventDropzoneInteraction : handleDragLeave}
+            onDragOver={(isRetryingProcessing || isAwaitingProcessing) ? preventDropzoneInteraction : handleDragOver}
+            onDrop={(isRetryingProcessing || isAwaitingProcessing) ? preventDropzoneInteraction : handleDrop}
           >
             <input {...getInputProps()} />
 
@@ -228,6 +315,35 @@ export function ResumeUploadDialog({
                 <p className="font-mono text-sm font-bold uppercase text-blue-700">
                   {t('common.uploading')}
                 </p>
+              </div>
+            ) : isAwaitingProcessing && currentFile ? (
+              /* AI parsing in progress */
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 text-left overflow-hidden">
+                  <div className="w-10 h-10 border border-black bg-blue-50 flex items-center justify-center shrink-0">
+                    <Loader2Icon className="w-5 h-5 text-blue-700 animate-spin" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm truncate max-w-[200px]">
+                      {currentFile.file.name}
+                    </p>
+                    <p className="font-mono text-xs text-blue-600 uppercase">
+                      {t('dashboard.uploadDialog.aiProcessing')}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFile(currentFile.id);
+                  }}
+                  className="hover:bg-red-100 text-red-600 rounded-none"
+                  title={t('dashboard.uploadDialog.tryDifferentFile')}
+                >
+                  <XIcon className="w-5 h-5" />
+                </Button>
               </div>
             ) : currentFile ? (
               <div className="flex items-center justify-between gap-4">
@@ -311,6 +427,7 @@ export function ResumeUploadDialog({
               className="rounded-none border-black hover:bg-gray-100 w-full sm:w-auto"
               disabled={isRetryingProcessing}
               onClick={() => {
+                if (pendingResumeIdRef.current) stopPolling(pendingResumeIdRef.current);
                 if (files[0]) removeFile(files[0].id);
                 setUploadFeedback(null);
                 setFailedResumeId(null);

@@ -100,7 +100,8 @@
       "dropzoneTitle": "Click or Drag File",
       "dropzoneSubtitle": "PDF, DOC, DOCX (Max 4MB)",
       "tryDifferentFile": "Try Different File",
-      "parsingFailedKeepOpen": "AI parsing failed. Try a different file or close this dialog."
+      "parsingFailedKeepOpen": "AI parsing failed. Try a different file or close this dialog.",
+      "aiProcessing": "AI is parsing your resume\u2026 Please wait."
     }
   },
   "builder": {

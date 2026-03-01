@@ -100,7 +100,8 @@
       "dropzoneTitle": "Clique ou Arraste o Arquivo",
       "dropzoneSubtitle": "PDF, DOC, DOCX (Máximo 4MB)",
       "tryDifferentFile": "Tentar outro arquivo",
-      "parsingFailedKeepOpen": "A análise de IA falhou. Tente outro arquivo ou feche este diálogo."
+      "parsingFailedKeepOpen": "A análise de IA falhou. Tente outro arquivo ou feche este diálogo.",
+      "aiProcessing": "A IA está analisando seu currículo… Aguarde."
     }
   },
   "builder": {

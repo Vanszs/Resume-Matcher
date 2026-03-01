@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -76,8 +76,21 @@ export default function ResumeViewerPage() {
 
         // Prioritize processed_resume if available (structured JSON)
         if (data.processed_resume) {
-          setResumeData(data.processed_resume as ResumeData);
-          setError(null);
+          const pd = data.processed_resume as ResumeData;
+          // Treat completely empty LLM output (no name, no sections) as failed
+          const hasContent =
+            pd.personalInfo?.name ||
+            (Array.isArray(pd.workExperience) && pd.workExperience.length > 0) ||
+            (Array.isArray(pd.sectionMeta) && pd.sectionMeta.length > 0) ||
+            (Array.isArray(pd.education) && pd.education.length > 0);
+          if (hasContent) {
+            setResumeData(pd);
+            setError(null);
+          } else {
+            // processed_resume exists but is empty — treat as failed so retry button shows
+            setProcessingStatus('failed');
+            setError(t('resumeViewer.errors.processingFailed'));
+          }
         } else if (status === 'failed') {
           setError(t('resumeViewer.errors.processingFailed'));
         } else if (status === 'processing') {
@@ -103,6 +116,59 @@ export default function ResumeViewerPage() {
 
     loadResume();
   }, [resumeId, t]);
+
+  // Auto-poll every 3 s while background LLM processing is in progress.
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => {
+    if (processingStatus !== 'processing') {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+      return;
+    }
+    pollingRef.current = setInterval(async () => {
+      try {
+        const data = await fetchResume(resumeId);
+        const newStatus = (data.raw_resume?.processing_status || 'pending') as ProcessingStatus;
+        if (newStatus === 'ready') {
+          clearInterval(pollingRef.current!);
+          pollingRef.current = null;
+          setProcessingStatus('ready');
+          if (data.processed_resume) {
+            const pd = data.processed_resume as ResumeData;
+            const hasContent =
+              pd.personalInfo?.name ||
+              (Array.isArray(pd.workExperience) && pd.workExperience.length > 0) ||
+              (Array.isArray(pd.sectionMeta) && pd.sectionMeta.length > 0) ||
+              (Array.isArray(pd.education) && pd.education.length > 0);
+            if (hasContent) {
+              setResumeData(pd);
+              setError(null);
+            } else {
+              setProcessingStatus('failed');
+              setError(t('resumeViewer.errors.processingFailed'));
+            }
+          } else {
+            setError(t('resumeViewer.errors.noDataAvailable'));
+          }
+        } else if (newStatus === 'failed') {
+          clearInterval(pollingRef.current!);
+          pollingRef.current = null;
+          setProcessingStatus('failed');
+          setError(t('resumeViewer.errors.processingFailed'));
+        }
+      } catch {
+        // ignore transient poll errors
+      }
+    }, 3000);
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+    };
+  }, [processingStatus, resumeId, t]);
 
   const handleRetryProcessing = async () => {
     if (!resumeId) return;
@@ -269,7 +335,8 @@ export default function ResumeViewerPage() {
             {error || t('resumeViewer.resumeNotFound')}
           </p>
           <div className="flex flex-col gap-2">
-            {isFailed && (
+            {/* Show retry+delete for both stuck-processing AND failed resumes */}
+            {(isFailed || isProcessing) && (
               <>
                 <Button onClick={handleRetryProcessing} disabled={isRetrying}>
                   {isRetrying ? (
