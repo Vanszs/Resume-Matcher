@@ -24,7 +24,7 @@ export function middleware(request: NextRequest) {
     const normalizedPath = pathname === '/' || pathname === '' ? '/' : pathname;
     if (normalizedPath === '/') {
         const response = NextResponse.next();
-        response.headers.set('X-Robots-Tag', noIndexValue);
+        // Homepage must be indexable — do NOT set X-Robots-Tag: noindex here
         // Clear any stale cache headers that might cause redirect loops
         response.headers.set('Cache-Control', 'no-store, must-revalidate');
         return response;
