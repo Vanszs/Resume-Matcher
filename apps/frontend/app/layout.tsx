@@ -1,8 +1,19 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, IBM_Plex_Mono, Playfair_Display } from 'next/font/google';
 import './(default)/css/globals.css';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://resume.bevansatria.my.id';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F0F0E8' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+  ],
+  colorScheme: 'light dark',
+};
 
 const inter = Inter({
   variable: '--font-inter',
