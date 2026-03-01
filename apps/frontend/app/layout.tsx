@@ -135,8 +135,8 @@ export const metadata: Metadata = {
     'free resume',
     'free cv',
   ],
-  authors: [{ name: 'Bevan Satria', url: 'https://bevansatria.my.id' }],
-  creator: 'Bevan Satria',
+  authors: [{ name: 'Bevantyo Satria Pinandhita', url: 'https://bevansatria.my.id' }],
+  creator: 'Bevantyo Satria',
   publisher: 'Resume Matcher',
   category: 'Career Tools',
   classification: 'Resume Builder, CV Tailor, Job Application Tool',
@@ -184,11 +184,11 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@bevansatria',
+    site: '@Yourjungler',
     title: 'Free AI Resume Tailoring — Match Your CV to Any Job',
     description:
       'Tailor your CV to any job description for free using AI. ATS-friendly, keyword-matched, PDF export. No subscription. By Bevan Satria.',
-    creator: '@bevansatria',
+    creator: '@Yourjungler',
     images: [
       {
         url: `${siteUrl}/opengraph-image`,

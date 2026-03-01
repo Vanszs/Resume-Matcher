@@ -1,33 +1,4 @@
-INFO:     Started server process [660267]
+INFO:     Started server process [675828]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     108.162.227.23:0 - "DELETE /api/v1/resumes/241edfd0-0c79-4873-861c-9309f2ed8e44 HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes?resume_id=241edfd0-0c79-4873-861c-9309f2ed8e44 HTTP/1.1" 404 Not Found
-INFO:     108.162.227.23:0 - "GET /api/v1/status HTTP/1.1" 200 OK
-INFO:     108.162.227.24:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     108.162.227.24:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     108.162.227.24:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     108.162.227.24:0 - "GET /api/v1/resumes?resume_id=77d76789-e6b8-4aac-a8be-b6de0891a9c9 HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes?resume_id=77d76789-e6b8-4aac-a8be-b6de0891a9c9 HTTP/1.1" 200 OK
-INFO:     108.162.227.24:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     108.162.227.24:0 - "DELETE /api/v1/resumes/77d76789-e6b8-4aac-a8be-b6de0891a9c9 HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes?resume_id=77d76789-e6b8-4aac-a8be-b6de0891a9c9 HTTP/1.1" 404 Not Found
-INFO:     108.162.227.24:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes?resume_id=77d76789-e6b8-4aac-a8be-b6de0891a9c9 HTTP/1.1" 404 Not Found
-INFO:     108.162.227.24:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     108.162.227.24:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     108.162.227.24:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     108.162.227.24:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     108.162.227.24:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     108.162.227.24:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     108.162.227.24:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
