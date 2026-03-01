@@ -19,6 +19,7 @@ import { fetchPromptConfig, type PromptOption } from '@/lib/api/config';
 import { Dropdown } from '@/components/ui/dropdown';
 import { useStatusCache } from '@/lib/context/status-cache';
 import { Loader2, ArrowLeft, AlertTriangle, Settings } from 'lucide-react';
+import { useNavigating } from '@/hooks/use-navigating';
 import { useTranslations } from '@/lib/i18n';
 import { DiffPreviewModal } from '@/components/tailor/diff-preview-modal';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -37,6 +38,7 @@ export default function TailorPage() {
   const missingDiffConfirmInFlight = useRef(false);
   const confirmInFlight = useRef(false);
   const navigationInProgress = useRef(false);
+  const { isNavigating, navigateBack } = useNavigating();
 
   // Diff preview modal state
   const [showDiffModal, setShowDiffModal] = useState(false);
@@ -359,8 +361,8 @@ export default function TailorPage() {
     >
       <div className="w-full max-w-4xl bg-white border border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)] p-8 md:p-12 lg:p-14 relative">
         {/* Back Button */}
-        <Button variant="link" className="absolute top-4 left-4" onClick={() => router.back()}>
-          <ArrowLeft className="w-4 h-4" />
+        <Button variant="link" className="absolute top-4 left-4" disabled={isNavigating} onClick={navigateBack}>
+          {isNavigating ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowLeft className="w-4 h-4" />}
           {t('common.back')}
         </Button>
 

@@ -3,7 +3,6 @@
 import { SwissGrid } from '@/components/home/swiss-grid';
 import { ResumeUploadDialog } from '@/components/dashboard/resume-upload-dialog';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Card, CardTitle, CardDescription } from '@/components/ui/card';
@@ -28,6 +27,7 @@ import {
 } from '@/lib/api/resume';
 import { useStatusCache } from '@/lib/context/status-cache';
 import { API_BASE } from '@/lib/api/client';
+import { useNavigating } from '@/hooks/use-navigating';
 
 type ProcessingStatus = 'pending' | 'processing' | 'ready' | 'failed' | 'loading';
 type ResumeProcessingStatus = ResumeListItem['processing_status'];
@@ -113,7 +113,7 @@ export default function DashboardPage() {
   const [isRetrying, setIsRetrying] = useState(false);
   const [isDeletingMaster, setIsDeletingMaster] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-  const router = useRouter();
+  const { isNavigating, navigatingTo, navigateTo } = useNavigating();
 
   // Status cache for optimistic counter updates and LLM status check
   const {
@@ -624,7 +624,7 @@ export default function DashboardPage() {
                     if (!isActiveMaster) {
                       handleSelectMaster(master.resume_id);
                     }
-                    router.push(`/resumes/${master.resume_id}`);
+                    navigateTo(master.resume_id, `/resumes/${master.resume_id}`);
                   }}
                 >
                   <div className="flex-1 flex flex-col h-full">
@@ -633,6 +633,9 @@ export default function DashboardPage() {
                         <span className="font-mono font-bold text-lg">M</span>
                       </div>
                       <div className="flex gap-1 items-center">
+                        {navigatingTo === master.resume_id && (
+                          <Loader2 className="w-3 h-3 animate-spin text-gray-500" />
+                        )}
                         <span className="font-mono text-xs text-gray-500 uppercase">
                           {t('dashboard.masterResume')}
                         </span>
@@ -751,7 +754,7 @@ export default function DashboardPage() {
               key={resume.resume_id}
               variant="interactive"
               className="aspect-square h-full bg-canvas"
-              onClick={() => router.push(`/resumes/${resume.resume_id}`)}
+              onClick={() => navigateTo(resume.resume_id, `/resumes/${resume.resume_id}`)}
             >
               <div className="flex-1 flex flex-col">
                 <div className="flex justify-between items-start mb-6">
@@ -761,9 +764,13 @@ export default function DashboardPage() {
                   >
                     <span className="font-mono font-bold">{getMonogram(title)}</span>
                   </div>
-                  <span className="font-mono text-xs text-gray-500 uppercase">
-                    {resume.processing_status}
-                  </span>
+                  {navigatingTo === resume.resume_id ? (
+                    <Loader2 className="w-3 h-3 animate-spin text-gray-500" />
+                  ) : (
+                    <span className="font-mono text-xs text-gray-500 uppercase">
+                      {resume.processing_status}
+                    </span>
+                  )}
                 </div>
                 <CardTitle className="text-lg">
                   <span className="block font-serif text-base font-bold leading-tight mb-1 w-full line-clamp-2">
@@ -783,11 +790,11 @@ export default function DashboardPage() {
         <Card className="aspect-square h-full" variant="default">
           <div className="flex-1 flex flex-col items-center justify-center text-center h-full">
             <Button
-              onClick={() => router.push('/tailor')}
-              disabled={!isTailorEnabled}
+              onClick={() => navigateTo('tailor', '/tailor')}
+              disabled={!isTailorEnabled || navigatingTo === 'tailor'}
               className="w-20 h-20 bg-blue-700 text-white border-2 border-black shadow-sw-default hover:bg-blue-800 hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-none transition-all rounded-none"
             >
-              <Plus className="w-8 h-8" />
+              {navigatingTo === 'tailor' ? <Loader2 className="w-8 h-8 animate-spin" /> : <Plus className="w-8 h-8" />}
             </Button>
             <p className="text-xs font-mono mt-4 uppercase text-green-700">
               {t('dashboard.createResume')}

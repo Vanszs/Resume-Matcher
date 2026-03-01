@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense, useCallback, useMemo } from 'react';
 import Image from 'next/image';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { type ResumeData } from '@/components/dashboard/resume-component';
 import { ResumeForm } from './resume-form';
 import { FormattingControls } from './formatting-controls';
@@ -25,6 +25,7 @@ import {
   Sparkles,
   Loader2,
 } from 'lucide-react';
+import { useNavigating } from '@/hooks/use-navigating';
 import { useResumePreview } from '@/components/common/resume_previewer_context';
 import { PaginatedPreview } from '@/components/preview';
 import {
@@ -119,7 +120,7 @@ const ResumeBuilderContent = () => {
   const improvedCoverLetter = improvedData?.data?.cover_letter;
   const improvedOutreach = improvedData?.data?.outreach_message;
   const searchParams = useSearchParams();
-  const router = useRouter();
+  const { isNavigating, navigateTo } = useNavigating();
   const resumeId = searchParams.get('id');
 
   useEffect(() => {
@@ -149,6 +150,7 @@ const ResumeBuilderContent = () => {
   const [isTailoredResume, setIsTailoredResume] = useState(false);
   const [isGeneratingCoverLetter, setIsGeneratingCoverLetter] = useState(false);
   const [isGeneratingOutreach, setIsGeneratingOutreach] = useState(false);
+  const { isNavigating, navigateTo } = useNavigating();
   const [showRegenerateDialog, setShowRegenerateDialog] = useState<
     'cover-letter' | 'outreach' | null
   >(null);
@@ -610,10 +612,11 @@ const ResumeBuilderContent = () => {
             <div>
               <Button
                 variant="link"
-                onClick={() => router.push('/dashboard')}
+                onClick={() => navigateTo('/dashboard')}
+                disabled={isNavigating}
                 className="mb-2 -ml-1"
               >
-                <ArrowLeft className="w-4 h-4" />
+                {isNavigating ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowLeft className="w-4 h-4" />}
                 {t('nav.backToDashboard')}
               </Button>
               <h1 className="font-serif text-3xl md:text-5xl text-black tracking-tight leading-[0.95] uppercase">

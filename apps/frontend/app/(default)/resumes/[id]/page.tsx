@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useNavigating } from '@/hooks/use-navigating';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import Resume, { ResumeData } from '@/components/dashboard/resume-component';
@@ -30,7 +31,6 @@ export default function ResumeViewerPage() {
   const { t } = useTranslations();
   const { uiLanguage } = useLanguage();
   const params = useParams();
-  const router = useRouter();
   const { decrementResumes, setHasMasterResume } = useStatusCache();
   const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,6 +43,7 @@ export default function ResumeViewerPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showEnrichmentModal, setShowEnrichmentModal] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
+  const { isNavigating, navigateTo } = useNavigating();
   const [resumeTitle, setResumeTitle] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editingTitleValue, setEditingTitleValue] = useState('');
@@ -209,7 +210,7 @@ export default function ResumeViewerPage() {
   };
 
   const handleEdit = () => {
-    router.push(`/builder?id=${resumeId}`);
+    navigateTo(`/builder?id=${resumeId}`);
   };
 
   const handleTitleSave = async () => {
@@ -313,9 +314,13 @@ export default function ResumeViewerPage() {
     }
   };
 
+  const handleGoToDashboard = () => {
+    navigateTo('/dashboard');
+  };
+
   const handleDeleteSuccessConfirm = () => {
     setShowDeleteSuccessDialog(false);
-    router.push('/dashboard');
+    handleGoToDashboard();
   };
 
   const handleDownloadSuccessConfirm = () => {
@@ -383,10 +388,51 @@ export default function ResumeViewerPage() {
                 </Button>
               </>
             )}
-            <Button variant="outline" onClick={() => router.push('/dashboard')}>
-              {t('resumeViewer.returnToDashboard')}
+            <Button variant="outline" onClick={handleGoToDashboard} disabled={isNavigating}>
+              {isNavigating ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {t('common.loading')}
+                </>
+              ) : (
+                t('resumeViewer.returnToDashboard')
+              )}
             </Button>
           </div>
+
+          {/* Delete confirm dialog — must be rendered here since this is an early return */}
+          <ConfirmDialog
+            open={showDeleteDialog}
+            onOpenChange={setShowDeleteDialog}
+            title={t('dashboard.deleteResume')}
+            description={t('confirmations.deleteResumeFromSystemDescription')}
+            confirmLabel={t('confirmations.deleteResumeConfirmLabel')}
+            cancelLabel={t('confirmations.keepResumeCancelLabel')}
+            onConfirm={handleDeleteResume}
+            variant="danger"
+          />
+          <ConfirmDialog
+            open={showDeleteSuccessDialog}
+            onOpenChange={setShowDeleteSuccessDialog}
+            title={t('resumeViewer.deletedTitle')}
+            description={t('resumeViewer.deletedDescriptionRegular')}
+            confirmLabel={t('resumeViewer.returnToDashboard')}
+            onConfirm={handleDeleteSuccessConfirm}
+            variant="success"
+            showCancelButton={false}
+          />
+          {deleteError && (
+            <ConfirmDialog
+              open={!!deleteError}
+              onOpenChange={() => setDeleteError(null)}
+              title={t('resumeViewer.deleteFailedTitle')}
+              description={deleteError}
+              confirmLabel={t('common.ok')}
+              onConfirm={() => setDeleteError(null)}
+              variant="danger"
+              showCancelButton={false}
+            />
+          )}
         </div>
       </div>
     );
@@ -397,8 +443,12 @@ export default function ResumeViewerPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header Actions */}
         <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
-          <Button variant="outline" onClick={() => router.push('/dashboard')}>
-            <ArrowLeft className="w-4 h-4" />
+          <Button variant="outline" onClick={handleGoToDashboard} disabled={isNavigating}>
+            {isNavigating ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <ArrowLeft className="w-4 h-4" />
+            )}
             {t('nav.backToDashboard')}
           </Button>
 
@@ -409,8 +459,8 @@ export default function ResumeViewerPage() {
                 {t('resumeViewer.enhanceResume')}
               </Button>
             )}
-            <Button variant="outline" onClick={handleEdit}>
-              <Edit className="w-4 h-4" />
+            <Button variant="outline" onClick={handleEdit} disabled={isNavigating}>
+              {isNavigating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Edit className="w-4 h-4" />}
               {t('dashboard.editResume')}
             </Button>
             <Button variant="success" onClick={handleDownload}>
