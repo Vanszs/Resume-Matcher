@@ -4,36 +4,81 @@ import Hero from '@/components/home/hero';
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://resume.bevansatria.my.id';
 
 export const metadata: Metadata = {
-  title: 'Free CV Maker & AI Resume Tailoring — Resume Matcher',
+  title: 'Free AI CV Maker & Resume Tailor | Resume Matcher',
   description:
-    'Resume Matcher is a free AI-powered CV maker and resume tailoring tool. Tailor your resume to any job description in seconds, pass ATS filters, and export a polished PDF — no sign-up, no subscription, 100% free.',
+    'Resume Matcher is a free AI-powered CV maker and resume tailoring tool by Bevan Satria. Tailor your resume to any job description in seconds, pass ATS filters, and export a polished PDF — no sign-up, no subscription, 100% free.',
   keywords: [
+    // Personal brand
+    'bevan resume',
+    'bevan satria resume',
+    'bevan satria cv tool',
+    'resume by bevan satria',
+    'bevan ai resume',
+    'bevansatria',
+    // Core
     'free cv maker',
     'free resume builder',
-    'AI resume tailoring',
+    'ai resume tailoring',
     'resume tailoring tool',
-    'ATS resume optimizer',
-    'CV tailored to job description',
-    'free ATS resume checker',
+    'ats resume optimizer',
+    'cv tailored to job description',
+    'free ats resume checker',
     'resume keyword optimizer',
-    'job application CV builder',
-    'AI CV generator free',
+    'job application cv builder',
+    'ai cv generator free',
+    // Free no-login variants
+    'free resume builder no login',
+    'free cv builder no account',
+    'free resume maker no signup',
+    'ai resume builder free 2025',
+    'ai resume builder free 2026',
+    'best free ai resume builder',
+    'free chatgpt resume builder',
+    'free gemini resume builder',
+    'free claude cv builder',
+    // ATS variants
+    'pass ats free tool',
+    'ats resume template free download',
+    'ats cv checker free',
+    'beat ats resume builder',
+    'resume keyword match free',
+    // PDF
+    'resume pdf maker free',
+    'cv pdf export free',
+    'professional resume pdf free',
   ],
   alternates: {
     canonical: siteUrl,
   },
   openGraph: {
-    title: 'Free CV Maker & AI Resume Tailoring — Resume Matcher',
+    title: 'Free AI CV Maker & Resume Tailor — Resume Matcher',
     description:
-      'Tailor your CV to any job description with AI — completely free. ATS keyword optimisation, smart rewrites, polished PDF export. No account required.',
+      'Tailor your CV to any job description with AI — completely free. ATS keyword optimisation, smart rewrites, polished PDF export. No account required. By Bevan Satria.',
     url: siteUrl,
     type: 'website',
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: 'Resume Matcher — Free AI CV Maker & ATS Resume Tailor by Bevan Satria',
+        type: 'image/png',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Free CV Maker & AI Resume Tailoring — Resume Matcher',
+    site: '@bevansatria',
+    title: 'Free AI CV Maker & Resume Tailor — Resume Matcher',
     description:
-      'Free AI resume builder and CV tailoring tool. Beat ATS, match job keywords, export polished PDFs. No subscription or sign-up needed.',
+      'Free AI resume builder and CV tailoring tool by Bevan Satria. Beat ATS, match job keywords, export polished PDFs. No subscription or sign-up needed.',
+    creator: '@bevansatria',
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`,
+        alt: 'Resume Matcher — Free AI Resume Tailoring Tool',
+      },
+    ],
   },
 };
 
@@ -52,8 +97,13 @@ export default function Home() {
     operatingSystem: 'Web',
     url: siteUrl,
     description:
-      'Free AI-powered CV maker and resume tailoring tool. Tailor your resume to any job description, pass ATS filters, and export polished PDFs — 100% free, no subscription.',
-    alternateName: ['Free CV Maker', 'Free Resume Builder', 'AI Resume Tailoring Tool'],
+      'Free AI-powered CV maker and resume tailoring tool by Bevan Satria. Tailor your resume to any job description, pass ATS filters, and export polished PDFs — 100% free, no subscription.',
+    alternateName: ['Free CV Maker', 'Free Resume Builder', 'AI Resume Tailoring Tool', 'Bevan Resume Tool', 'Resume Matcher by Bevan'],
+    author: {
+      '@type': 'Person',
+      name: 'Bevan Satria',
+      url: 'https://bevansatria.my.id',
+    },
     offers: {
       '@type': 'Offer',
       price: '0',
@@ -150,7 +200,83 @@ export default function Home() {
           text: 'Your resume data is stored locally in your browser session. We do not upload or store your personal data on any server beyond what is needed to generate the AI response.',
         },
       },
+      {
+        '@type': 'Question',
+        name: 'Who made Resume Matcher?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Resume Matcher was created by Bevan Satria, a developer from Indonesia. The tool is open-source and available at resume.bevansatria.my.id.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'What is "bevan resume" or "bevan resume tool"?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'This refers to Resume Matcher, the free AI resume tailoring tool built by Bevan Satria. You can access it at resume.bevansatria.my.id.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Is there a free alternative to Teal, Rezi, or Jobscan?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes — Resume Matcher is a completely free alternative to Teal, Rezi, Jobscan, and similar paid ATS resume tools. No subscription or credit card required.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'What languages does Resume Matcher support?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Resume Matcher supports English, Spanish (Español), Chinese (中文), Japanese (日本語), Portuguese (Português), and Indonesian (Bahasa Indonesia) for both the UI and AI-generated content.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'What is the best free resume builder in 2025 or 2026?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Resume Matcher is one of the best free AI resume builders in 2025 and 2026. It offers AI-powered tailoring to job descriptions, ATS optimisation, multi-language support, and PDF export — all at no cost and with no account required.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Can I use Resume Matcher without signing up or logging in?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. Resume Matcher is completely free to use without any account, login, or subscription. Start tailoring your resume immediately at resume.bevansatria.my.id.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'How is Resume Matcher different from paid tools like Teal, Rezi, Kickresume, or ResumeWorded?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Unlike Teal, Rezi, Kickresume, ResumeWorded, and Jobscan which require paid subscriptions, Resume Matcher is 100% free with no credit card needed. You get the same core features: ATS keyword matching, AI resume rewrites, and PDF export, all without a paywall.',
+        },
+      },
     ],
+  };
+
+  // Schema 4: Person — establishes creator identity for branded searches
+  const personSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: 'Bevan Satria',
+    url: 'https://bevansatria.my.id',
+    sameAs: [
+      'https://bevansatria.my.id',
+      'https://resume.bevansatria.my.id',
+      'https://github.com/Vanszs',
+      'https://github.com/Vanszs/Resume-Matcher',
+    ],
+    knowsAbout: ['Resume Builder', 'AI Tools', 'ATS Optimization', 'Web Development'],
+    creator: {
+      '@type': 'SoftwareApplication',
+      name: 'Resume Matcher',
+      url: siteUrl,
+    },
   };
 
   return (
@@ -166,6 +292,10 @@ export default function Home() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
       />
       <Hero />
     </>
