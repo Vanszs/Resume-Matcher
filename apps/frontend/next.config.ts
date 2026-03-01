@@ -51,11 +51,51 @@ const nextConfig: NextConfig = {
   experimental: {
     turbopackUseSystemTlsCerts: true,
   },
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 31536000, // 1 year cache for processed images
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'resumematcher.fyi',
+      },
+    ],
+  },
   async headers() {
     return [
       {
         source: '/(.*)',
         headers: securityHeaders,
+      },
+      {
+        // Long-lived cache for all static assets in /public/assets/
+        source: '/assets/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Long-lived cache for Next.js optimized images
+        source: '/_next/image(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Long-lived cache for Next.js static chunks (content-hashed)
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
       },
     ];
   },
