@@ -150,7 +150,6 @@ const ResumeBuilderContent = () => {
   const [isTailoredResume, setIsTailoredResume] = useState(false);
   const [isGeneratingCoverLetter, setIsGeneratingCoverLetter] = useState(false);
   const [isGeneratingOutreach, setIsGeneratingOutreach] = useState(false);
-  const { isNavigating, navigateTo } = useNavigating();
   const [showRegenerateDialog, setShowRegenerateDialog] = useState<
     'cover-letter' | 'outreach' | null
   >(null);
