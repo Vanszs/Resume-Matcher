@@ -505,9 +505,8 @@ export default function ResumeViewerPage() {
           </div>
         </div>
 
-        {/* Editable Title (tailored resumes only) */}
-        {!isMasterResume && (
-          <div className="mb-6 no-print">
+        {/* Editable Title */}
+        <div className="mb-6 no-print">
             {isEditingTitle ? (
               <input
                 type="text"
@@ -539,7 +538,6 @@ export default function ResumeViewerPage() {
               </button>
             )}
           </div>
-        )}
 
         {/* Resume Viewer */}
         <div className="flex justify-center pb-4">

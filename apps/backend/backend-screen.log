@@ -1,38 +1,12 @@
-INFO:     Started server process [1284834]
+INFO:     Started server process [1288297]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     172.69.165.59:0 - "GET /api/v1/resumes?resume_id=a0ba9cf5-39cc-44d2-8873-47970ebbb368 HTTP/1.1" 200 OK
 INFO:     172.69.165.59:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.69.165.58:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     172.69.165.59:0 - "GET /api/v1/status HTTP/1.1" 200 OK
-INFO:     172.69.165.59:0 - "GET /api/v1/resumes?resume_id=a0ba9cf5-39cc-44d2-8873-47970ebbb368 HTTP/1.1" 200 OK
-INFO:     172.69.165.58:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/job-description HTTP/1.1" 200 OK
-INFO:     172.71.164.210:0 - "GET /api/v1/resumes?resume_id=a0ba9cf5-39cc-44d2-8873-47970ebbb368 HTTP/1.1" 200 OK
-INFO:     172.69.165.59:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/pdf?template=swiss-single&pageSize=A4&marginTop=10&marginBottom=10&marginLeft=10&marginRight=10&sectionSpacing=3&itemSpacing=2&lineHeight=3&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=true&showContactIcons=true&accentColor=blue&lang=en HTTP/1.1" 200 OK
-INFO:     172.70.242.249:0 - "GET /api/v1/resumes?resume_id=a0ba9cf5-39cc-44d2-8873-47970ebbb368 HTTP/1.1" 200 OK
-INFO:     172.69.165.59:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/pdf?template=swiss-single&pageSize=A4&marginTop=10&marginBottom=10&marginLeft=10&marginRight=10&sectionSpacing=3&itemSpacing=2&lineHeight=3&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=true&showContactIcons=true&accentColor=blue&lang=en HTTP/1.1" 200 OK
-INFO:     172.71.232.67:0 - "GET /api/v1/resumes?resume_id=a0ba9cf5-39cc-44d2-8873-47970ebbb368 HTTP/1.1" 200 OK
-INFO:     172.69.165.59:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/pdf?template=swiss-single&pageSize=A4&marginTop=10&marginBottom=10&marginLeft=10&marginRight=10&sectionSpacing=3&itemSpacing=2&lineHeight=3&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=true&showContactIcons=true&accentColor=blue&lang=en HTTP/1.1" 200 OK
-INFO:     172.69.165.58:0 - "PATCH /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368 HTTP/1.1" 200 OK
-INFO:     172.71.172.64:0 - "GET /api/v1/resumes?resume_id=a0ba9cf5-39cc-44d2-8873-47970ebbb368 HTTP/1.1" 200 OK
-INFO:     172.69.165.59:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/pdf?template=swiss-single&pageSize=A4&marginTop=10&marginBottom=10&marginLeft=10&marginRight=10&sectionSpacing=3&itemSpacing=2&lineHeight=3&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=true&showContactIcons=true&accentColor=blue&lang=en HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
-INFO:     162.158.108.91:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     162.158.108.91:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/job-description HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     162.158.108.91:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/job-description HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
-INFO:     162.158.108.91:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     162.158.108.90:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
+INFO:     172.71.124.233:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.70.92.247:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.92.247:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
