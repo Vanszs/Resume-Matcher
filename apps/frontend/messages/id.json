@@ -91,6 +91,8 @@
     },
     "llmNotConfiguredTitle": "[ LLM BELUM DIKONFIGURASI ]",
     "llmNotConfiguredMessage": "> Kunci API tidak ditemukan. Penyesuaian resume dinonaktifkan hingga dikonfigurasi di pengaturan.",
+    "llmUnhealthyTitle": "[ MASALAH KONEKSI LLM ]",
+    "llmUnhealthyMessage": "> Kunci API sudah dikonfigurasi tetapi LLM tidak dapat dijangkau. Periksa Pengaturan untuk detailnya.",
     "setupRequiredTitle": "[ PENGATURAN DIPERLUKAN ]",
     "setupRequiredMessage": "> Konfigurasikan kunci API di pengaturan untuk mengaktifkan penyesuaian resume.",
     "uploadDialog": {
@@ -685,7 +687,8 @@
         "health_check_failed": "Pemeriksaan kesehatan gagal.",
         "duplicate_v1_path": "Pemeriksaan kesehatan gagal. URL Dasar mungkin mengandung jalur /v1 duplikat.",
         "not_found_404": "Pemeriksaan kesehatan gagal. 404 Tidak Ditemukan - pastikan URL Dasar sesuai dengan penyedia.",
-        "html_response": "Pemeriksaan kesehatan gagal. URL Dasar mengembalikan HTML; mungkin URL konsol atau jalur gateway yang tidak didukung."
+        "html_response": "Pemeriksaan kesehatan gagal. URL Dasar mengembalikan HTML; mungkin URL konsol atau jalur gateway yang tidak didukung.",
+        "empty_content": "Pemeriksaan kesehatan gagal. LLM mengembalikan respons kosong."
       },
       "healthWarnings": {
         "empty_content": "LLM mengembalikan konten kosong untuk pemeriksaan kesehatan."

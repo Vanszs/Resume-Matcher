@@ -34,9 +34,10 @@ export default function LoginPage() {
         localStorage.removeItem('user_role');
         localStorage.removeItem('user_email');
         // Clear cookies with all possible path variations to handle edge cases
+        const secure = typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
         const cookieOptions = [
-            'auth_token=; path=/; max-age=0; SameSite=Lax',
-            'user_role=; path=/; max-age=0; SameSite=Lax',
+            `auth_token=; path=/; max-age=0; SameSite=Lax${secure}`,
+            `user_role=; path=/; max-age=0; SameSite=Lax${secure}`,
             'auth_token=; path=/; max-age=0', // Without SameSite for older browsers
             'user_role=; path=/; max-age=0',
         ];
@@ -126,8 +127,9 @@ export default function LoginPage() {
         localStorage.setItem('user_role', data.role);
         localStorage.setItem('user_email', data.email);
         const maxAge = 60 * 60 * 24;
-        document.cookie = `auth_token=${data.access_token}; path=/; max-age=${maxAge}; SameSite=Lax`;
-        document.cookie = `user_role=${data.role}; path=/; max-age=${maxAge}; SameSite=Lax`;
+        const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+        document.cookie = `auth_token=${data.access_token}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
+        document.cookie = `user_role=${data.role}; path=/; max-age=${maxAge}; SameSite=Lax${secure}`;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

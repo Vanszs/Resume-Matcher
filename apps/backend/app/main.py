@@ -18,6 +18,9 @@ if sys.platform == "win32":
 
 logger = logging.getLogger(__name__)
 
+# Plan D: Suppress noisy pdfminer font warnings that are cosmetic and not actionable
+logging.getLogger("pdfminer").setLevel(logging.ERROR)
+
 from app import __version__
 from app.config import settings
 from app.database import db

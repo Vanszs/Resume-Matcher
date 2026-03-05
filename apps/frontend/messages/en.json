@@ -91,6 +91,8 @@
     },
     "llmNotConfiguredTitle": "[ LLM NOT CONFIGURED ]",
     "llmNotConfiguredMessage": "> API keys are missing. Resume tailoring is disabled until configured in settings.",
+    "llmUnhealthyTitle": "[ LLM CONNECTION ISSUE ]",
+    "llmUnhealthyMessage": "> Your API key is configured but the LLM is unreachable. Check Settings for details.",
     "setupRequiredTitle": "[ SETUP REQUIRED ]",
     "setupRequiredMessage": "> Configure API key in settings to enable resume tailoring.",
     "uploadDialog": {
@@ -685,7 +687,8 @@
         "health_check_failed": "Health check failed.",
         "duplicate_v1_path": "Health check failed. The Base URL may contain a duplicate /v1 path.",
         "not_found_404": "Health check failed. 404 Not Found - check that the Base URL matches the provider.",
-        "html_response": "Health check failed. The Base URL returned HTML; it may be a console URL or an unsupported gateway path."
+        "html_response": "Health check failed. The Base URL returned HTML; it may be a console URL or an unsupported gateway path.",
+        "empty_content": "Health check failed. The LLM returned an empty response."
       },
       "healthWarnings": {
         "empty_content": "LLM returned empty content for the health check."

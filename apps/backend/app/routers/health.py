@@ -106,14 +106,17 @@ async def get_status(
         # Full path: live LLM connectivity test (may take several seconds)
         llm_status = await check_llm_health(config)
         llm_healthy = llm_status["healthy"]
+        llm_error_code = llm_status.get("error_code") if not llm_healthy else None
     else:
         # Fast path: assume healthy when configured, skip the API round-trip
         llm_healthy = is_configured
+        llm_error_code = None
 
     return StatusResponse(
         status="ready" if llm_healthy and db_stats["has_master_resume"] else "setup_required",
         llm_configured=is_configured,
         llm_healthy=llm_healthy,
+        llm_error_code=llm_error_code,
         has_master_resume=db_stats["has_master_resume"],
         database_stats=db_stats,
     )

@@ -566,12 +566,36 @@ def _calculate_timeout(
     return int(base * token_factor * provider_factor)
 
 
+# Patterns indicating a reasoning model is "thinking" instead of outputting JSON
+_REASONING_PATTERNS = (
+    "1.  **Analyze",
+    "1. **Analyze",
+    "**Analyze the Request",
+    "*   **Goal",
+    "* **Goal",
+    "Let me analyze",
+    "Let me parse",
+    "Sure, here",
+    "Certainly!",
+)
+
+
+def _is_reasoning_response(content: str) -> bool:
+    """Detect if LLM response is reasoning/thinking text instead of JSON."""
+    stripped = content.strip()
+    return any(stripped.startswith(p) for p in _REASONING_PATTERNS) or (
+        not stripped.startswith(("{", "[", "```")) and "json" not in stripped[:50].lower()
+        and any(p in stripped[:300] for p in _REASONING_PATTERNS)
+    )
+
+
 def _extract_json(content: str, _depth: int = 0) -> str:
     """Extract JSON from LLM response, handling various formats.
 
     LLM-001: Improved to detect and reject likely truncated JSON.
     LLM-007: Improved error messages for debugging.
     JSON-010: Added recursion depth and size limits.
+    B1: Handle reasoning model responses that wrap JSON in prose.
     """
     # JSON-010: Safety limits
     if _depth > MAX_JSON_EXTRACTION_RECURSION:
@@ -718,17 +742,35 @@ async def complete_json(
 
             return result
 
-        except json.JSONDecodeError as e:
+        except (json.JSONDecodeError, ValueError) as e:
             last_error = e
             logging.warning(f"JSON parse failed (attempt {attempt + 1}): {e}")
             if attempt < retries:
-                # Add hint to prompt for retry
-                messages[-1]["content"] = (
-                    prompt
-                    + "\n\nIMPORTANT: Output ONLY a valid JSON object. Start with { and end with }."
-                )
+                # B2: Detect reasoning patterns and use stronger retry hint
+                prev_content = content if 'content' in dir() else ""
+                is_reasoning = _is_reasoning_response(prev_content) if prev_content else False
+                if is_reasoning:
+                    logging.warning(
+                        "Reasoning model detected: upgrading retry hint to critical JSON-only prompt"
+                    )
+                    messages[-1]["content"] = (
+                        prompt
+                        + "\n\nCRITICAL: You MUST output ONLY raw JSON. "
+                        + "Do NOT include any analysis, thinking, explanation, or prose. "
+                        + "Your ENTIRE response must start with { and end with }. "
+                        + "Nothing before {, nothing after }."
+                    )
+                else:
+                    messages[-1]["content"] = (
+                        prompt
+                        + "\n\nIMPORTANT: Output ONLY a valid JSON object. Start with { and end with }."
+                    )
                 continue
-            raise ValueError(f"Failed to parse JSON after {retries + 1} attempts: {e}")
+            raise ValueError(
+                f"Failed to parse JSON after {retries + 1} attempts: {e}. "
+                "This can happen with reasoning-focused models. "
+                "Try switching to a standard model (e.g., gpt-4o, claude-3.5-sonnet) in Settings."
+            )
 
         except Exception as e:
             last_error = e

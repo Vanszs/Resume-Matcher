@@ -706,5 +706,6 @@ class StatusResponse(BaseModel):
     status: str
     llm_configured: bool
     llm_healthy: bool
+    llm_error_code: str | None = None  # Error code from last LLM health check
     has_master_resume: bool
     database_stats: dict[str, Any]

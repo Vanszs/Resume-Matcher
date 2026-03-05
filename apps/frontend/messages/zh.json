@@ -91,6 +91,8 @@
     },
     "llmNotConfiguredTitle": "[ 未配置 LLM ]",
     "llmNotConfiguredMessage": "> 缺少 API 密钥。配置前将禁用简历定制功能。",
+    "llmUnhealthyTitle": "[ LLM 连接问题 ]",
+    "llmUnhealthyMessage": "> 您的 API 密钥已配置，但 LLM 无法访问。请在设置中查看详情。",
     "setupRequiredTitle": "[ 需要配置 ]",
     "setupRequiredMessage": "> 请在设置中配置 API 密钥以启用简历定制。",
     "uploadDialog": {
@@ -685,7 +687,8 @@
         "health_check_failed": "健康检查失败。",
         "duplicate_v1_path": "健康检查失败。Base URL 可能包含重复的 /v1 路径。",
         "not_found_404": "健康检查失败。404 未找到，请检查 Base URL 是否与提供方匹配。",
-        "html_response": "健康检查失败。Base URL 返回了 HTML，可能是控制台地址或网关不支持该路径。"
+        "html_response": "健康检查失败。Base URL 返回了 HTML，可能是控制台地址或网关不支持该路径。",
+        "empty_content": "健康检查失败。LLM 返回了空响应。"
       },
       "healthWarnings": {
         "empty_content": "健康检查返回了空内容。"

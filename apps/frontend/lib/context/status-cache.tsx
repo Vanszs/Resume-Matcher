@@ -196,10 +196,10 @@ export function StatusCacheProvider({ children }: { children: React.ReactNode })
     });
   }, []);
 
-  // Initial fetch on mount
+  // Initial fetch on mount — use full LLM health check so llm_error_code is populated
   useEffect(() => {
     mountedRef.current = true;
-    refreshStatus();
+    refreshStatus(true);
 
     return () => {
       mountedRef.current = false;

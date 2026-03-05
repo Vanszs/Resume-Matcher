@@ -59,6 +59,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/lib/context/language-context';
 import { useTranslations } from '@/lib/i18n';
+import { getHealthCheckMessage } from '@/lib/utils/health-messages';
 import type { SupportedLanguage } from '@/lib/api/config';
 import type { Locale } from '@/i18n/config';
 
@@ -88,20 +89,6 @@ const unwrapCodeBlock = (value?: string | null): string | null => {
     return fenced[1]?.trimEnd() || null;
   }
   return trimmed;
-};
-
-const getHealthCheckMessage = (
-  t: (key: string, params?: Record<string, string | number>) => string,
-  baseKey: string,
-  code?: string,
-  fallback?: string
-): string | null => {
-  if (code) {
-    const key = `${baseKey}.${code}`;
-    const localized = t(key);
-    return localized !== key ? localized : (fallback ?? code);
-  }
-  return fallback ?? null;
 };
 
 export default function SettingsPage() {

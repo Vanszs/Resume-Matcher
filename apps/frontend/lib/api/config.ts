@@ -28,6 +28,7 @@ export interface SystemStatus {
   status: 'ready' | 'setup_required';
   llm_configured: boolean;
   llm_healthy: boolean;
+  llm_error_code?: string;  // Error code when LLM is configured but unhealthy
   has_master_resume: boolean;
   database_stats: DatabaseStats;
 }

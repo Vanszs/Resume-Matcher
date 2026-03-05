@@ -28,6 +28,7 @@ import {
 import { useStatusCache } from '@/lib/context/status-cache';
 import { API_BASE } from '@/lib/api/client';
 import { useNavigating } from '@/hooks/use-navigating';
+import { getHealthCheckMessage } from '@/lib/utils/health-messages';
 
 type ProcessingStatus = 'pending' | 'processing' | 'ready' | 'failed' | 'loading';
 type ResumeProcessingStatus = ResumeListItem['processing_status'];
@@ -130,9 +131,13 @@ export default function DashboardPage() {
   const jobSnippetCacheRef = useRef<Record<string, string>>({});
   // Guard: auto-retry restart-interrupted failures at most once per session
   const autoRetryAttemptedRef = useRef(false);
+  // Stable ref for SSE polling fallback — always points to latest loadTailoredResumes
+  const loadTailoredResumesRef = useRef<() => void>(() => {});
 
   // Check if LLM is configured (API key is set)
   const isLlmConfigured = !statusLoading && systemStatus?.llm_configured;
+  // Check if LLM is healthy (configured AND health check passed)
+  const isLlmHealthy = !statusLoading && systemStatus?.llm_healthy !== false;
 
   const isTailorEnabled =
     Boolean(masterResumeId) && processingStatus === 'ready' && isLlmConfigured;
@@ -308,6 +313,11 @@ export default function DashboardPage() {
     loadTailoredResumes();
   }, [loadTailoredResumes]);
 
+  // Keep stable ref in sync so SSE polling interval always calls latest version
+  useEffect(() => {
+    loadTailoredResumesRef.current = loadTailoredResumes;
+  }, [loadTailoredResumes]);
+
   // ---------------------------------------------------------------
   // Real-time status: SSE stream while any resume is transient.
   // Opens ONE EventSource connection per transient batch.
@@ -321,12 +331,19 @@ export default function DashboardPage() {
   const hasAnyTransient = masterIsTransient || tailoredIsTransient;
 
   const sseRef = useRef<EventSource | null>(null);
+  // Fallback polling interval when SSE is unavailable (e.g. 401 / network error)
+  const ssePollingRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!hasAnyTransient) {
       if (sseRef.current) {
         sseRef.current.close();
         sseRef.current = null;
+      }
+      // Also stop fallback polling when there's nothing transient
+      if (ssePollingRef.current) {
+        clearInterval(ssePollingRef.current);
+        ssePollingRef.current = null;
       }
       return;
     }
@@ -403,14 +420,24 @@ export default function DashboardPage() {
     });
 
     es.onerror = () => {
-      // SSE error (network issue, token expired, etc.) — fall back to one manual refresh
+      // SSE error (network issue, token expired, etc.) — fall back to polling
       es.close();
       sseRef.current = null;
+      // Start interval polling every 5s as fallback (stops on next effect cleanup)
+      if (!ssePollingRef.current) {
+        ssePollingRef.current = setInterval(() => {
+          loadTailoredResumesRef.current();
+        }, 5000);
+      }
     };
 
     return () => {
       es.close();
       sseRef.current = null;
+      if (ssePollingRef.current) {
+        clearInterval(ssePollingRef.current);
+        ssePollingRef.current = null;
+      }
     };
     // Intentionally track only stable primitives to avoid reconnect on every render.
     // The `hasAnyTransient` boolean is the correct gate.
@@ -564,17 +591,35 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Configuration Warning Banner */}
-      {masterResumeId && !isLlmConfigured && !statusLoading && (
+      {masterResumeId && (!isLlmConfigured || (isLlmConfigured && !isLlmHealthy)) && !statusLoading && (
         <div className="border-2 border-warning bg-amber-50 p-4 shadow-sw-default mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-warning shrink-0" />
             <div>
-              <p className="font-mono text-sm font-bold uppercase tracking-wider text-amber-800">
-                {t('dashboard.llmNotConfiguredTitle')}
-              </p>
-              <p className="font-mono text-xs text-amber-700 mt-0.5">
-                {t('dashboard.llmNotConfiguredMessage')}
-              </p>
+              {!isLlmConfigured ? (
+                <>
+                  <p className="font-mono text-sm font-bold uppercase tracking-wider text-amber-800">
+                    {t('dashboard.llmNotConfiguredTitle')}
+                  </p>
+                  <p className="font-mono text-xs text-amber-700 mt-0.5">
+                    {t('dashboard.llmNotConfiguredMessage')}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-mono text-sm font-bold uppercase tracking-wider text-amber-800">
+                    {t('dashboard.llmUnhealthyTitle')}
+                  </p>
+                  <p className="font-mono text-xs text-amber-700 mt-0.5">
+                    {getHealthCheckMessage(
+                      t,
+                      'settings.llmConfiguration.healthErrors',
+                      systemStatus?.llm_error_code,
+                      t('dashboard.llmUnhealthyMessage')
+                    )}
+                  </p>
+                </>
+              )}
             </div>
           </div>
           <Link href="/settings" className="self-start sm:self-auto">

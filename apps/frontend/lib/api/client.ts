@@ -39,6 +39,14 @@ function buildHeaders(extra?: HeadersInit): HeadersInit {
 }
 
 /**
+ * Returns "; Secure" when page is served over HTTPS, empty string otherwise.
+ * Prevents Secure-flag cookies from being blocked in local HTTP dev.
+ */
+function secureCookieFlag(): string {
+  return typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
+}
+
+/**
  * Standard fetch wrapper with common error handling.
  * Automatically attaches JWT token and handles 401 redirects.
  */
@@ -55,8 +63,9 @@ export async function apiFetch(endpoint: string, options?: RequestInit): Promise
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_email');
-    document.cookie = 'auth_token=; path=/; max-age=0; SameSite=Lax';
-    document.cookie = 'user_role=; path=/; max-age=0; SameSite=Lax';
+    const secure = secureCookieFlag();
+    document.cookie = `auth_token=; path=/; max-age=0; SameSite=Lax${secure}`;
+    document.cookie = `user_role=; path=/; max-age=0; SameSite=Lax${secure}`;
     window.location.href = '/login';
   }
 
@@ -129,9 +138,10 @@ export function logout(): void {
   localStorage.removeItem('auth_token');
   localStorage.removeItem('user_role');
   localStorage.removeItem('user_email');
-  // Clear middleware cookies
-  document.cookie = 'auth_token=; path=/; max-age=0; SameSite=Lax';
-  document.cookie = 'user_role=; path=/; max-age=0; SameSite=Lax';
+  // Clear middleware cookies (add Secure flag on HTTPS)
+  const secure = secureCookieFlag();
+  document.cookie = `auth_token=; path=/; max-age=0; SameSite=Lax${secure}`;
+  document.cookie = `user_role=; path=/; max-age=0; SameSite=Lax${secure}`;
   if (typeof window !== 'undefined') {
     window.location.href = '/login';
   }
