@@ -1,0 +1,460 @@
+INFO:     162.158.170.18:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.170.18:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.208.48:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.208.48:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.208.48:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.208.48:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.208.49:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.208.48:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 840, in acompletion
+    headers, response = await self.make_openai_chat_completion_request(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 460, in make_openai_chat_completion_request
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 437, in make_openai_chat_completion_request
+    await openai_aclient.chat.completions.with_raw_response.create(
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_legacy_response.py", line 381, in wrapped
+    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 2676, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1884, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1669, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.PermissionDeniedError: <html>
+  <head>
+    <style global>body{font-family:Arial,Helvetica,sans-serif}.container{align-items:center;display:flex;flex-direction:column;gap:2rem;height:100%;justify-content:center;width:100%}@keyframes enlarge-appear{0%{opacity:0;transform:scale(75%) rotate(-90deg)}to{opacity:1;transform:scale(100%) rotate(0deg)}}.logo{color:#8e8ea0}.scale-appear{animation:enlarge-appear .4s ease-out}@media (min-width:768px){.scale-appear{height:48px;width:48px}}.data:empty{display:none}.data{border-radius:5px;color:#8e8ea0;text-align:center}@media (prefers-color-scheme:dark){body{background-color:#343541}.logo{color:#acacbe}}</style>
+  <meta http-equiv="refresh" content="360">
+</head>
+  <body>
+    <div class="container">
+      <div class="logo">
+        <svg
+          width="41"
+          height="41"
+          viewBox="0 0 41 41"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          strokeWidth="2"
+          class="scale-appear"
+        >
+          <path
+            d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.500197C16.1708 0.495044 14.0893 1.16803 12.3614 2.42214C10.6335 3.67624 9.34853 5.44666 8.6917 7.47815C7.30085 7.76286 5.98686 8.3414 4.8377 9.17505C3.68854 10.0087 2.73073 11.0782 2.02839 12.312C0.956464 14.1591 0.498905 16.2988 0.721698 18.4228C0.944492 20.5467 1.83612 22.5449 3.268 24.1293C2.81966 25.4759 2.66413 26.9026 2.81182 28.3141C2.95951 29.7256 3.40701 31.0892 4.12437 32.3138C5.18791 34.1659 6.8123 35.6322 8.76321 36.5013C10.7141 37.3704 12.8907 37.5973 14.9789 37.1492C15.9208 38.2107 17.0786 39.0587 18.3747 39.6366C19.6709 40.2144 21.0755 40.5087 22.4946 40.4998C24.6307 40.5054 26.7133 39.8321 28.4418 38.5772C30.1704 37.3223 31.4556 35.5506 32.1119 33.5179C33.5027 33.2332 34.8167 32.6547 35.9659 31.821C37.115 30.9874 38.0728 29.9178 38.7752 28.684C39.8458 26.8371 40.3023 24.6979 40.0789 22.5748C39.8556 20.4517 38.9639 18.4544 37.5324 16.8707ZM22.4978 37.8849C20.7443 37.8874 19.0459 37.2733 17.6994 36.1501C17.7601 36.117 17.8666 36.0586 17.936 36.0161L25.9004 31.4156C26.1003 31.3019 26.2663 31.137 26.3813 30.9378C26.4964 30.7386 26.5563 30.5124 26.5549 30.2825V19.0542L29.9213 20.998C29.9389 21.0068 29.9541 21.0198 29.9656 21.0359C29.977 21.052 29.9842 21.0707 29.9867 21.0902V30.3889C29.9842 32.375 29.1946 34.2791 27.7909 35.6841C26.3872 37.0892 24.4838 37.8806 22.4978 37.8849ZM6.39227 31.0064C5.51397 29.4888 5.19742 27.7107 5.49804 25.9832C5.55718 26.0187 5.66048 26.0818 5.73461 26.1244L13.699 30.7248C13.8975 30.8408 14.1233 30.902 14.3532 30.902C14.583 30.902 14.8088 30.8408 15.0073 30.7248L24.731 25.1103V28.9979C24.7321 29.0177 24.7283 29.0376 24.7199 29.0556C24.7115 29.0736 24.6988 29.0893 24.6829 29.1012L16.6317 33.7497C14.9096 34.7416 12.8643 35.0097 10.9447 34.4954C9.02506 33.9811 7.38785 32.7263 6.39227 31.0064ZM4.29707 13.6194C5.17156 12.0998 6.55279 10.9364 8.19885 10.3327C8.19885 10.4013 8.19491 10.5228 8.19491 10.6071V19.808C8.19351 20.0378 8.25334 20.2638 8.36823 20.4629C8.48312 20.6619 8.64893 20.8267 8.84863 20.9404L18.5723 26.5542L15.206 28.4979C15.1894 28.5089 15.1703 28.5155 15.1505 28.5173C15.1307 28.5191 15.1107 28.516 15.0924 28.5082L7.04046 23.8557C5.32135 22.8601 4.06716 21.2235 3.55289 19.3046C3.03862 17.3858 3.30624 15.3413 4.29707 13.6194ZM31.955 20.0556L22.2312 14.4411L25.5976 12.4981C25.6142 12.4872 25.6333 12.4805 25.6531 12.4787C25.6729 12.4769 25.6928 12.4801 25.7111 12.4879L33.7631 17.1364C34.9967 17.849 36.0017 18.8982 36.6606 20.1613C37.3194 21.4244 37.6047 22.849 37.4832 24.2684C37.3617 25.6878 36.8382 27.0432 35.9743 28.1759C35.1103 29.3086 33.9415 30.1717 32.6047 30.6641C32.6047 30.5947 32.6047 30.4733 32.6047 30.3889V21.188C32.6066 20.9586 32.5474 20.7328 32.4332 20.5338C32.319 20.3348 32.154 20.1698 31.955 20.0556ZM35.3055 15.0128C35.2464 14.9765 35.1431 14.9142 35.069 14.8717L27.1045 10.2712C26.906 10.1554 26.6803 10.0943 26.4504 10.0943C26.2206 10.0943 25.9948 10.1554 25.7963 10.2712L16.0726 15.8858V11.9982C16.0715 11.9783 16.0753 11.9585 16.0837 11.9405C16.0921 11.9225 16.1048 11.9068 16.1207 11.8949L24.1719 7.25025C25.4053 6.53903 26.8158 6.19376 28.2383 6.25482C29.6608 6.31589 31.0364 6.78077 32.2044 7.59508C33.3723 8.40939 34.2842 9.53945 34.8334 10.8531C35.3826 12.1667 35.5464 13.6095 35.3055 15.0128ZM14.2424 21.9419L10.8752 19.9981C10.8576 19.9893 10.8423 19.9763 10.8309 19.9602C10.8195 19.9441 10.8122 19.9254 10.8098 19.9058V10.6071C10.8107 9.18295 11.2173 7.78848 11.9819 6.58696C12.7466 5.38544 13.8377 4.42659 15.1275 3.82264C16.4173 3.21869 17.8524 2.99464 19.2649 3.1767C20.6775 3.35876 22.0089 3.93941 23.1034 4.85067C23.0427 4.88379 22.937 4.94215 22.8668 4.98473L14.9024 9.58517C14.7025 9.69878 14.5366 9.86356 14.4215 10.0626C14.3065 10.2616 14.2466 10.4877 14.2479 10.7175L14.2424 21.9419ZM16.071 17.9991L20.4018 15.4978L24.7325 17.9975V22.9985L20.4018 25.4983L16.071 22.9985V17.9991Z"
+            fill="currentColor"
+          />
+        </svg>
+      </div>
+      <div class="data"><div class="main-wrapper" role="main"><div class="main-content"><noscript><div class="h2"><span id="challenge-error-text">Enable JavaScript and cookies to continue</span></div></noscript></div></div><script>(function(){window._cf_chl_opt = {cvId: '3',cZone: 'platform.openai.com',cType: 'managed',cRay: '9d77005f6831d275',cH: 'jkjRb7jMQPwgiBm1qSy1s1GUApXlLbUJFT..K.qQ3ig-1772691486-1.2.1.1-aknxYKlFvU1jRRN.SD1Awx6xlUG7hrais1JOvWGDswTd3MxuqVXwV9pTjVC60ZWg',cUPMDTk:"\/api-keys\/chat\/completions?__cf_chl_tk=387PPFDUtOjfmAcJ311lOIboZpsvo7z.qcIHvp4wX58-1772691486-1.0.1.1-wmqPEIqfct01nWRq7clxISwswl_2i41tBNdXZxS1RmE",cFPWv: 'g',cITimeS: '1772691486',cTplC:1,cTplV:5,cTplB: '0',fa:"\/api-keys\/chat\/completions?__cf_chl_f_tk=387PPFDUtOjfmAcJ311lOIboZpsvo7z.qcIHvp4wX58-1772691486-1.0.1.1-wmqPEIqfct01nWRq7clxISwswl_2i41tBNdXZxS1RmE",md: 'OCm_Z3MY.KjxYlA1NcbLKPxToB4FKJeW_TcmXfJianQ-1772691486-1.2.1.1-AHwPzTg32h.3mITrNxyUqG0o8AQz5dIGKLB65p7xWeoZRtpKOZtE3tJeSL7xu3YM26kTKymqTmR3RxZCNkgnx6y1PylTUx6660A4NU718mw.O_4808bhb6RkCz4c0NL5kdAdC7yFrmChs.HU8M4kIO8IkP0sOC8ZIbH0TV1Wnj.CVODySugCFDoYO5.l.NFKnkp9LlAqEwpgIUtoJnAtYwjphWW1LFap56Vad9gPeNrq8Wf6TawGYDu_W.cx63eCR7eAog4LlUj7doVyEy3hqi.O1_IVMPPvzK2Lhgh39TvilM6cUcJXKUPmqzI_WsUhF5asiM5xdNwAIXaXfhBdpTyPnm32rESVZfDKH8ePccLc0_8f40t67rkU70PH8Fi.Z8cv5rDUVdCU6zp4BEr59sxmCEAxDmKLTmuCED1emr4j7o5C_Hu0cUqpzs84BUIXzS3QCzBD.ck0OJyd5huKvLdgHCvvfx2.BAJlqfb9Xk2khqN571pVv5o_9a1JvW8WefTaxvXSvOjo4RGi1aFIzTv7UtRa8EkSkm..wwVD3aFkkv82WtIRgVaSK2QzVfU2wn3XZODNEnRzNoZw48Sk85jTif8dsmftvwSw8oB9CsPktrmi8H31Q8KhdRdeQUu.OeAb0WJ9cVY14nPJMffNrLCXCvwV9cTSAMJkczJY4LsVAYOd5AhHP.yj90J2VEcrGPXNNEoDeDMvsj9au6v9LVPsVZfajeeUIeyQ6Jwe9UxmbD8agDu93NSAo0fB2pIbLNyJYIA11pI9Sj.2KPKet_0Uk9WkuAB5R4wP_btAUq2lqL0Y0kszIVddLRwEK1PnPSNNxYYyBSrMImHvzKRDCp38bAUzfj9z3ETQrtc7FVhUdz2wbAJw9LCh2fO_Tr3EJPuPK3v886SNEUCzinQxNr8Fv2d3B9z9pU6fus2WV_DpyX1_wTtkqRr0NjYjp_QBKgj_lMQWI3q5uTuzfyW2Nzdm8WBlrja3cHlKWaRr3W__CjqXE1dpATYbUQe.wB3r',mdrd: 'OVV2XcpkuT0v4glXhdexogLINAvQ1YVqxffzhnfodcc-1772691486-1.2.1.1-3S8lSaAVY6LW8jrxGn_HIXCqChmmKjfSVXk7_0PIzFz2gEpBUyHZVIXrWyXGfgfG7FjsWZtS.X5U06KC1mSy.r4VAtnJ_fYU4FYC5AuOT05nT1qcG7dn8TU7.bJM6ujtuRGDO_V5w5xfOhN2i2zg8BeAF_bPwgC53xVMINQXmj_hZ5LK1jVg2K7DaM11igxGY5eHP8y9xiB8qKPoKWVEiXtEOM.SfLOuC.im0JbqV3fHq16ZdsMkbq66__jSkDsB4gNGjFFdUw8eNLItBJYswoqHPo.AP5mF4lGKyC.BgAh1yyY4Op8VcV7m25kFcPnFaGSNGg1KlpB1e7kAIs7yTNxatAcIqx34Uy4JwCcGfW.io1ICOZ4umjGwOVXtjEXnSKNEB8EJDz6x4Nlj4b3YuM3FnW557HXMAB.yX_ZLw2pvtEC6paEUUORZsbDRglQi8Pbbb5oVdK.8F3gGxyUc9UfDX7R6aWmEe9wql5drpsYgjI2fO2UgAbN2UW3BaiV_8EIUgQp_wSZKSBXTQMHjq.7WWf5bEjDJqHiwzffH4hZaUcOyyFZR3cu36w5sgx0usY1g8LMfh9vpXTclv4620_dmPkrIXA2AoPQzA06oiNlAATBkipvjHlKMQLw_JeNQ6obXQCfab1G0fJYIRL6PmvDIaz7LFa0t5z2joPXexJwyhIaKv67nwme4C8WVPFB3TekOWPvHc.ArHgGOyYkOsLbepXSYQMJkXrOcMmCcMRHnTlwTiRMqceCpcmMCWgCz_ThgTuekNGen9eN9CG8y0nDuTZrcefNdnA0TI4h5EeKqGFV_J7p.S_R6ruJ4ZcAHBYHES.gxQfWlIJrHSK0Je2Dwo.GzU7KA29yyeVrqvZSFS2VDM6siyeLJNr94XaUKrtU_GPipHyvMwfyvSI92Sd8lrO2blL_yb70IPfuRMSjgVN7H8LD3ByC46E_1XJoDFk.kgQIgU7ThH1qMqBXbhLgQb1eWJxjNx3P6eBkbbe41j5vHM.eT30aQgFZjhKmmwCP40hk3jJhm3i8xQRtMgAqKefDhya56bXV00neIpjFjdJHta0tOZ7uw58FgGOF3VxdPcNeGF9ywWhIHaywZ.mrzAjiWchl0Lt12nP5WcGV.gy_3hjfp8OiYANfgH3IXDP6jCsYRSeA9W4x0JLR22y4xqeLEZ7ViOcfQNhXwMnJOQeAdVJ_jRh5re8rif_1Bq6mPBlubouyVLyM0FNAV0izd4r2D.ojLWe3x3YcRGvjLC5Vp3O0Lb4XjDTBffW1UaaTwpaXUc51RjcneV5MkkHuvX74F6BePCUVEvQNW44HFgAsVRkm1p8ppw5k2GgM44fasNA7gnoONHlfNxeXMq0.ntEkGl1yilEuwGPxRK4hB2i8CRom5hZw6w9pgnufjIeX7qHGxWcR24.tA2GQjy1uCcGhIg5opwBf_hjqaST9_8Kr8F6fzg9FoBZ54ShsPkVe4RwgZ.0rAcVlIGtYrHb50lGJJpMBlb1fizo3KHIilo41LKvI9fTy83SHuc1JhCI99sTBOnrvVpV9XDR.n2lKlunl8mPvWB22RvQIy0cJR_aphlnD.xLr74362beuqlAlG8U75EcSJki9SuxDPW8VCzkMVhiU8yOWBvvpQVPDSPV6yEtGENSgHn7ColFqFaU14mNIRasQJnEgGaKDXvvGjcsi58YQ2ixWras0E49AH8sn0crSLIAIIWBNkHdwIj1hdnY_2vwwtTx6yRFpOcVGviGORro3xY__Cm9OxZoM8JkmGcieR4rwWthvbiJmuyE92xZQ6Ya1nc7hnvHjhFS_RUoC9DB_HX7oBgeyYce_rnp61ZZltmCypFJzKmLIukg0pPa4.5_TmcuGlPzSoEq2LkeP4L9rxHq0LfpgBTCy0o5.M7RKg0_l0YCp43sGqI0EDnvbxNsuhIMq5fqrrRH.qJ_kk_6CGDYPCrheKxlTMvJ94wLvvoL0NcPRvEuxGMlNjRF5a5N_x9tTJJ7H3HVyiyjuuBxNI9zqYvdGCQCa4.iys973IRbSIWKkOgLijmJxT4NzSfGJTrNPLBKjbbPalI4kOobpXoJlatXWbLNNSMqs2mto01x.Wpr_vQSvtlCOZvrEKCK0uqHDRIhcazIia48rQvZpVl1ejCbFBxr10Qxi6sounaBQbs4.zKVZTIhqq2IKIv6SU966c3D.GIZaIe4n50npZMtDm2s7_lxD8Up53H62Am7FrfA5kg1rH8W4lr0EAsNGGBWcPFvZlbR4RMfjr0mZzQUPcYn3wJRi4sjlU.WoVZc3FCt7FD1K3S9Qwn_A5l7ZfJvqtOApxHRNDQsTZRr9zRjXSISDw4OIcywhZ7YEDYfIMW4xl4euiKxghXkWXK5sziGRvSAstJ9Jj7kOaESBBGLe_iK.OxnKfcGfQtSl8yHBqfoc7z2aDlIjqeOf6T6woEmu9FJ0ZBONgxMhOQTCyg8RYM3Jnik4NptX4YRu6Q47EOO78MBVHvBB3TtIyke0QwBX8MyXmkQ070J3Q2hOLtjTtTSASQAgp0JD_EVnEdP8AgXIS8s_KvMrFUdoDguby3r68zQsV0DgOV9hRSUd48RdNCOdFSfRUv5G61goThMc8WbiDJXxG69h6XkFcOVIJYbDz92wgep.1FBsoLDprJkGM1xuzd5z6VE8S9rLRJW6_0kn_vtA93Ks6vqrWXvuCoO7iLW3AQTYX5dU8cIcnVG81aZsl.Gfw1nPCSqohhZ3lB41JqT_faFdHfMkyZrYvjbQ7Fhs1Qu5kxrnVMxw4A4kgTPlOfpTXjW_ldOj15R588IzXNBZpWlGZFbL4J5e.AIl7qnRjM_htCawv4oEOHXelvdpdVzFbq2bq34VpE4NnNBWXfib1Uv8LVW3VIAC0OIS4oos2fMeaTIn0P_tSLK6bdNPZkKOrfp0WeqPdyVBQg.cZ8y5E7EXXXcMHYVoXBCJ.tu0FbH5u1cECzo1ZOiGk83KoHBFVHGgvUubMiqJ_SdWP5fwg9SOcV.tBSzbsH64pYE85YiAatrkziWtcv4g26GdnIYE',};var a = document.createElement('script');a.src = '/cdn-cgi/challenge-platform/h/g/orchestrate/chl_page/v1?ray=9d77005f6831d275';window._cf_chl_opt.cOgUHash = location.hash === '' && location.href.indexOf('#') !== -1 ? '#' : location.hash;window._cf_chl_opt.cOgUQuery = location.search === '' && location.href.slice(0, location.href.length - window._cf_chl_opt.cOgUHash.length).indexOf('?') !== -1 ? '?' : location.search;if (window.history && window.history.replaceState) {var ogU = location.pathname + window._cf_chl_opt.cOgUQuery + window._cf_chl_opt.cOgUHash;history.replaceState(null, null,"\/api-keys\/chat\/completions?__cf_chl_rt_tk=387PPFDUtOjfmAcJ311lOIboZpsvo7z.qcIHvp4wX58-1772691486-1.0.1.1-wmqPEIqfct01nWRq7clxISwswl_2i41tBNdXZxS1RmE"+ window._cf_chl_opt.cOgUHash);a.onload = function() {history.replaceState(null, null, ogU);}}document.getElementsByTagName('head')[0].appendChild(a);}());</script></div>
+    </div>
+  <script>!function(){var e=document.createElement("iframe");function n(){var n=e.contentDocument||e.contentWindow.document;if(n){var t=n.createElement("script");t.nonce="",t.innerHTML="window['__CF$cv$params']={r:'792f8224776acf9f',m:'hMcSCCrnIkr7c8Pec6Na6boaaFAnQ6S0ypG2GKRbKgc-1675305063-0-AaJn0SqKZQnadmRQ5O1dM9xMkXWyP+ll7gpl2NHeoNbZTEXMjlB10KkwnEU3hf0/gMODfKqcBGLVecql6U04GGs+iJ/kNrNqj1FgfAOlQV+T2koMQMvUy1zr9tegBBX6BikfccHZhwoJhnXc0eTcg58=',s:[0x60b082f691,0xee65a67e11],u:'/cdn-cgi/challenge-platform/h/b'};var now=Date.now()/1000,offset=14400,ts=''+(Math.floor(now)-Math.floor(now%offset)),_cpo=document.createElement('script');_cpo.nonce='',_cpo.src='/cdn-cgi/challenge-platform/h/b/scripts/alpha/invisible.js?ts='+ts,document.getElementsByTagName('head')[0].appendChild(_cpo);",n.getElementsByTagName("head")[0].appendChild(t)}}if(e.height=1,e.width=1,e.style.position="absolute",e.style.top=0,e.style.left=0,e.style.border="none",e.style.visibility="hidden",document.body.appendChild(e),"loading"!==document.readyState)n();else if(window.addEventListener)document.addEventListener("DOMContentLoaded",n);else{var t=document.onreadystatechange||function(){};document.onreadystatechange=function(e){t(e),"loading"!==document.readyState&&(document.onreadystatechange=t,n())}}}();</script></body>
+</html>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 887, in acompletion
+    raise OpenAIError(
+litellm.llms.openai.common_utils.OpenAIError: <html>
+  <head>
+    <style global>body{font-family:Arial,Helvetica,sans-serif}.container{align-items:center;display:flex;flex-direction:column;gap:2rem;height:100%;justify-content:center;width:100%}@keyframes enlarge-appear{0%{opacity:0;transform:scale(75%) rotate(-90deg)}to{opacity:1;transform:scale(100%) rotate(0deg)}}.logo{color:#8e8ea0}.scale-appear{animation:enlarge-appear .4s ease-out}@media (min-width:768px){.scale-appear{height:48px;width:48px}}.data:empty{display:none}.data{border-radius:5px;color:#8e8ea0;text-align:center}@media (prefers-color-scheme:dark){body{background-color:#343541}.logo{color:#acacbe}}</style>
+  <meta http-equiv="refresh" content="360">
+</head>
+  <body>
+    <div class="container">
+      <div class="logo">
+        <svg
+          width="41"
+          height="41"
+          viewBox="0 0 41 41"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          strokeWidth="2"
+          class="scale-appear"
+        >
+          <path
+            d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.500197C16.1708 0.495044 14.0893 1.16803 12.3614 2.42214C10.6335 3.67624 9.34853 5.44666 8.6917 7.47815C7.30085 7.76286 5.98686 8.3414 4.8377 9.17505C3.68854 10.0087 2.73073 11.0782 2.02839 12.312C0.956464 14.1591 0.498905 16.2988 0.721698 18.4228C0.944492 20.5467 1.83612 22.5449 3.268 24.1293C2.81966 25.4759 2.66413 26.9026 2.81182 28.3141C2.95951 29.7256 3.40701 31.0892 4.12437 32.3138C5.18791 34.1659 6.8123 35.6322 8.76321 36.5013C10.7141 37.3704 12.8907 37.5973 14.9789 37.1492C15.9208 38.2107 17.0786 39.0587 18.3747 39.6366C19.6709 40.2144 21.0755 40.5087 22.4946 40.4998C24.6307 40.5054 26.7133 39.8321 28.4418 38.5772C30.1704 37.3223 31.4556 35.5506 32.1119 33.5179C33.5027 33.2332 34.8167 32.6547 35.9659 31.821C37.115 30.9874 38.0728 29.9178 38.7752 28.684C39.8458 26.8371 40.3023 24.6979 40.0789 22.5748C39.8556 20.4517 38.9639 18.4544 37.5324 16.8707ZM22.4978 37.8849C20.7443 37.8874 19.0459 37.2733 17.6994 36.1501C17.7601 36.117 17.8666 36.0586 17.936 36.0161L25.9004 31.4156C26.1003 31.3019 26.2663 31.137 26.3813 30.9378C26.4964 30.7386 26.5563 30.5124 26.5549 30.2825V19.0542L29.9213 20.998C29.9389 21.0068 29.9541 21.0198 29.9656 21.0359C29.977 21.052 29.9842 21.0707 29.9867 21.0902V30.3889C29.9842 32.375 29.1946 34.2791 27.7909 35.6841C26.3872 37.0892 24.4838 37.8806 22.4978 37.8849ZM6.39227 31.0064C5.51397 29.4888 5.19742 27.7107 5.49804 25.9832C5.55718 26.0187 5.66048 26.0818 5.73461 26.1244L13.699 30.7248C13.8975 30.8408 14.1233 30.902 14.3532 30.902C14.583 30.902 14.8088 30.8408 15.0073 30.7248L24.731 25.1103V28.9979C24.7321 29.0177 24.7283 29.0376 24.7199 29.0556C24.7115 29.0736 24.6988 29.0893 24.6829 29.1012L16.6317 33.7497C14.9096 34.7416 12.8643 35.0097 10.9447 34.4954C9.02506 33.9811 7.38785 32.7263 6.39227 31.0064ZM4.29707 13.6194C5.17156 12.0998 6.55279 10.9364 8.19885 10.3327C8.19885 10.4013 8.19491 10.5228 8.19491 10.6071V19.808C8.19351 20.0378 8.25334 20.2638 8.36823 20.4629C8.48312 20.6619 8.64893 20.8267 8.84863 20.9404L18.5723 26.5542L15.206 28.4979C15.1894 28.5089 15.1703 28.5155 15.1505 28.5173C15.1307 28.5191 15.1107 28.516 15.0924 28.5082L7.04046 23.8557C5.32135 22.8601 4.06716 21.2235 3.55289 19.3046C3.03862 17.3858 3.30624 15.3413 4.29707 13.6194ZM31.955 20.0556L22.2312 14.4411L25.5976 12.4981C25.6142 12.4872 25.6333 12.4805 25.6531 12.4787C25.6729 12.4769 25.6928 12.4801 25.7111 12.4879L33.7631 17.1364C34.9967 17.849 36.0017 18.8982 36.6606 20.1613C37.3194 21.4244 37.6047 22.849 37.4832 24.2684C37.3617 25.6878 36.8382 27.0432 35.9743 28.1759C35.1103 29.3086 33.9415 30.1717 32.6047 30.6641C32.6047 30.5947 32.6047 30.4733 32.6047 30.3889V21.188C32.6066 20.9586 32.5474 20.7328 32.4332 20.5338C32.319 20.3348 32.154 20.1698 31.955 20.0556ZM35.3055 15.0128C35.2464 14.9765 35.1431 14.9142 35.069 14.8717L27.1045 10.2712C26.906 10.1554 26.6803 10.0943 26.4504 10.0943C26.2206 10.0943 25.9948 10.1554 25.7963 10.2712L16.0726 15.8858V11.9982C16.0715 11.9783 16.0753 11.9585 16.0837 11.9405C16.0921 11.9225 16.1048 11.9068 16.1207 11.8949L24.1719 7.25025C25.4053 6.53903 26.8158 6.19376 28.2383 6.25482C29.6608 6.31589 31.0364 6.78077 32.2044 7.59508C33.3723 8.40939 34.2842 9.53945 34.8334 10.8531C35.3826 12.1667 35.5464 13.6095 35.3055 15.0128ZM14.2424 21.9419L10.8752 19.9981C10.8576 19.9893 10.8423 19.9763 10.8309 19.9602C10.8195 19.9441 10.8122 19.9254 10.8098 19.9058V10.6071C10.8107 9.18295 11.2173 7.78848 11.9819 6.58696C12.7466 5.38544 13.8377 4.42659 15.1275 3.82264C16.4173 3.21869 17.8524 2.99464 19.2649 3.1767C20.6775 3.35876 22.0089 3.93941 23.1034 4.85067C23.0427 4.88379 22.937 4.94215 22.8668 4.98473L14.9024 9.58517C14.7025 9.69878 14.5366 9.86356 14.4215 10.0626C14.3065 10.2616 14.2466 10.4877 14.2479 10.7175L14.2424 21.9419ZM16.071 17.9991L20.4018 15.4978L24.7325 17.9975V22.9985L20.4018 25.4983L16.071 22.9985V17.9991Z"
+            fill="currentColor"
+          />
+        </svg>
+      </div>
+      <div class="data"><div class="main-wrapper" role="main"><div class="main-content"><noscript><div class="h2"><span id="challenge-error-text">Enable JavaScript and cookies to continue</span></div></noscript></div></div><script>(function(){window._cf_chl_opt = {cvId: '3',cZone: 'platform.openai.com',cType: 'managed',cRay: '9d77005f6831d275',cH: 'jkjRb7jMQPwgiBm1qSy1s1GUApXlLbUJFT..K.qQ3ig-1772691486-1.2.1.1-aknxYKlFvU1jRRN.SD1Awx6xlUG7hrais1JOvWGDswTd3MxuqVXwV9pTjVC60ZWg',cUPMDTk:"\/api-keys\/chat\/completions?__cf_chl_tk=387PPFDUtOjfmAcJ311lOIboZpsvo7z.qcIHvp4wX58-1772691486-1.0.1.1-wmqPEIqfct01nWRq7clxISwswl_2i41tBNdXZxS1RmE",cFPWv: 'g',cITimeS: '1772691486',cTplC:1,cTplV:5,cTplB: '0',fa:"\/api-keys\/chat\/completions?__cf_chl_f_tk=387PPFDUtOjfmAcJ311lOIboZpsvo7z.qcIHvp4wX58-1772691486-1.0.1.1-wmqPEIqfct01nWRq7clxISwswl_2i41tBNdXZxS1RmE",md: 'OCm_Z3MY.KjxYlA1NcbLKPxToB4FKJeW_TcmXfJianQ-1772691486-1.2.1.1-AHwPzTg32h.3mITrNxyUqG0o8AQz5dIGKLB65p7xWeoZRtpKOZtE3tJeSL7xu3YM26kTKymqTmR3RxZCNkgnx6y1PylTUx6660A4NU718mw.O_4808bhb6RkCz4c0NL5kdAdC7yFrmChs.HU8M4kIO8IkP0sOC8ZIbH0TV1Wnj.CVODySugCFDoYO5.l.NFKnkp9LlAqEwpgIUtoJnAtYwjphWW1LFap56Vad9gPeNrq8Wf6TawGYDu_W.cx63eCR7eAog4LlUj7doVyEy3hqi.O1_IVMPPvzK2Lhgh39TvilM6cUcJXKUPmqzI_WsUhF5asiM5xdNwAIXaXfhBdpTyPnm32rESVZfDKH8ePccLc0_8f40t67rkU70PH8Fi.Z8cv5rDUVdCU6zp4BEr59sxmCEAxDmKLTmuCED1emr4j7o5C_Hu0cUqpzs84BUIXzS3QCzBD.ck0OJyd5huKvLdgHCvvfx2.BAJlqfb9Xk2khqN571pVv5o_9a1JvW8WefTaxvXSvOjo4RGi1aFIzTv7UtRa8EkSkm..wwVD3aFkkv82WtIRgVaSK2QzVfU2wn3XZODNEnRzNoZw48Sk85jTif8dsmftvwSw8oB9CsPktrmi8H31Q8KhdRdeQUu.OeAb0WJ9cVY14nPJMffNrLCXCvwV9cTSAMJkczJY4LsVAYOd5AhHP.yj90J2VEcrGPXNNEoDeDMvsj9au6v9LVPsVZfajeeUIeyQ6Jwe9UxmbD8agDu93NSAo0fB2pIbLNyJYIA11pI9Sj.2KPKet_0Uk9WkuAB5R4wP_btAUq2lqL0Y0kszIVddLRwEK1PnPSNNxYYyBSrMImHvzKRDCp38bAUzfj9z3ETQrtc7FVhUdz2wbAJw9LCh2fO_Tr3EJPuPK3v886SNEUCzinQxNr8Fv2d3B9z9pU6fus2WV_DpyX1_wTtkqRr0NjYjp_QBKgj_lMQWI3q5uTuzfyW2Nzdm8WBlrja3cHlKWaRr3W__CjqXE1dpATYbUQe.wB3r',mdrd: 'OVV2XcpkuT0v4glXhdexogLINAvQ1YVqxffzhnfodcc-1772691486-1.2.1.1-3S8lSaAVY6LW8jrxGn_HIXCqChmmKjfSVXk7_0PIzFz2gEpBUyHZVIXrWyXGfgfG7FjsWZtS.X5U06KC1mSy.r4VAtnJ_fYU4FYC5AuOT05nT1qcG7dn8TU7.bJM6ujtuRGDO_V5w5xfOhN2i2zg8BeAF_bPwgC53xVMINQXmj_hZ5LK1jVg2K7DaM11igxGY5eHP8y9xiB8qKPoKWVEiXtEOM.SfLOuC.im0JbqV3fHq16ZdsMkbq66__jSkDsB4gNGjFFdUw8eNLItBJYswoqHPo.AP5mF4lGKyC.BgAh1yyY4Op8VcV7m25kFcPnFaGSNGg1KlpB1e7kAIs7yTNxatAcIqx34Uy4JwCcGfW.io1ICOZ4umjGwOVXtjEXnSKNEB8EJDz6x4Nlj4b3YuM3FnW557HXMAB.yX_ZLw2pvtEC6paEUUORZsbDRglQi8Pbbb5oVdK.8F3gGxyUc9UfDX7R6aWmEe9wql5drpsYgjI2fO2UgAbN2UW3BaiV_8EIUgQp_wSZKSBXTQMHjq.7WWf5bEjDJqHiwzffH4hZaUcOyyFZR3cu36w5sgx0usY1g8LMfh9vpXTclv4620_dmPkrIXA2AoPQzA06oiNlAATBkipvjHlKMQLw_JeNQ6obXQCfab1G0fJYIRL6PmvDIaz7LFa0t5z2joPXexJwyhIaKv67nwme4C8WVPFB3TekOWPvHc.ArHgGOyYkOsLbepXSYQMJkXrOcMmCcMRHnTlwTiRMqceCpcmMCWgCz_ThgTuekNGen9eN9CG8y0nDuTZrcefNdnA0TI4h5EeKqGFV_J7p.S_R6ruJ4ZcAHBYHES.gxQfWlIJrHSK0Je2Dwo.GzU7KA29yyeVrqvZSFS2VDM6siyeLJNr94XaUKrtU_GPipHyvMwfyvSI92Sd8lrO2blL_yb70IPfuRMSjgVN7H8LD3ByC46E_1XJoDFk.kgQIgU7ThH1qMqBXbhLgQb1eWJxjNx3P6eBkbbe41j5vHM.eT30aQgFZjhKmmwCP40hk3jJhm3i8xQRtMgAqKefDhya56bXV00neIpjFjdJHta0tOZ7uw58FgGOF3VxdPcNeGF9ywWhIHaywZ.mrzAjiWchl0Lt12nP5WcGV.gy_3hjfp8OiYANfgH3IXDP6jCsYRSeA9W4x0JLR22y4xqeLEZ7ViOcfQNhXwMnJOQeAdVJ_jRh5re8rif_1Bq6mPBlubouyVLyM0FNAV0izd4r2D.ojLWe3x3YcRGvjLC5Vp3O0Lb4XjDTBffW1UaaTwpaXUc51RjcneV5MkkHuvX74F6BePCUVEvQNW44HFgAsVRkm1p8ppw5k2GgM44fasNA7gnoONHlfNxeXMq0.ntEkGl1yilEuwGPxRK4hB2i8CRom5hZw6w9pgnufjIeX7qHGxWcR24.tA2GQjy1uCcGhIg5opwBf_hjqaST9_8Kr8F6fzg9FoBZ54ShsPkVe4RwgZ.0rAcVlIGtYrHb50lGJJpMBlb1fizo3KHIilo41LKvI9fTy83SHuc1JhCI99sTBOnrvVpV9XDR.n2lKlunl8mPvWB22RvQIy0cJR_aphlnD.xLr74362beuqlAlG8U75EcSJki9SuxDPW8VCzkMVhiU8yOWBvvpQVPDSPV6yEtGENSgHn7ColFqFaU14mNIRasQJnEgGaKDXvvGjcsi58YQ2ixWras0E49AH8sn0crSLIAIIWBNkHdwIj1hdnY_2vwwtTx6yRFpOcVGviGORro3xY__Cm9OxZoM8JkmGcieR4rwWthvbiJmuyE92xZQ6Ya1nc7hnvHjhFS_RUoC9DB_HX7oBgeyYce_rnp61ZZltmCypFJzKmLIukg0pPa4.5_TmcuGlPzSoEq2LkeP4L9rxHq0LfpgBTCy0o5.M7RKg0_l0YCp43sGqI0EDnvbxNsuhIMq5fqrrRH.qJ_kk_6CGDYPCrheKxlTMvJ94wLvvoL0NcPRvEuxGMlNjRF5a5N_x9tTJJ7H3HVyiyjuuBxNI9zqYvdGCQCa4.iys973IRbSIWKkOgLijmJxT4NzSfGJTrNPLBKjbbPalI4kOobpXoJlatXWbLNNSMqs2mto01x.Wpr_vQSvtlCOZvrEKCK0uqHDRIhcazIia48rQvZpVl1ejCbFBxr10Qxi6sounaBQbs4.zKVZTIhqq2IKIv6SU966c3D.GIZaIe4n50npZMtDm2s7_lxD8Up53H62Am7FrfA5kg1rH8W4lr0EAsNGGBWcPFvZlbR4RMfjr0mZzQUPcYn3wJRi4sjlU.WoVZc3FCt7FD1K3S9Qwn_A5l7ZfJvqtOApxHRNDQsTZRr9zRjXSISDw4OIcywhZ7YEDYfIMW4xl4euiKxghXkWXK5sziGRvSAstJ9Jj7kOaESBBGLe_iK.OxnKfcGfQtSl8yHBqfoc7z2aDlIjqeOf6T6woEmu9FJ0ZBONgxMhOQTCyg8RYM3Jnik4NptX4YRu6Q47EOO78MBVHvBB3TtIyke0QwBX8MyXmkQ070J3Q2hOLtjTtTSASQAgp0JD_EVnEdP8AgXIS8s_KvMrFUdoDguby3r68zQsV0DgOV9hRSUd48RdNCOdFSfRUv5G61goThMc8WbiDJXxG69h6XkFcOVIJYbDz92wgep.1FBsoLDprJkGM1xuzd5z6VE8S9rLRJW6_0kn_vtA93Ks6vqrWXvuCoO7iLW3AQTYX5dU8cIcnVG81aZsl.Gfw1nPCSqohhZ3lB41JqT_faFdHfMkyZrYvjbQ7Fhs1Qu5kxrnVMxw4A4kgTPlOfpTXjW_ldOj15R588IzXNBZpWlGZFbL4J5e.AIl7qnRjM_htCawv4oEOHXelvdpdVzFbq2bq34VpE4NnNBWXfib1Uv8LVW3VIAC0OIS4oos2fMeaTIn0P_tSLK6bdNPZkKOrfp0WeqPdyVBQg.cZ8y5E7EXXXcMHYVoXBCJ.tu0FbH5u1cECzo1ZOiGk83KoHBFVHGgvUubMiqJ_SdWP5fwg9SOcV.tBSzbsH64pYE85YiAatrkziWtcv4g26GdnIYE',};var a = document.createElement('script');a.src = '/cdn-cgi/challenge-platform/h/g/orchestrate/chl_page/v1?ray=9d77005f6831d275';window._cf_chl_opt.cOgUHash = location.hash === '' && location.href.indexOf('#') !== -1 ? '#' : location.hash;window._cf_chl_opt.cOgUQuery = location.search === '' && location.href.slice(0, location.href.length - window._cf_chl_opt.cOgUHash.length).indexOf('?') !== -1 ? '?' : location.search;if (window.history && window.history.replaceState) {var ogU = location.pathname + window._cf_chl_opt.cOgUQuery + window._cf_chl_opt.cOgUHash;history.replaceState(null, null,"\/api-keys\/chat\/completions?__cf_chl_rt_tk=387PPFDUtOjfmAcJ311lOIboZpsvo7z.qcIHvp4wX58-1772691486-1.0.1.1-wmqPEIqfct01nWRq7clxISwswl_2i41tBNdXZxS1RmE"+ window._cf_chl_opt.cOgUHash);a.onload = function() {history.replaceState(null, null, ogU);}}document.getElementsByTagName('head')[0].appendChild(a);}());</script></div>
+    </div>
+  <script>!function(){var e=document.createElement("iframe");function n(){var n=e.contentDocument||e.contentWindow.document;if(n){var t=n.createElement("script");t.nonce="",t.innerHTML="window['__CF$cv$params']={r:'792f8224776acf9f',m:'hMcSCCrnIkr7c8Pec6Na6boaaFAnQ6S0ypG2GKRbKgc-1675305063-0-AaJn0SqKZQnadmRQ5O1dM9xMkXWyP+ll7gpl2NHeoNbZTEXMjlB10KkwnEU3hf0/gMODfKqcBGLVecql6U04GGs+iJ/kNrNqj1FgfAOlQV+T2koMQMvUy1zr9tegBBX6BikfccHZhwoJhnXc0eTcg58=',s:[0x60b082f691,0xee65a67e11],u:'/cdn-cgi/challenge-platform/h/b'};var now=Date.now()/1000,offset=14400,ts=''+(Math.floor(now)-Math.floor(now%offset)),_cpo=document.createElement('script');_cpo.nonce='',_cpo.src='/cdn-cgi/challenge-platform/h/b/scripts/alpha/invisible.js?ts='+ts,document.getElementsByTagName('head')[0].appendChild(_cpo);",n.getElementsByTagName("head")[0].appendChild(t)}}if(e.height=1,e.width=1,e.style.position="absolute",e.style.top=0,e.style.left=0,e.style.border="none",e.style.visibility="hidden",document.body.appendChild(e),"loading"!==document.readyState)n();else if(window.addEventListener)document.addEventListener("DOMContentLoaded",n);else{var t=document.onreadystatechange||function(){};document.onreadystatechange=function(e){t(e),"loading"!==document.readyState&&(document.onreadystatechange=t,n())}}}();</script></body>
+</html>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 590, in exception_type
+    raise APIError(
+litellm.exceptions.APIError: litellm.APIError: APIError: OpenAIException - <html>
+  <head>
+    <style global>body{font-family:Arial,Helvetica,sans-serif}.container{align-items:center;display:flex;flex-direction:column;gap:2rem;height:100%;justify-content:center;width:100%}@keyframes enlarge-appear{0%{opacity:0;transform:scale(75%) rotate(-90deg)}to{opacity:1;transform:scale(100%) rotate(0deg)}}.logo{color:#8e8ea0}.scale-appear{animation:enlarge-appear .4s ease-out}@media (min-width:768px){.scale-appear{height:48px;width:48px}}.data:empty{display:none}.data{border-radius:5px;color:#8e8ea0;text-align:center}@media (prefers-color-scheme:dark){body{background-color:#343541}.logo{color:#acacbe}}</style>
+  <meta http-equiv="refresh" content="360">
+</head>
+  <body>
+    <div class="container">
+      <div class="logo">
+        <svg
+          width="41"
+          height="41"
+          viewBox="0 0 41 41"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          strokeWidth="2"
+          class="scale-appear"
+        >
+          <path
+            d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.500197C16.1708 0.495044 14.0893 1.16803 12.3614 2.42214C10.6335 3.67624 9.34853 5.44666 8.6917 7.47815C7.30085 7.76286 5.98686 8.3414 4.8377 9.17505C3.68854 10.0087 2.73073 11.0782 2.02839 12.312C0.956464 14.1591 0.498905 16.2988 0.721698 18.4228C0.944492 20.5467 1.83612 22.5449 3.268 24.1293C2.81966 25.4759 2.66413 26.9026 2.81182 28.3141C2.95951 29.7256 3.40701 31.0892 4.12437 32.3138C5.18791 34.1659 6.8123 35.6322 8.76321 36.5013C10.7141 37.3704 12.8907 37.5973 14.9789 37.1492C15.9208 38.2107 17.0786 39.0587 18.3747 39.6366C19.6709 40.2144 21.0755 40.5087 22.4946 40.4998C24.6307 40.5054 26.7133 39.8321 28.4418 38.5772C30.1704 37.3223 31.4556 35.5506 32.1119 33.5179C33.5027 33.2332 34.8167 32.6547 35.9659 31.821C37.115 30.9874 38.0728 29.9178 38.7752 28.684C39.8458 26.8371 40.3023 24.6979 40.0789 22.5748C39.8556 20.4517 38.9639 18.4544 37.5324 16.8707ZM22.4978 37.8849C20.7443 37.8874 19.0459 37.2733 17.6994 36.1501C17.7601 36.117 17.8666 36.0586 17.936 36.0161L25.9004 31.4156C26.1003 31.3019 26.2663 31.137 26.3813 30.9378C26.4964 30.7386 26.5563 30.5124 26.5549 30.2825V19.0542L29.9213 20.998C29.9389 21.0068 29.9541 21.0198 29.9656 21.0359C29.977 21.052 29.9842 21.0707 29.9867 21.0902V30.3889C29.9842 32.375 29.1946 34.2791 27.7909 35.6841C26.3872 37.0892 24.4838 37.8806 22.4978 37.8849ZM6.39227 31.0064C5.51397 29.4888 5.19742 27.7107 5.49804 25.9832C5.55718 26.0187 5.66048 26.0818 5.73461 26.1244L13.699 30.7248C13.8975 30.8408 14.1233 30.902 14.3532 30.902C14.583 30.902 14.8088 30.8408 15.0073 30.7248L24.731 25.1103V28.9979C24.7321 29.0177 24.7283 29.0376 24.7199 29.0556C24.7115 29.0736 24.6988 29.0893 24.6829 29.1012L16.6317 33.7497C14.9096 34.7416 12.8643 35.0097 10.9447 34.4954C9.02506 33.9811 7.38785 32.7263 6.39227 31.0064ZM4.29707 13.6194C5.17156 12.0998 6.55279 10.9364 8.19885 10.3327C8.19885 10.4013 8.19491 10.5228 8.19491 10.6071V19.808C8.19351 20.0378 8.25334 20.2638 8.36823 20.4629C8.48312 20.6619 8.64893 20.8267 8.84863 20.9404L18.5723 26.5542L15.206 28.4979C15.1894 28.5089 15.1703 28.5155 15.1505 28.5173C15.1307 28.5191 15.1107 28.516 15.0924 28.5082L7.04046 23.8557C5.32135 22.8601 4.06716 21.2235 3.55289 19.3046C3.03862 17.3858 3.30624 15.3413 4.29707 13.6194ZM31.955 20.0556L22.2312 14.4411L25.5976 12.4981C25.6142 12.4872 25.6333 12.4805 25.6531 12.4787C25.6729 12.4769 25.6928 12.4801 25.7111 12.4879L33.7631 17.1364C34.9967 17.849 36.0017 18.8982 36.6606 20.1613C37.3194 21.4244 37.6047 22.849 37.4832 24.2684C37.3617 25.6878 36.8382 27.0432 35.9743 28.1759C35.1103 29.3086 33.9415 30.1717 32.6047 30.6641C32.6047 30.5947 32.6047 30.4733 32.6047 30.3889V21.188C32.6066 20.9586 32.5474 20.7328 32.4332 20.5338C32.319 20.3348 32.154 20.1698 31.955 20.0556ZM35.3055 15.0128C35.2464 14.9765 35.1431 14.9142 35.069 14.8717L27.1045 10.2712C26.906 10.1554 26.6803 10.0943 26.4504 10.0943C26.2206 10.0943 25.9948 10.1554 25.7963 10.2712L16.0726 15.8858V11.9982C16.0715 11.9783 16.0753 11.9585 16.0837 11.9405C16.0921 11.9225 16.1048 11.9068 16.1207 11.8949L24.1719 7.25025C25.4053 6.53903 26.8158 6.19376 28.2383 6.25482C29.6608 6.31589 31.0364 6.78077 32.2044 7.59508C33.3723 8.40939 34.2842 9.53945 34.8334 10.8531C35.3826 12.1667 35.5464 13.6095 35.3055 15.0128ZM14.2424 21.9419L10.8752 19.9981C10.8576 19.9893 10.8423 19.9763 10.8309 19.9602C10.8195 19.9441 10.8122 19.9254 10.8098 19.9058V10.6071C10.8107 9.18295 11.2173 7.78848 11.9819 6.58696C12.7466 5.38544 13.8377 4.42659 15.1275 3.82264C16.4173 3.21869 17.8524 2.99464 19.2649 3.1767C20.6775 3.35876 22.0089 3.93941 23.1034 4.85067C23.0427 4.88379 22.937 4.94215 22.8668 4.98473L14.9024 9.58517C14.7025 9.69878 14.5366 9.86356 14.4215 10.0626C14.3065 10.2616 14.2466 10.4877 14.2479 10.7175L14.2424 21.9419ZM16.071 17.9991L20.4018 15.4978L24.7325 17.9975V22.9985L20.4018 25.4983L16.071 22.9985V17.9991Z"
+            fill="currentColor"
+          />
+        </svg>
+      </div>
+      <div class="data"><div class="main-wrapper" role="main"><div class="main-content"><noscript><div class="h2"><span id="challenge-error-text">Enable JavaScript and cookies to continue</span></div></noscript></div></div><script>(function(){window._cf_chl_opt = {cvId: '3',cZone: 'platform.openai.com',cType: 'managed',cRay: '9d77005f6831d275',cH: 'jkjRb7jMQPwgiBm1qSy1s1GUApXlLbUJFT..K.qQ3ig-1772691486-1.2.1.1-aknxYKlFvU1jRRN.SD1Awx6xlUG7hrais1JOvWGDswTd3MxuqVXwV9pTjVC60ZWg',cUPMDTk:"\/api-keys\/chat\/completions?__cf_chl_tk=387PPFDUtOjfmAcJ311lOIboZpsvo7z.qcIHvp4wX58-1772691486-1.0.1.1-wmqPEIqfct01nWRq7clxISwswl_2i41tBNdXZxS1RmE",cFPWv: 'g',cITimeS: '1772691486',cTplC:1,cTplV:5,cTplB: '0',fa:"\/api-keys\/chat\/completions?__cf_chl_f_tk=387PPFDUtOjfmAcJ311lOIboZpsvo7z.qcIHvp4wX58-1772691486-1.0.1.1-wmqPEIqfct01nWRq7clxISwswl_2i41tBNdXZxS1RmE",md: 'OCm_Z3MY.KjxYlA1NcbLKPxToB4FKJeW_TcmXfJianQ-1772691486-1.2.1.1-AHwPzTg32h.3mITrNxyUqG0o8AQz5dIGKLB65p7xWeoZRtpKOZtE3tJeSL7xu3YM26kTKymqTmR3RxZCNkgnx6y1PylTUx6660A4NU718mw.O_4808bhb6RkCz4c0NL5kdAdC7yFrmChs.HU8M4kIO8IkP0sOC8ZIbH0TV1Wnj.CVODySugCFDoYO5.l.NFKnkp9LlAqEwpgIUtoJnAtYwjphWW1LFap56Vad9gPeNrq8Wf6TawGYDu_W.cx63eCR7eAog4LlUj7doVyEy3hqi.O1_IVMPPvzK2Lhgh39TvilM6cUcJXKUPmqzI_WsUhF5asiM5xdNwAIXaXfhBdpTyPnm32rESVZfDKH8ePccLc0_8f40t67rkU70PH8Fi.Z8cv5rDUVdCU6zp4BEr59sxmCEAxDmKLTmuCED1emr4j7o5C_Hu0cUqpzs84BUIXzS3QCzBD.ck0OJyd5huKvLdgHCvvfx2.BAJlqfb9Xk2khqN571pVv5o_9a1JvW8WefTaxvXSvOjo4RGi1aFIzTv7UtRa8EkSkm..wwVD3aFkkv82WtIRgVaSK2QzVfU2wn3XZODNEnRzNoZw48Sk85jTif8dsmftvwSw8oB9CsPktrmi8H31Q8KhdRdeQUu.OeAb0WJ9cVY14nPJMffNrLCXCvwV9cTSAMJkczJY4LsVAYOd5AhHP.yj90J2VEcrGPXNNEoDeDMvsj9au6v9LVPsVZfajeeUIeyQ6Jwe9UxmbD8agDu93NSAo0fB2pIbLNyJYIA11pI9Sj.2KPKet_0Uk9WkuAB5R4wP_btAUq2lqL0Y0kszIVddLRwEK1PnPSNNxYYyBSrMImHvzKRDCp38bAUzfj9z3ETQrtc7FVhUdz2wbAJw9LCh2fO_Tr3EJPuPK3v886SNEUCzinQxNr8Fv2d3B9z9pU6fus2WV_DpyX1_wTtkqRr0NjYjp_QBKgj_lMQWI3q5uTuzfyW2Nzdm8WBlrja3cHlKWaRr3W__CjqXE1dpATYbUQe.wB3r',mdrd: 'OVV2XcpkuT0v4glXhdexogLINAvQ1YVqxffzhnfodcc-1772691486-1.2.1.1-3S8lSaAVY6LW8jrxGn_HIXCqChmmKjfSVXk7_0PIzFz2gEpBUyHZVIXrWyXGfgfG7FjsWZtS.X5U06KC1mSy.r4VAtnJ_fYU4FYC5AuOT05nT1qcG7dn8TU7.bJM6ujtuRGDO_V5w5xfOhN2i2zg8BeAF_bPwgC53xVMINQXmj_hZ5LK1jVg2K7DaM11igxGY5eHP8y9xiB8qKPoKWVEiXtEOM.SfLOuC.im0JbqV3fHq16ZdsMkbq66__jSkDsB4gNGjFFdUw8eNLItBJYswoqHPo.AP5mF4lGKyC.BgAh1yyY4Op8VcV7m25kFcPnFaGSNGg1KlpB1e7kAIs7yTNxatAcIqx34Uy4JwCcGfW.io1ICOZ4umjGwOVXtjEXnSKNEB8EJDz6x4Nlj4b3YuM3FnW557HXMAB.yX_ZLw2pvtEC6paEUUORZsbDRglQi8Pbbb5oVdK.8F3gGxyUc9UfDX7R6aWmEe9wql5drpsYgjI2fO2UgAbN2UW3BaiV_8EIUgQp_wSZKSBXTQMHjq.7WWf5bEjDJqHiwzffH4hZaUcOyyFZR3cu36w5sgx0usY1g8LMfh9vpXTclv4620_dmPkrIXA2AoPQzA06oiNlAATBkipvjHlKMQLw_JeNQ6obXQCfab1G0fJYIRL6PmvDIaz7LFa0t5z2joPXexJwyhIaKv67nwme4C8WVPFB3TekOWPvHc.ArHgGOyYkOsLbepXSYQMJkXrOcMmCcMRHnTlwTiRMqceCpcmMCWgCz_ThgTuekNGen9eN9CG8y0nDuTZrcefNdnA0TI4h5EeKqGFV_J7p.S_R6ruJ4ZcAHBYHES.gxQfWlIJrHSK0Je2Dwo.GzU7KA29yyeVrqvZSFS2VDM6siyeLJNr94XaUKrtU_GPipHyvMwfyvSI92Sd8lrO2blL_yb70IPfuRMSjgVN7H8LD3ByC46E_1XJoDFk.kgQIgU7ThH1qMqBXbhLgQb1eWJxjNx3P6eBkbbe41j5vHM.eT30aQgFZjhKmmwCP40hk3jJhm3i8xQRtMgAqKefDhya56bXV00neIpjFjdJHta0tOZ7uw58FgGOF3VxdPcNeGF9ywWhIHaywZ.mrzAjiWchl0Lt12nP5WcGV.gy_3hjfp8OiYANfgH3IXDP6jCsYRSeA9W4x0JLR22y4xqeLEZ7ViOcfQNhXwMnJOQeAdVJ_jRh5re8rif_1Bq6mPBlubouyVLyM0FNAV0izd4r2D.ojLWe3x3YcRGvjLC5Vp3O0Lb4XjDTBffW1UaaTwpaXUc51RjcneV5MkkHuvX74F6BePCUVEvQNW44HFgAsVRkm1p8ppw5k2GgM44fasNA7gnoONHlfNxeXMq0.ntEkGl1yilEuwGPxRK4hB2i8CRom5hZw6w9pgnufjIeX7qHGxWcR24.tA2GQjy1uCcGhIg5opwBf_hjqaST9_8Kr8F6fzg9FoBZ54ShsPkVe4RwgZ.0rAcVlIGtYrHb50lGJJpMBlb1fizo3KHIilo41LKvI9fTy83SHuc1JhCI99sTBOnrvVpV9XDR.n2lKlunl8mPvWB22RvQIy0cJR_aphlnD.xLr74362beuqlAlG8U75EcSJki9SuxDPW8VCzkMVhiU8yOWBvvpQVPDSPV6yEtGENSgHn7ColFqFaU14mNIRasQJnEgGaKDXvvGjcsi58YQ2ixWras0E49AH8sn0crSLIAIIWBNkHdwIj1hdnY_2vwwtTx6yRFpOcVGviGORro3xY__Cm9OxZoM8JkmGcieR4rwWthvbiJmuyE92xZQ6Ya1nc7hnvHjhFS_RUoC9DB_HX7oBgeyYce_rnp61ZZltmCypFJzKmLIukg0pPa4.5_TmcuGlPzSoEq2LkeP4L9rxHq0LfpgBTCy0o5.M7RKg0_l0YCp43sGqI0EDnvbxNsuhIMq5fqrrRH.qJ_kk_6CGDYPCrheKxlTMvJ94wLvvoL0NcPRvEuxGMlNjRF5a5N_x9tTJJ7H3HVyiyjuuBxNI9zqYvdGCQCa4.iys973IRbSIWKkOgLijmJxT4NzSfGJTrNPLBKjbbPalI4kOobpXoJlatXWbLNNSMqs2mto01x.Wpr_vQSvtlCOZvrEKCK0uqHDRIhcazIia48rQvZpVl1ejCbFBxr10Qxi6sounaBQbs4.zKVZTIhqq2IKIv6SU966c3D.GIZaIe4n50npZMtDm2s7_lxD8Up53H62Am7FrfA5kg1rH8W4lr0EAsNGGBWcPFvZlbR4RMfjr0mZzQUPcYn3wJRi4sjlU.WoVZc3FCt7FD1K3S9Qwn_A5l7ZfJvqtOApxHRNDQsTZRr9zRjXSISDw4OIcywhZ7YEDYfIMW4xl4euiKxghXkWXK5sziGRvSAstJ9Jj7kOaESBBGLe_iK.OxnKfcGfQtSl8yHBqfoc7z2aDlIjqeOf6T6woEmu9FJ0ZBONgxMhOQTCyg8RYM3Jnik4NptX4YRu6Q47EOO78MBVHvBB3TtIyke0QwBX8MyXmkQ070J3Q2hOLtjTtTSASQAgp0JD_EVnEdP8AgXIS8s_KvMrFUdoDguby3r68zQsV0DgOV9hRSUd48RdNCOdFSfRUv5G61goThMc8WbiDJXxG69h6XkFcOVIJYbDz92wgep.1FBsoLDprJkGM1xuzd5z6VE8S9rLRJW6_0kn_vtA93Ks6vqrWXvuCoO7iLW3AQTYX5dU8cIcnVG81aZsl.Gfw1nPCSqohhZ3lB41JqT_faFdHfMkyZrYvjbQ7Fhs1Qu5kxrnVMxw4A4kgTPlOfpTXjW_ldOj15R588IzXNBZpWlGZFbL4J5e.AIl7qnRjM_htCawv4oEOHXelvdpdVzFbq2bq34VpE4NnNBWXfib1Uv8LVW3VIAC0OIS4oos2fMeaTIn0P_tSLK6bdNPZkKOrfp0WeqPdyVBQg.cZ8y5E7EXXXcMHYVoXBCJ.tu0FbH5u1cECzo1ZOiGk83KoHBFVHGgvUubMiqJ_SdWP5fwg9SOcV.tBSzbsH64pYE85YiAatrkziWtcv4g26GdnIYE',};var a = document.createElement('script');a.src = '/cdn-cgi/challenge-platform/h/g/orchestrate/chl_page/v1?ray=9d77005f6831d275';window._cf_chl_opt.cOgUHash = location.hash === '' && location.href.indexOf('#') !== -1 ? '#' : location.hash;window._cf_chl_opt.cOgUQuery = location.search === '' && location.href.slice(0, location.href.length - window._cf_chl_opt.cOgUHash.length).indexOf('?') !== -1 ? '?' : location.search;if (window.history && window.history.replaceState) {var ogU = location.pathname + window._cf_chl_opt.cOgUQuery + window._cf_chl_opt.cOgUHash;history.replaceState(null, null,"\/api-keys\/chat\/completions?__cf_chl_rt_tk=387PPFDUtOjfmAcJ311lOIboZpsvo7z.qcIHvp4wX58-1772691486-1.0.1.1-wmqPEIqfct01nWRq7clxISwswl_2i41tBNdXZxS1RmE"+ window._cf_chl_opt.cOgUHash);a.onload = function() {history.replaceState(null, null, ogU);}}document.getElementsByTagName('head')[0].appendChild(a);}());</script></div>
+    </div>
+  <script>!function(){var e=document.createElement("iframe");function n(){var n=e.contentDocument||e.contentWindow.document;if(n){var t=n.createElement("script");t.nonce="",t.innerHTML="window['__CF$cv$params']={r:'792f8224776acf9f',m:'hMcSCCrnIkr7c8Pec6Na6boaaFAnQ6S0ypG2GKRbKgc-1675305063-0-AaJn0SqKZQnadmRQ5O1dM9xMkXWyP+ll7gpl2NHeoNbZTEXMjlB10KkwnEU3hf0/gMODfKqcBGLVecql6U04GGs+iJ/kNrNqj1FgfAOlQV+T2koMQMvUy1zr9tegBBX6BikfccHZhwoJhnXc0eTcg58=',s:[0x60b082f691,0xee65a67e11],u:'/cdn-cgi/challenge-platform/h/b'};var now=Date.now()/1000,offset=14400,ts=''+(Math.floor(now)-Math.floor(now%offset)),_cpo=document.createElement('script');_cpo.nonce='',_cpo.src='/cdn-cgi/challenge-platform/h/b/scripts/alpha/invisible.js?ts='+ts,document.getElementsByTagName('head')[0].appendChild(_cpo);",n.getElementsByTagName("head")[0].appendChild(t)}}if(e.height=1,e.width=1,e.style.position="absolute",e.style.top=0,e.style.left=0,e.style.border="none",e.style.visibility="hidden",document.body.appendChild(e),"loading"!==document.readyState)n();else if(window.addEventListener)document.addEventListener("DOMContentLoaded",n);else{var t=document.onreadystatechange||function(){};document.onreadystatechange=function(e){t(e),"loading"!==document.readyState&&(document.onreadystatechange=t,n())}}}();</script></body>
+</html>
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.71.143.134:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+INFO:     172.71.143.142:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "PUT /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 840, in acompletion
+    headers, response = await self.make_openai_chat_completion_request(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 460, in make_openai_chat_completion_request
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 437, in make_openai_chat_completion_request
+    await openai_aclient.chat.completions.with_raw_response.create(
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_legacy_response.py", line 381, in wrapped
+    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 2676, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1884, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1669, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.BadRequestError: Error code: 400 - {'error': {'message': 'Could not finish the message because max_tokens or model output limit was reached. Please try again with higher max_tokens.', 'type': 'invalid_request_error', 'param': None, 'code': None}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 887, in acompletion
+    raise OpenAIError(
+litellm.llms.openai.common_utils.OpenAIError: Error code: 400 - {'error': {'message': 'Could not finish the message because max_tokens or model output limit was reached. Please try again with higher max_tokens.', 'type': 'invalid_request_error', 'param': None, 'code': None}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 444, in exception_type
+    raise BadRequestError(
+litellm.exceptions.BadRequestError: litellm.BadRequestError: OpenAIException - Could not finish the message because max_tokens or model output limit was reached. Please try again with higher max_tokens.
+WARNING:root:LLM config saved but health check failed
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.71.143.134:0 - "PUT /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 840, in acompletion
+    headers, response = await self.make_openai_chat_completion_request(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 460, in make_openai_chat_completion_request
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 437, in make_openai_chat_completion_request
+    await openai_aclient.chat.completions.with_raw_response.create(
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_legacy_response.py", line 381, in wrapped
+    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 2676, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1884, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1669, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.BadRequestError: Error code: 400 - {'error': {'message': 'Could not finish the message because max_tokens or model output limit was reached. Please try again with higher max_tokens.', 'type': 'invalid_request_error', 'param': None, 'code': None}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 887, in acompletion
+    raise OpenAIError(
+litellm.llms.openai.common_utils.OpenAIError: Error code: 400 - {'error': {'message': 'Could not finish the message because max_tokens or model output limit was reached. Please try again with higher max_tokens.', 'type': 'invalid_request_error', 'param': None, 'code': None}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 444, in exception_type
+    raise BadRequestError(
+litellm.exceptions.BadRequestError: litellm.BadRequestError: OpenAIException - Could not finish the message because max_tokens or model output limit was reached. Please try again with higher max_tokens.
+WARNING:root:LLM config saved but health check failed
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+WARNING:pdfminer.pdffont:Could not get FontBBox from font descriptor because None cannot be parsed as 4 floats
+INFO:     172.71.143.134:0 - "POST /api/v1/resumes/upload HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/status-stream?ids=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 401 Unauthorized
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+WARNING:root:Possible truncation detected: missing required section 'personalInfo'
+WARNING:root:Parsed JSON appears truncated, but proceeding with result
+INFO:     172.71.143.135:0 - "POST /api/v1/enrichment/analyze/6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "POST /api/v1/resumes/upload?as_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/status-stream?ids=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 401 Unauthorized
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/status-stream?ids=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 401 Unauthorized
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+ERROR:root:Could not extract JSON from response format. Content preview: 1.  **Analyze the Request:**
+    *   **Goal:** Parse a resume into a specific JSON format.
+    *   **Input:** A text-based resume for "Bevantyo Satria Pinandhita".
+    *   **Output:** Valid JSON only.
+WARNING:root:LLM call failed (attempt 1): No JSON found in response: 1.  **Analyze the Request:**
+    *   **Goal:** Parse a resume into a specific JSON format.
+    *   **Input:** A text-based resume for "Bevantyo Satria Pinandhita".
+    *   **Output:** Valid JSON only.
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+ERROR:root:Could not extract JSON from response format. Content preview: 1.  **Analyze the Request:**
+    *   **Input:** A resume text.
+    *   **Output:** Valid JSON only.
+    *   **Structure:**
+        *   `personalInfo`: Name, title, email, phone, location, website, lin
+WARNING:root:LLM call failed (attempt 2): No JSON found in response: 1.  **Analyze the Request:**
+    *   **Input:** A resume text.
+    *   **Output:** Valid JSON only.
+    *   **Structure:**
+        *   `personalInfo`: Name, title, email, phone, location, website, lin
+INFO:     172.70.142.9:0 - "DELETE /api/v1/resumes/980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=980b7de9-fb26-4823-af08-6897b4c23b72 HTTP/1.1" 404 Not Found
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.143.134:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK
+WARNING:root:JSON parse failed (attempt 3): Expecting property name enclosed in double quotes: line 2 column 25 (char 26)
+WARNING:app.routers.resumes:Background processing failed for resume 980b7de9-fb26-4823-af08-6897b4c23b72: Failed to parse JSON after 3 attempts: Expecting property name enclosed in double quotes: line 2 column 25 (char 26)
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "POST /api/v1/resumes/upload?as_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/status-stream?ids=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 401 Unauthorized
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/status-stream?ids=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 401 Unauthorized
+INFO:     162.158.88.134:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     172.71.124.232:0 - "GET /api/v1/auth/register-status HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/status-stream?ids=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 401 Unauthorized
+INFO:     162.158.88.134:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     162.158.88.135:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/resumes?resume_id=636732ca-1a1b-4906-8e8b-9babee0a62b1 HTTP/1.1" 200 OK
+WARNING:app.routers.resumes:Background processing failed for resume 636732ca-1a1b-4906-8e8b-9babee0a62b1: 6 validation errors for ResumeData
+personalProjects.0.years
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.12/v/string_type
+personalProjects.1.years
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.12/v/string_type
+personalProjects.2.years
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.12/v/string_type
+customSections.publications.items.0.years
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.12/v/string_type
+customSections.publications.items.1.years
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.12/v/string_type
+customSections.publications.items.2.years
+  Input should be a valid string [type=string_type, input_value=None, input_type=NoneType]
+    For further information visit https://errors.pydantic.dev/2.12/v/string_type
+INFO:     162.158.190.114:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.189.195:0 - "GET /api/v1/resumes?resume_id=6547bb93-118b-4d13-9777-d988228fc514 HTTP/1.1" 200 OK

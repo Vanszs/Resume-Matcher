@@ -107,7 +107,9 @@
       "errorDetail": "Error",
       "showErrorDetail": "Mostrar detalles del error",
       "hideErrorDetail": "Ocultar detalles del error"
-    }
+    },
+    "restartInterruptedRetrying": "El procesamiento fue interrumpido por una actualización del servidor. Reintentando automáticamente…",
+    "restartInterrupted": "El procesamiento fue interrumpido por una actualización del servidor."
   },
   "builder": {
     "title": "Constructor de CV",

@@ -107,7 +107,9 @@
       "errorDetail": "エラー",
       "showErrorDetail": "エラー詳細を表示",
       "hideErrorDetail": "エラー詳細を非表示"
-    }
+    },
+    "restartInterruptedRetrying": "サーバー更新により処理が中断されました。自動的に再試行中…",
+    "restartInterrupted": "サーバー更新により処理が中断されました。"
   },
   "builder": {
     "title": "履歴書ビルダー",

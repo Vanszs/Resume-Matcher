@@ -128,6 +128,8 @@ export default function DashboardPage() {
   const loadRequestIdRef = useRef(0);
   // Lightweight in-memory cache for job snippets to avoid N+1 refetches
   const jobSnippetCacheRef = useRef<Record<string, string>>({});
+  // Guard: auto-retry restart-interrupted failures at most once per session
+  const autoRetryAttemptedRef = useRef(false);
 
   // Check if LLM is configured (API key is set)
   const isLlmConfigured = !statusLoading && systemStatus?.llm_configured;
@@ -200,6 +202,22 @@ export default function DashboardPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // intentionally omit deps — runs once with the lazy-init value
+
+  // Auto-retry once when a restart-interrupted failure is detected.
+  // The [RESTART] prefix is written by the backend startup sweep so we can
+  // distinguish it from genuine AI-parsing errors.
+  useEffect(() => {
+    if (
+      processingStatus === 'failed' &&
+      masterResumeId &&
+      masterErrorMessage?.startsWith('[RESTART]') &&
+      !autoRetryAttemptedRef.current
+    ) {
+      autoRetryAttemptedRef.current = true;
+      handleRetryProcessing({ stopPropagation: () => {} } as React.MouseEvent);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [processingStatus, masterErrorMessage, masterResumeId]);
 
   const loadTailoredResumes = useCallback(async () => {
     try {
@@ -697,19 +715,30 @@ export default function DashboardPage() {
                         <div className="flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
                           {masterErrorMessage && (
                             <div>
-                              <button
-                                type="button"
-                                className="font-mono text-xs text-red-600 uppercase underline underline-offset-2 hover:text-red-800 transition-colors"
-                                onClick={() => setShowMasterError((v) => !v)}
-                              >
-                                {showMasterError
-                                  ? t('dashboard.hideErrorDetail')
-                                  : t('dashboard.showErrorDetail')}
-                              </button>
-                              {showMasterError && (
-                                <pre className="mt-1 p-2 bg-red-50 border border-red-200 text-xs font-mono text-red-700 normal-case whitespace-pre-wrap break-words max-h-24 overflow-y-auto">
-                                  {masterErrorMessage}
-                                </pre>
+                              {masterErrorMessage.startsWith('[RESTART]') ? (
+                                // Restart-interrupted: show friendly hint, no raw error dump
+                                <p className="font-mono text-xs text-amber-700 uppercase">
+                                  {isRetrying
+                                    ? t('dashboard.restartInterruptedRetrying')
+                                    : t('dashboard.restartInterrupted')}
+                                </p>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="font-mono text-xs text-red-600 uppercase underline underline-offset-2 hover:text-red-800 transition-colors"
+                                    onClick={() => setShowMasterError((v) => !v)}
+                                  >
+                                    {showMasterError
+                                      ? t('dashboard.hideErrorDetail')
+                                      : t('dashboard.showErrorDetail')}
+                                  </button>
+                                  {showMasterError && (
+                                    <pre className="mt-1 p-2 bg-red-50 border border-red-200 text-xs font-mono text-red-700 normal-case whitespace-pre-wrap break-words max-h-24 overflow-y-auto">
+                                      {masterErrorMessage}
+                                    </pre>
+                                  )}
+                                </>
                               )}
                             </div>
                           )}

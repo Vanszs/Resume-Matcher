@@ -107,7 +107,9 @@
       "errorDetail": "Error",
       "showErrorDetail": "Show error details",
       "hideErrorDetail": "Hide error details"
-    }
+    },
+    "restartInterruptedRetrying": "Processing was interrupted by a server update. Retrying automatically…",
+    "restartInterrupted": "Processing was interrupted by a server update."
   },
   "builder": {
     "title": "Resume Builder",

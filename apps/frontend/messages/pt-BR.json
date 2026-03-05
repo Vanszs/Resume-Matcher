@@ -107,7 +107,9 @@
       "errorDetail": "Erro",
       "showErrorDetail": "Mostrar detalhes do erro",
       "hideErrorDetail": "Ocultar detalhes do erro"
-    }
+    },
+    "restartInterruptedRetrying": "O processamento foi interrompido por uma atualização do servidor. Tentando novamente automaticamente…",
+    "restartInterrupted": "O processamento foi interrompido por uma atualização do servidor."
   },
   "builder": {
     "title": "Criar Currículo",

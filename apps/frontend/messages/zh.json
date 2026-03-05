@@ -107,7 +107,9 @@
       "errorDetail": "错误",
       "showErrorDetail": "显示错误详情",
       "hideErrorDetail": "隐藏错误详情"
-    }
+    },
+    "restartInterruptedRetrying": "处理因服务器更新而中断。正在自动重试…",
+    "restartInterrupted": "处理因服务器更新而中断。"
   },
   "builder": {
     "title": "简历生成器",

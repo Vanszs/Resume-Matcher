@@ -107,7 +107,9 @@
       "errorDetail": "Error",
       "showErrorDetail": "Tampilkan detail error",
       "hideErrorDetail": "Sembunyikan detail error"
-    }
+    },
+    "restartInterruptedRetrying": "Pemrosesan terganggu oleh pembaruan server. Mencoba ulang secara otomatis…",
+    "restartInterrupted": "Pemrosesan terganggu oleh pembaruan server."
   },
   "builder": {
     "title": "Pembuat Resume",

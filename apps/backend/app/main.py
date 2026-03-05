@@ -75,7 +75,7 @@ async def lifespan(app: FastAPI):
             db.resumes.update(
                 {
                     "processing_status": "failed",
-                    "error_message": "Processing interrupted by server restart.",
+                    "error_message": "[RESTART] Processing was interrupted by a server restart.",
                     "updated_at": datetime.now(timezone.utc).isoformat(),
                 },
                 RQ.processing_status.one_of(list(stuck_states)),
