@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { apiFetch, apiPost, apiDelete, apiPatch, logout } from '@/lib/api/client';
+import { UserDetailModal } from '@/components/admin/user-detail-modal';
 import {
     ArrowLeft,
     Users,
@@ -22,6 +23,7 @@ import {
     LogOut,
     AlertTriangle,
     X,
+    Eye,
 } from 'lucide-react';
 
 type UserEntry = {
@@ -38,6 +40,26 @@ type RoleEntry = {
     id: string;
     name: string;
     permissions: string;
+};
+
+type ActivityDataPoint = {
+    date: string;
+    actions: number;
+};
+
+type UserDetailData = {
+    id: string;
+    email: string;
+    username: string;
+    role_name: string;
+    is_active: boolean;
+    is_verified: boolean;
+    created_at: string;
+    last_login: string | null;
+    total_resumes: number;
+    total_tailored_resumes: number;
+    total_master_resumes: number;
+    activity_timeline: ActivityDataPoint[];
 };
 
 type Status = 'idle' | 'loading' | 'saving' | 'error';
@@ -75,6 +97,11 @@ export default function AdminPage() {
     const [modalMaintenanceEnabled, setModalMaintenanceEnabled] = useState(false);
     const [modalMaintenanceMessage, setModalMaintenanceMessage] = useState('');
     const [savingMaintenance, setSavingMaintenance] = useState(false);
+
+    // User detail modal
+    const [showUserDetailModal, setShowUserDetailModal] = useState(false);
+    const [selectedUserDetail, setSelectedUserDetail] = useState<UserDetailData | null>(null);
+    const [detailLoadingUserId, setDetailLoadingUserId] = useState<string | null>(null);
 
     // Feedback
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -246,6 +273,26 @@ export default function AdminPage() {
             setFeedback({ type: 'error', message: err.message || 'Failed to update setting' });
         } finally {
             setTogglingRegister(false);
+        }
+    }
+
+    async function handleViewUser(userId: string) {
+        if (detailLoadingUserId === userId) return;
+        setDetailLoadingUserId(userId);
+        setFeedback(null);
+        try {
+            const res = await apiFetch(`/admin/users/${userId}/detail`);
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error((data as any).detail || 'Failed to load user details');
+            }
+            const data: UserDetailData = await res.json();
+            setSelectedUserDetail(data);
+            setShowUserDetailModal(true);
+        } catch (err: any) {
+            setFeedback({ type: 'error', message: err.message || 'Failed to load user details' });
+        } finally {
+            setDetailLoadingUserId(null);
         }
     }
 
@@ -640,6 +687,20 @@ export default function AdminPage() {
                                                                     <Button
                                                                         variant="ghost"
                                                                         size="icon"
+                                                                        onClick={() => handleViewUser(user.id)}
+                                                                        title="View user details"
+                                                                        className="hover:bg-blue-50"
+                                                                        disabled={detailLoadingUserId === user.id}
+                                                                    >
+                                                                        {detailLoadingUserId === user.id ? (
+                                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                                        ) : (
+                                                                            <Eye className="w-4 h-4 text-blue-700" />
+                                                                        )}
+                                                                    </Button>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
                                                                         onClick={() => handleToggleActive(user.id)}
                                                                         title={user.is_active ? 'Disable user' : 'Enable user'}
                                                                         disabled={userActionId === user.id}
@@ -779,6 +840,19 @@ export default function AdminPage() {
                     </p>
                 </div>
             </div>
+
+            {/* ================================================================ */}
+            {/* User Detail Modal                                               */}
+            {/* ================================================================ */}
+            {showUserDetailModal && selectedUserDetail && (
+                <UserDetailModal
+                    user={selectedUserDetail}
+                    onClose={() => {
+                        setShowUserDetailModal(false);
+                        setSelectedUserDetail(null);
+                    }}
+                />
+            )}
 
             {/* ================================================================ */}
             {/* Maintenance Warning Modal                                         */}

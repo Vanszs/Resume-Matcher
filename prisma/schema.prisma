@@ -66,6 +66,9 @@ model User {
   // OTP Verification Tokens
   verificationTokens VerificationToken[]
 
+  // Track the last successful login timestamp
+  lastLoginAt  DateTime?
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }

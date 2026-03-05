@@ -192,6 +192,15 @@ async def login(request: Request, body: LoginRequest) -> TokenResponse:
             data={"sub": user.id, "email": user.email, "role": user.role.name}
         )
 
+        # Record last login timestamp
+        try:
+            await prisma.user.update(
+                where={"id": user.id},
+                data={"lastLoginAt": datetime.now(timezone.utc)},
+            )
+        except Exception as e:
+            logger.warning("Failed to update lastLoginAt for %s: %s", user.email, e)
+
         logger.info("Successful login: %s (role=%s)", user.email, user.role.name)
 
         return TokenResponse(

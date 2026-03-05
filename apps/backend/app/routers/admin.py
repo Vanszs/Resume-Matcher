@@ -431,6 +431,89 @@ async def get_app_settings(_admin=Depends(get_current_admin)) -> AppSettingsResp
     )
 
 
+# --- User Detail ---
+
+class ActivityDataPoint(BaseModel):
+    date: str  # YYYY-MM-DD
+    actions: int
+
+
+class UserDetailResponse(BaseModel):
+    id: str
+    email: str
+    username: str
+    role_name: str
+    is_active: bool
+    is_verified: bool
+    created_at: str
+    last_login: str | None
+    total_resumes: int
+    total_tailored_resumes: int
+    total_master_resumes: int
+    activity_timeline: list[ActivityDataPoint]
+
+
+@router.get("/users/{user_id}/detail", response_model=UserDetailResponse)
+async def get_user_detail(user_id: str, admin=Depends(get_current_admin)) -> UserDetailResponse:
+    """Get detailed information and activity timeline for a specific user (admin only)."""
+    from datetime import date, timedelta
+    from app.database import db
+
+    try:
+        user = await prisma.user.find_unique(where={"id": user_id}, include={"role": True})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        logger.info("Admin %s viewed details for user %s", admin.email, user_id)
+
+        # Gather resume stats from TinyDB
+        total_resumes = db.count_resumes_for_user(user_id)
+        total_tailored = db.count_tailored_resumes_for_user(user_id)
+        total_master = db.count_master_resumes_for_user(user_id)
+        resume_dates = db.get_resume_dates_for_user(user_id)
+
+        # Build 30-day activity timeline
+        today = date.today()
+        date_counts: dict[str, int] = {}
+        for i in range(29, -1, -1):
+            day = today - timedelta(days=i)
+            date_counts[day.isoformat()] = 0
+
+        for date_str in resume_dates:
+            try:
+                # Parse ISO 8601 and extract the date part
+                day_key = date_str[:10]
+                if day_key in date_counts:
+                    date_counts[day_key] += 1
+            except Exception:
+                pass
+
+        activity_timeline = [
+            ActivityDataPoint(date=d, actions=count)
+            for d, count in sorted(date_counts.items())
+        ]
+
+        return UserDetailResponse(
+            id=user.id,
+            email=user.email,
+            username=user.username,
+            role_name=user.role.name if user.role else "unknown",
+            is_active=user.isActive,
+            is_verified=user.isVerified,
+            created_at=user.createdAt.isoformat(),
+            last_login=user.lastLoginAt.isoformat() if user.lastLoginAt else None,
+            total_resumes=total_resumes,
+            total_tailored_resumes=total_tailored,
+            total_master_resumes=total_master,
+            activity_timeline=activity_timeline,
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error("Failed to get user detail for %s: %s", user_id, e)
+        raise HTTPException(status_code=500, detail="Failed to retrieve user details.")
+
+
 @router.patch("/app-settings", response_model=AppSettingsResponse)
 async def update_app_settings(
     request: AppSettingsUpdate,

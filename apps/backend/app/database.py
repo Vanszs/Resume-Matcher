@@ -375,6 +375,34 @@ class Database:
         result = self.improvements.search(query)
         return result[0] if result else None
 
+    # Admin activity query helpers
+    def count_resumes_for_user(self, user_id: str) -> int:
+        """Count all non-deleted resumes for a specific user."""
+        Resume = Query()
+        active_query = (Resume.deleted_at == None) | (~Resume.deleted_at.exists())
+        query = (Resume.user_id == user_id) & active_query
+        return len(self.resumes.search(query))
+
+    def count_tailored_resumes_for_user(self, user_id: str) -> int:
+        """Count non-deleted, non-master (tailored) resumes for a specific user."""
+        Resume = Query()
+        active_query = (Resume.deleted_at == None) | (~Resume.deleted_at.exists())
+        query = (Resume.user_id == user_id) & active_query & (Resume.is_master == False)
+        return len(self.resumes.search(query))
+
+    def count_master_resumes_for_user(self, user_id: str) -> int:
+        """Count non-deleted master resumes for a specific user."""
+        Resume = Query()
+        active_query = (Resume.deleted_at == None) | (~Resume.deleted_at.exists())
+        query = (Resume.user_id == user_id) & active_query & (Resume.is_master == True)
+        return len(self.resumes.search(query))
+
+    def get_resume_dates_for_user(self, user_id: str) -> list[str]:
+        """Return list of created_at date strings for all resumes (including soft-deleted) for a user."""
+        Resume = Query()
+        results = self.resumes.search(Resume.user_id == user_id)
+        return [r["created_at"] for r in results if "created_at" in r]
+
     # Stats
     def get_stats(self, user_id: str | None = None) -> dict[str, Any]:
         """Get database statistics."""
