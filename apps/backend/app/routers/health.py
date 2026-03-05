@@ -7,7 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.config import settings
+from app.config import settings, load_config_file
 from app.database import db
 from app.llm import check_llm_health, get_llm_config, LLMConfig
 from app.schemas import HealthResponse, StatusResponse
@@ -42,6 +42,20 @@ def _get_user_llm_config(user_id: str) -> LLMConfig:
         api_key=stored.get("api_key", settings.llm_api_key),
         api_base=stored.get("api_base", settings.llm_api_base),
     )
+
+
+@router.get("/maintenance-status")
+async def get_maintenance_status() -> dict:
+    """Public endpoint: return current maintenance notice state.
+
+    Does **not** require authentication so the dashboard can fetch it on
+    every mount without a token.
+    """
+    cfg = load_config_file()
+    return {
+        "maintenance_enabled": bool(cfg.get("maintenance_enabled", False)),
+        "maintenance_message": str(cfg.get("maintenance_message", "")),
+    }
 
 
 @router.get("/health", response_model=HealthResponse)

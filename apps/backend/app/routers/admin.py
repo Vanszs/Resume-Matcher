@@ -403,17 +403,32 @@ async def list_roles() -> list[RoleResponse]:
 
 class AppSettingsResponse(BaseModel):
     register_enabled: bool
+    maintenance_enabled: bool = False
+    maintenance_message: str = ""
 
 
 class AppSettingsUpdate(BaseModel):
     register_enabled: bool
+    maintenance_enabled: bool | None = None
+    maintenance_message: str | None = None
+
+    @field_validator("maintenance_message")
+    @classmethod
+    def message_max_length(cls, v: str | None) -> str | None:
+        if v is not None and len(v) > 2000:
+            raise ValueError("Maintenance message must be 2000 characters or less")
+        return v
 
 
 @router.get("/app-settings", response_model=AppSettingsResponse)
 async def get_app_settings(_admin=Depends(get_current_admin)) -> AppSettingsResponse:
     """Get global application settings (admin only)."""
     cfg = load_config_file()
-    return AppSettingsResponse(register_enabled=bool(cfg.get("register_enabled", False)))
+    return AppSettingsResponse(
+        register_enabled=bool(cfg.get("register_enabled", False)),
+        maintenance_enabled=bool(cfg.get("maintenance_enabled", False)),
+        maintenance_message=str(cfg.get("maintenance_message", "")),
+    )
 
 
 @router.patch("/app-settings", response_model=AppSettingsResponse)
@@ -424,8 +439,19 @@ async def update_app_settings(
     """Update global application settings (admin only)."""
     cfg = load_config_file()
     cfg["register_enabled"] = request.register_enabled
+    if request.maintenance_enabled is not None:
+        cfg["maintenance_enabled"] = request.maintenance_enabled
+    if request.maintenance_message is not None:
+        cfg["maintenance_message"] = request.maintenance_message
     save_config_file(cfg)
     logger.info(
-        "Admin %s set register_enabled=%s", admin.email, request.register_enabled
+        "Admin %s updated app settings: register_enabled=%s, maintenance_enabled=%s",
+        admin.email,
+        request.register_enabled,
+        cfg.get("maintenance_enabled"),
     )
-    return AppSettingsResponse(register_enabled=request.register_enabled)
+    return AppSettingsResponse(
+        register_enabled=bool(cfg["register_enabled"]),
+        maintenance_enabled=bool(cfg.get("maintenance_enabled", False)),
+        maintenance_message=str(cfg.get("maintenance_message", "")),
+    )

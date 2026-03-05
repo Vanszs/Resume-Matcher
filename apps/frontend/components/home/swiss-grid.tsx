@@ -7,7 +7,13 @@ import LogOut from 'lucide-react/dist/esm/icons/log-out';
 import { useTranslations } from '@/lib/i18n';
 import { logout } from '@/lib/api/client';
 
-export const SwissGrid = ({ children }: { children: React.ReactNode }) => {
+export const SwissGrid = ({
+  children,
+  maintenanceNotice,
+}: {
+  children: React.ReactNode;
+  maintenanceNotice?: React.ReactNode;
+}) => {
   const { t } = useTranslations();
   const [isAdmin, setIsAdmin] = useState(false);
   const [userEmail, setUserEmail] = useState('');
@@ -31,13 +37,29 @@ export const SwissGrid = ({ children }: { children: React.ReactNode }) => {
       <div className="w-full max-w-[86rem] max-h-full border border-black bg-[#F0F0E8] shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)] flex flex-col overflow-hidden">
         {/* Header Section - stays above hovered cards */}
         <div className="border-b border-black p-8 md:p-12 shrink-0 bg-[#F0F0E8] relative z-30">
-          <h1 className="font-serif text-5xl md:text-7xl text-black tracking-tight leading-[0.95] uppercase">
-            {t('nav.dashboard')}
-          </h1>
-          <p className="mt-6 text-sm font-mono text-blue-700 uppercase tracking-wide max-w-md font-bold">
-            {'// '}
-            {t('dashboard.selectModule')}
-          </p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="font-serif text-5xl md:text-7xl text-black tracking-tight leading-[0.95] uppercase">
+                {t('nav.dashboard')}
+              </h1>
+              <p className="mt-6 text-sm font-mono text-blue-700 uppercase tracking-wide max-w-md font-bold">
+                {'// '}
+                {t('dashboard.selectModule')}
+              </p>
+            </div>
+            {/* Desktop: maintenance capsule anchored to top-right of header */}
+            {maintenanceNotice && (
+              <div className="hidden md:block shrink-0 mt-1">
+                {maintenanceNotice}
+              </div>
+            )}
+          </div>
+          {/* Mobile: maintenance capsule below title, full-width */}
+          {maintenanceNotice && (
+            <div className="mt-4 md:hidden w-full">
+              {maintenanceNotice}
+            </div>
+          )}
         </div>
 
         {/* Content Grid - Scrollable area with NO padding */}

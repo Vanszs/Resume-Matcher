@@ -20,6 +20,8 @@ import {
     ToggleLeft,
     ToggleRight,
     LogOut,
+    AlertTriangle,
+    X,
 } from 'lucide-react';
 
 type UserEntry = {
@@ -66,6 +68,14 @@ export default function AdminPage() {
     const [registerEnabled, setRegisterEnabled] = useState(false);
     const [togglingRegister, setTogglingRegister] = useState(false);
 
+    // Maintenance warning
+    const [maintenanceEnabled, setMaintenanceEnabled] = useState(false);
+    const [maintenanceMessage, setMaintenanceMessage] = useState('');
+    const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+    const [modalMaintenanceEnabled, setModalMaintenanceEnabled] = useState(false);
+    const [modalMaintenanceMessage, setModalMaintenanceMessage] = useState('');
+    const [savingMaintenance, setSavingMaintenance] = useState(false);
+
     // Feedback
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -106,6 +116,8 @@ export default function AdminPage() {
             if (appSettingsRes.ok) {
                 const appSettings = await appSettingsRes.json();
                 setRegisterEnabled(Boolean(appSettings.register_enabled));
+                setMaintenanceEnabled(Boolean(appSettings.maintenance_enabled));
+                setMaintenanceMessage(appSettings.maintenance_message || '');
             }
             if (meRes.ok) {
                 const meData = await meRes.json();
@@ -237,6 +249,40 @@ export default function AdminPage() {
         }
     }
 
+    function handleOpenMaintenanceModal() {
+        setModalMaintenanceEnabled(maintenanceEnabled);
+        setModalMaintenanceMessage(maintenanceMessage);
+        setShowMaintenanceModal(true);
+    }
+
+    async function handleSaveMaintenance() {
+        setSavingMaintenance(true);
+        try {
+            const res = await apiFetch('/admin/app-settings', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    register_enabled: registerEnabled,
+                    maintenance_enabled: modalMaintenanceEnabled,
+                    maintenance_message: modalMaintenanceMessage,
+                }),
+            });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error((data as any).detail || 'Failed to save maintenance settings');
+            }
+            const data = await res.json();
+            setMaintenanceEnabled(Boolean(data.maintenance_enabled));
+            setMaintenanceMessage(data.maintenance_message || '');
+            setShowMaintenanceModal(false);
+            setFeedback({ type: 'success', message: 'Maintenance settings saved successfully' });
+        } catch (err: any) {
+            setFeedback({ type: 'error', message: err.message || 'Failed to save maintenance settings' });
+        } finally {
+            setSavingMaintenance(false);
+        }
+    }
+
     return (
         <div
             className="flex flex-col items-center justify-start p-6 md:p-12 min-h-screen overflow-y-auto"
@@ -357,6 +403,29 @@ export default function AdminPage() {
                                 label="Public Registration"
                                 description="Allow anyone to create an account from the login page. New accounts are assigned the 'user' role."
                             />
+
+                            {/* Maintenance Warning Row */}
+                            <div className="border border-black bg-white p-4 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.1)]">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div
+                                            className={`w-2 h-2 rounded-full shrink-0 ${
+                                                maintenanceEnabled ? 'bg-[#15803D]' : 'bg-gray-400'
+                                            }`}
+                                        />
+                                        <span className="font-mono text-sm font-bold uppercase tracking-wider">
+                                            Maintenance Warning
+                                        </span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleOpenMaintenanceModal}
+                                        className="font-mono text-xs uppercase text-blue-700 underline cursor-pointer hover:text-blue-900 transition-colors"
+                                    >
+                                        Click for Detail →
+                                    </button>
+                                </div>
+                            </div>
                         </section>
                     )}
 
@@ -710,6 +779,132 @@ export default function AdminPage() {
                     </p>
                 </div>
             </div>
+
+            {/* ================================================================ */}
+            {/* Maintenance Warning Modal                                         */}
+            {/* ================================================================ */}
+            {showMaintenanceModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget && !savingMaintenance) {
+                            setShowMaintenanceModal(false);
+                        }
+                    }}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="maintenance-modal-title"
+                >
+                    <div className="w-full max-w-[32rem] border border-black bg-[#F0F0E8] shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)]">
+                        {/* Modal Header */}
+                        <div className="flex items-start justify-between border-b border-black p-5">
+                            <div>
+                                <h2
+                                    id="maintenance-modal-title"
+                                    className="font-serif text-xl font-bold uppercase tracking-tight"
+                                >
+                                    Maintenance Warning
+                                </h2>
+                                <p className="font-mono text-xs text-gray-500 uppercase mt-1">
+                                    {'// Configure maintenance notice for all users'}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => !savingMaintenance && setShowMaintenanceModal(false)}
+                                disabled={savingMaintenance}
+                                aria-label="Close"
+                                className="border border-black bg-white p-1 shadow-[2px_2px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all disabled:opacity-50"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="p-5 space-y-4">
+                            <ToggleSwitch
+                                checked={modalMaintenanceEnabled}
+                                onCheckedChange={(v) => {
+                                    setModalMaintenanceEnabled(v);
+                                    // Auto-populate with default template when first enabling and message is empty
+                                    if (v && !modalMaintenanceMessage.trim()) {
+                                        setModalMaintenanceMessage(
+                                            `Admin website ini sedang mengembangkan fitur baru.\nAnda mungkin akan menemui beberapa error, jadi mohon dimaklumi.\n\nJika ada pertanyaan silakan hubungi:\nme@bevansatria.my.id`
+                                        );
+                                    }
+                                }}
+                                disabled={savingMaintenance}
+                                label="Enable Maintenance Notice"
+                                description="When enabled, a notice capsule will appear on user dashboards."
+                            />
+
+                            <div className="space-y-2">
+                                <label
+                                    htmlFor="maintenance-message"
+                                    className="font-mono text-xs font-bold uppercase tracking-wider text-gray-700"
+                                >
+                                    Message
+                                </label>
+                                <textarea
+                                    id="maintenance-message"
+                                    rows={6}
+                                    value={modalMaintenanceMessage}
+                                    onChange={(e) => setModalMaintenanceMessage(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') e.stopPropagation(); }}
+                                    disabled={!modalMaintenanceEnabled || savingMaintenance}
+                                    maxLength={2000}
+                                    placeholder="Enter maintenance notice message..."
+                                    className={`w-full border border-black bg-white p-3 font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-700 transition-opacity ${
+                                        !modalMaintenanceEnabled ? 'opacity-40 cursor-not-allowed' : ''
+                                    }`}
+                                />
+                                <div className="flex items-center justify-between">
+                                    <span className="font-mono text-xs text-gray-400">
+                                        {modalMaintenanceMessage.length} / 2000
+                                    </span>
+                                    <button
+                                        type="button"
+                                        disabled={!modalMaintenanceEnabled || savingMaintenance}
+                                        onClick={() =>
+                                            setModalMaintenanceMessage(
+                                                `Admin website ini sedang mengembangkan fitur baru.\nAnda mungkin akan menemui beberapa error, jadi mohon dimaklumi.\n\nJika ada pertanyaan silakan hubungi:\nme@bevansatria.my.id`
+                                            )
+                                        }
+                                        className="font-mono text-xs border border-black bg-white px-3 py-1 shadow-[2px_2px_0px_0px_#000000] hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 disabled:shadow-[2px_2px_0px_0px_#000000]"
+                                    >
+                                        Use Default Template
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="border-t border-black p-4 flex items-center justify-end gap-3">
+                            <Button
+                                variant="outline"
+                                onClick={() => !savingMaintenance && setShowMaintenanceModal(false)}
+                                disabled={savingMaintenance}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="default"
+                                onClick={handleSaveMaintenance}
+                                disabled={savingMaintenance}
+                            >
+                                {savingMaintenance ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                        Saving...
+                                    </>
+                                ) : (
+                                    'Save'
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

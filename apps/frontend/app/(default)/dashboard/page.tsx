@@ -26,9 +26,10 @@ import {
   type ResumeListItem,
 } from '@/lib/api/resume';
 import { useStatusCache } from '@/lib/context/status-cache';
-import { API_BASE } from '@/lib/api/client';
+import { API_BASE, fetchMaintenanceStatus, type MaintenanceStatus } from '@/lib/api/client';
 import { useNavigating } from '@/hooks/use-navigating';
 import { getHealthCheckMessage } from '@/lib/utils/health-messages';
+import { MaintenanceCapsule } from '@/components/dashboard/maintenance-capsule';
 
 type ProcessingStatus = 'pending' | 'processing' | 'ready' | 'failed' | 'loading';
 type ResumeProcessingStatus = ResumeListItem['processing_status'];
@@ -98,6 +99,9 @@ export default function DashboardPage() {
   const [masterErrorMessage, setMasterErrorMessage] = useState<string | null>(null);
   const [showMasterError, setShowMasterError] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  // Maintenance notice — fetched once on mount, non-blocking
+  const [maintenanceStatus, setMaintenanceStatus] = useState<MaintenanceStatus | null>(null);
   const [tailoredResumes, setTailoredResumes] = useState<ResumeListItem[]>(() => {
     if (typeof window === 'undefined') return [];
     return readResumeCache()?.tailored ?? [];
@@ -207,6 +211,11 @@ export default function DashboardPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // intentionally omit deps — runs once with the lazy-init value
+
+  // Fetch maintenance status in parallel on mount — non-blocking, silent on error
+  useEffect(() => {
+    fetchMaintenanceStatus().then(setMaintenanceStatus).catch(() => {});
+  }, []);
 
   // Auto-retry once when a restart-interrupted failure is detected.
   // The [RESTART] prefix is written by the backend startup sweep so we can
@@ -631,7 +640,14 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <SwissGrid>
+      <SwissGrid
+        maintenanceNotice={
+          maintenanceStatus?.maintenance_enabled &&
+          maintenanceStatus.maintenance_message.trim()
+            ? <MaintenanceCapsule message={maintenanceStatus.maintenance_message} />
+            : undefined
+        }
+      >
         {/* 1. Master Resume Logic */}
         {masterResumes.length === 0 ? (
           // LLM Not Configured or Upload State

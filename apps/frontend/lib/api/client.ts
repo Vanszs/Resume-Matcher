@@ -124,6 +124,29 @@ export function getUploadUrl(asMaster = false): string {
   return query ? `${API_BASE}/resumes/upload?${query}` : `${API_BASE}/resumes/upload`;
 }
 
+// ---------------------------------------------------------------------------
+// Maintenance Status
+// ---------------------------------------------------------------------------
+
+export interface MaintenanceStatus {
+  maintenance_enabled: boolean;
+  maintenance_message: string;
+}
+
+/**
+ * Fetch the current maintenance notice from the public endpoint.
+ * Never throws — returns safe defaults on any error so callers can fire-and-forget.
+ */
+export async function fetchMaintenanceStatus(): Promise<MaintenanceStatus> {
+  try {
+    const res = await fetch(`${API_BASE}/maintenance-status`);
+    if (!res.ok) return { maintenance_enabled: false, maintenance_message: '' };
+    return (await res.json()) as MaintenanceStatus;
+  } catch {
+    return { maintenance_enabled: false, maintenance_message: '' };
+  }
+}
+
 /**
  * Check if user is authenticated (client-side only).
  */
