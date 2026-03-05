@@ -66,21 +66,11 @@ function readResumeCache(): ResumeListCache | null {
 
 const TRANSIENT_STATES = new Set(['processing', 'pending']);
 
-function writeResumeCache(data: ResumeListCache, masterProcessingStatus?: string): void {
+function writeResumeCache(data: ResumeListCache): void {
   try {
-    // Don't cache while anything is still being processed —
-    // on next back-navigation we want a fresh fetch instead of
-    // a stale "processing" label frozen in storage.
-    const masterTransient = (masterProcessingStatus
-      ? TRANSIENT_STATES.has(masterProcessingStatus)
-      : false) || data.masters.some((r) => TRANSIENT_STATES.has(r.processing_status ?? ''));
-    const tailoredTransient = data.tailored.some((r) =>
-      TRANSIENT_STATES.has(r.processing_status ?? '')
-    );
-    if (masterTransient || tailoredTransient) {
-      sessionStorage.removeItem(RESUME_LIST_CACHE_KEY);
-      return;
-    }
+    // Always write the cache — SSE handles real-time status updates so a
+    // briefly-stale "processing" label is fine and far better than showing
+    // a full loading skeleton on every back-navigation.
     sessionStorage.setItem(RESUME_LIST_CACHE_KEY, JSON.stringify(data));
   } catch {
     // sessionStorage unavailable (private browsing / quota exceeded) — silent fail
@@ -138,11 +128,6 @@ export default function DashboardPage() {
   const loadRequestIdRef = useRef(0);
   // Lightweight in-memory cache for job snippets to avoid N+1 refetches
   const jobSnippetCacheRef = useRef<Record<string, string>>({});
-  // Track latest master processing status for use inside loadTailoredResumes callback
-  const masterProcessingStatusRef = useRef<string>(processingStatus);
-  useEffect(() => {
-    masterProcessingStatusRef.current = processingStatus;
-  }, [processingStatus]);
 
   // Check if LLM is configured (API key is set)
   const isLlmConfigured = !statusLoading && systemStatus?.llm_configured;
@@ -292,10 +277,7 @@ export default function DashboardPage() {
         setTailoredResumes(updated);
         // Persist to sessionStorage so next render (back navigation) gets instant data.
         // Pass the current master processing status so transient states are not cached.
-        writeResumeCache(
-          { masterId: resolvedMasterId ?? null, tailored: updated, masters },
-          masterProcessingStatusRef.current,
-        );
+        writeResumeCache({ masterId: resolvedMasterId ?? null, tailored: updated, masters });
       }
       setIsListLoading(false);
     } catch (err) {
