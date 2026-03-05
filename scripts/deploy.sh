@@ -15,7 +15,7 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 
 # Define default ports or use environment variables
-FRONTEND_PORT="${FRONTEND_PORT:-3000}"
+FRONTEND_PORT="${FRONTEND_PORT:-3002}"
 BACKEND_PORT="${BACKEND_PORT:-8000}"
 
 # Return success when there is a LISTEN socket on the given TCP port.
