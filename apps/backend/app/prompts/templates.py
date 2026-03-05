@@ -86,7 +86,27 @@ RESUME_SCHEMA_EXAMPLE = """{
       "sectionType": "text",
       "text": "Description of volunteer activities..."
     }
-  }
+  },
+  "sectionMeta": [
+    {
+      "id": "summary",
+      "key": "summary",
+      "displayName": "Summary",
+      "sectionType": "text",
+      "isDefault": true,
+      "isVisible": true,
+      "order": 1
+    },
+    {
+      "id": "workExperience",
+      "key": "workExperience",
+      "displayName": "Experience",
+      "sectionType": "itemList",
+      "isDefault": true,
+      "isVisible": true,
+      "order": 2
+    }
+  ]
 }"""
 
 PARSE_RESUME_PROMPT = """Parse this resume into JSON. Output ONLY the JSON object, no other text.

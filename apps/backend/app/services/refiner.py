@@ -257,6 +257,13 @@ def validate_master_alignment(
     """
     violations: list[AlignmentViolation] = []
 
+    # SVC-FIX-007: Extract full master resume text once for cross-field skill presence check.
+    # Skills that appear anywhere in master (e.g., work experience descriptions) are
+    # legitimately re-surfaced by the LLM — they are NOT fabricated.  Only skills absent
+    # from ALL master text get "critical" severity; skills found in descriptions (but not in
+    # the skills list) get "warning", which does NOT trigger fix_alignment_violations removal.
+    master_full_text = _extract_all_text(master)
+
     # Check skills
     tailored_skills = set(
         s.lower()
@@ -270,12 +277,20 @@ def validate_master_alignment(
     )
 
     for skill in tailored_skills - master_skills:
+        # Downgrade to warning if skill appears anywhere else in master resume text
+        in_master_text = _keyword_in_text(skill, master_full_text)
+        severity = "warning" if in_master_text else "critical"
+        if in_master_text:
+            logger.debug(
+                "Skill '%s' not in master skills list but found in master text — warning only",
+                skill,
+            )
         violations.append(
             AlignmentViolation(
                 field_path="additional.technicalSkills",
                 violation_type="fabricated_skill",
                 value=skill,
-                severity="critical",
+                severity=severity,
             )
         )
 
@@ -292,12 +307,14 @@ def validate_master_alignment(
     )
 
     for cert in tailored_certs - master_certs:
+        in_master_text = _keyword_in_text(cert, master_full_text)
+        severity = "warning" if in_master_text else "critical"
         violations.append(
             AlignmentViolation(
                 field_path="additional.certificationsTraining",
                 violation_type="fabricated_cert",
                 value=cert,
-                severity="critical",
+                severity=severity,
             )
         )
 

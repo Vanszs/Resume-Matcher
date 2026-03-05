@@ -1,11 +1,14 @@
 """Pydantic models matching frontend expectations."""
 
 import copy
+import logging
 import re
 from enum import Enum
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
+
+logger = logging.getLogger(__name__)
 
 _TEXT_VALUE_KEYS = (
     "text",
@@ -372,6 +375,72 @@ class ResumeData(BaseModel):
     @classmethod
     def _normalize_summary(cls, value: Any) -> str:
         return _coerce_text(value)
+
+    @field_validator("customSections", mode="before")
+    @classmethod
+    def _normalize_custom_sections(cls, value: Any) -> dict[str, Any]:
+        """Coerce [] or None → {} — LLM often returns empty list instead of empty dict."""
+        if value is None or value == []:
+            return {}
+        if isinstance(value, list):
+            # Non-empty list: can't reliably map to dict keys, discard
+            logger.warning(
+                "customSections: received non-empty list (%d items), discarding",
+                len(value),
+            )
+            return {}
+        if not isinstance(value, dict):
+            return {}
+        return value
+
+    @field_validator("sectionMeta", mode="before")
+    @classmethod
+    def _normalize_section_meta(cls, value: Any) -> list[Any]:
+        """Drop or remap sectionMeta items with wrong field names.
+
+        LLMs commonly return {"title": ..., "type": ...} instead of
+        {"id": ..., "key": ..., "displayName": ..., "sectionType": ...}.
+        This validator tries to remap known aliases before dropping.
+        """
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            return []
+
+        # Common wrong field names → correct field names
+        _FIELD_ALIASES: dict[str, str] = {
+            "title": "displayName",
+            "name": "displayName",
+            "label": "displayName",
+            "type": "sectionType",
+            "section_type": "sectionType",
+            "sectiontype": "sectionType",
+        }
+        required = {"id", "key", "displayName", "sectionType"}
+
+        valid: list[Any] = []
+        for item in value:
+            if not isinstance(item, dict):
+                continue
+            remapped = dict(item)  # shallow copy to avoid mutating input
+            # Apply alias remapping only for missing target keys
+            for wrong, right in _FIELD_ALIASES.items():
+                if wrong in remapped and right not in remapped:
+                    remapped[right] = remapped.pop(wrong)
+            # Derive id/key from displayName if still absent
+            if "displayName" in remapped:
+                derived = str(remapped["displayName"]).lower().replace(" ", "_")
+                remapped.setdefault("id", derived)
+                remapped.setdefault("key", derived)
+            if required.issubset(remapped.keys()):
+                valid.append(remapped)
+            else:
+                logger.warning(
+                    "sectionMeta: dropping item missing fields %s: %s",
+                    required - remapped.keys(),
+                    item,
+                )
+        return valid
 
 
 # API Response Models

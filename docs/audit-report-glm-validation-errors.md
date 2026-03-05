@@ -1,8 +1,20 @@
 # Audit Report: Resume Matcher — Validation, Rendering & UX Errors
 
 > **Date**: March 2026 (updated March 5, 2026)  
-> **Models**: GLM-4-7 Flash (7B), gpt-oss-120b (120B) — both via Novita provider  
-> **Status**: Root cause identified; PDF download & dead button issues documented
+> **Models**: GLM-4-7 Flash (30B), gpt-oss-120b (120B) — both via Novita provider  
+> **Status**: Errors 1–3, 5, 7–9 **FIXED**. Errors 4 and 6 open (low/medium priority).
+
+| Error | Description | Status |
+|-------|-------------|--------|
+| 1 | `customSections: []` Pydantic crash | ✅ Fixed |
+| 2 | `sectionMeta` wrong field names | ✅ Fixed |
+| 3 | `customSections` raw list values | ✅ Fixed |
+| 4 | Cloudflare 524 timeout | ⏳ Open |
+| 5 | JSON envelope wrapping `{"final{"` | ✅ Fixed |
+| 6 | Keyword injection truncation | ⏳ Open |
+| 7 | False-positive alignment violations | ✅ Fixed |
+| 8 | PDF download 503 (wrong port) | ✅ Fixed |
+| 9 | Dead download button (no error feedback) | ✅ Fixed |
 
 ---
 
@@ -21,34 +33,30 @@ The same code works cleanly with GPT-5 Nano (upstream default) because that mode
 
 ## Errors Identified
 
-### Error 1: `customSections` — `[]` instead of `{}`
+### Error 1: `customSections` — `[]` instead of `{}` ✅ FIXED
 
 - **Pydantic error**: `Input should be a valid dictionary [type=dict_type]`
 - **Location**: `ResumeData.customSections: dict[str, CustomSection]`
 - **What happens**: GLM returns `"customSections": []` (empty list) instead of `"customSections": {}` (empty dict)
 - **File**: `apps/backend/app/schemas/models.py` — `ResumeData` class
-- **Fix needed**: Add `field_validator('customSections', mode='before')` to coerce `[]` → `{}`
+- **Fix applied** (`schemas/models.py`): Added `_normalize_custom_sections` `field_validator(mode='before')` on `ResumeData.customSections` — coerces `[]` or `None` → `{}`, discards non-empty non-dict with warning.
 
-### Error 2: `sectionMeta` — Wrong field names
+### Error 2: `sectionMeta` — Wrong field names ✅ FIXED
 
 - **Pydantic error**: `Field required [type=missing]` for `id`, `key`, `displayName`, `sectionType`
 - **Location**: `ResumeData.sectionMeta: list[SectionMeta]`
 - **What happens**: GLM returns `{"title": "...", "type": "..."}` instead of `{"id": "...", "key": "...", "displayName": "...", "sectionType": "..."}`
-- **Root cause**: `RESUME_SCHEMA_EXAMPLE` in `prompts/templates.py` does NOT include any `sectionMeta` example
-- **Files**: 
-  - `apps/backend/app/schemas/models.py` — `SectionMeta` class (requires id/key/displayName/sectionType)
-  - `apps/backend/app/prompts/templates.py` — `RESUME_SCHEMA_EXAMPLE` (missing sectionMeta example)
-- **Fix needed**: 
-  1. Add `sectionMeta` example to `RESUME_SCHEMA_EXAMPLE`
-  2. Add `field_validator('sectionMeta', mode='before')` to drop malformed items
+- **Root cause**: `RESUME_SCHEMA_EXAMPLE` in `prompts/templates.py` did NOT include any `sectionMeta` example
+- **Fix applied**:
+  1. (`prompts/templates.py`): Added `sectionMeta` array with 2 example items to `RESUME_SCHEMA_EXAMPLE` showing exact field names (`id`, `key`, `displayName`, `sectionType`, `isDefault`, `isVisible`, `order`). Alias `RESUME_SCHEMA = RESUME_SCHEMA_EXAMPLE` means all improve prompts pick it up automatically.
+  2. (`schemas/models.py`): Added `_normalize_section_meta` `field_validator(mode='before')` on `ResumeData.sectionMeta`. Remaps known aliases (`title→displayName`, `type→sectionType`) then derives `id`/`key` from `displayName` if absent. Items still missing required fields are dropped with a warning log.
 
-### Error 3: `customSections.Publications` — List instead of CustomSection
+### Error 3: `customSections.Publications` — List instead of CustomSection ✅ FIXED
 
 - **Pydantic error**: `Input should be a valid dictionary or instance of CustomSection [type=model_type]`
 - **Location**: `ResumeData.customSections['Publications']`
 - **What happens**: GLM returns `"Publications": ["paper1", "paper2"]` (raw list) instead of `"Publications": {"sectionType": "stringList", "strings": ["paper1", "paper2"]}`
-- **File**: `apps/backend/app/schemas/models.py` — `CustomSection` class
-- **Fix needed**: Add coercion in `_sanitize_resume_dict()` to wrap raw lists into `CustomSection` format
+- **Fix applied** (`services/improver.py` `_sanitize_resume_dict()`): Added structural coercion block that runs before the recursive null-coercion loop. For each `customSections` value that is a raw list: if first element is a dict → wraps as `{"sectionType": "itemList", "items": [...]}`, otherwise → wraps as `{"sectionType": "stringList", "strings": [...]}`. Acts as defense-in-depth alongside the Pydantic validator in Error 1.
 
 ### Error 4: Cloudflare 524 Timeout
 
@@ -58,11 +66,12 @@ The same code works cleanly with GPT-5 Nano (upstream default) because that mode
 - **File**: `apps/backend/app/routers/resumes.py` — `improve_resume_preview_endpoint()` (line 752)
 - **Fix needed**: Optimize LLM call chain or increase Cloudflare timeout
 
-### Error 5: JSON truncation — `{"final{"` (gpt-oss-120b)
+### Error 5: JSON truncation — `{"final{"` (gpt-oss-120b) ✅ FIXED
 
 - **Error**: `No JSON found in response: {"final{"`
 - **Location**: `llm.py` → `_extract_json()` → `complete_json()` retry loop
-- **What happens**: gpt-oss-120b wraps its JSON output in an unexpected key (e.g. `"final_resume": {...}`) and the response gets truncated mid-stream, producing malformed `{"final{"`. The brace-matching parser in `_extract_json()` detects `depth=1` (unbalanced) and raises `ValueError`.
+- **What happens**: gpt-oss-120b wraps its JSON output in an unexpected key (e.g. `"final_resume": {...}`) and the response gets truncated mid-stream, producing malformed `{"final{"`.
+- **Fix applied** (`llm.py`): Added `_unwrap_json_envelope(data)` function, called inside `complete_json()` after `json.loads()` but before `_appears_truncated()`. Unwraps only when: (1) exactly 1 top-level key, (2) key is in a known envelope allowlist (`final`, `final_resume`, `resume`, `result`, `output`, `response`, `json`, `data`, `content`, `answer`), AND (3) the value dict contains `personalInfo` — preventing false positives on legitimate resume structures. Logged at INFO level when triggered. The brace-matching parser in `_extract_json()` detects `depth=1` (unbalanced) and raises `ValueError`.
 - **Log sequence**:
   ```
   WARNING: JSON extraction found unbalanced braces (depth=1), possible truncation
@@ -95,11 +104,12 @@ The same code works cleanly with GPT-5 Nano (upstream default) because that mode
   1. `_appears_truncated()` should return the result but add a flag so callers can decide severity
   2. Consider reducing prompt size for keyword injection (only send relevant sections, not full resumes)
 
-### Error 7: False-positive alignment violations — Skills blocked as "fabricated"
+### Error 7: False-positive alignment violations — Skills blocked as "fabricated" ✅ FIXED
 
-- **Error**: `Critical alignment violations detected - blocking resume: ['typescript', 'javascript']` (also `'ai‑assisted workflow automation'` on first attempt)
+- **Error**: `Critical alignment violations detected - blocking resume: ['typescript', 'javascript']`
 - **Location**: `refiner.py` → `validate_master_alignment()` → `fix_alignment_violations()`
-- **What happens**: The LLM adds `typescript` and `javascript` to `additional.technicalSkills` in the tailored resume. These skills likely exist in the master resume's work experience **descriptions** (bullet points) but are NOT listed in `additional.technicalSkills`. The alignment checker only compares `technicalSkills` list-to-list, so it flags them as **fabricated** and removes them.
+- **What happens**: LLM promotes skills from work experience descriptions to `technicalSkills`. Old checker only compared skills list-to-list → flagged them `critical` → removed from output.
+- **Fix applied** (`services/refiner.py` `validate_master_alignment()`): Now calls `_extract_all_text(master)` (already existing in the same file) once at the top of the function. For each skill not in the master `technicalSkills` list, calls `_keyword_in_text(skill, master_full_text)` (also already existing). If found → severity `"warning"` (logged at DEBUG). If truly absent from all master text → severity `"critical"`. `fix_alignment_violations()` only acts on `severity == "critical"`, so warning-severity false positives are preserved. Company fabrication check is unchanged (companies are always critical).
 - **Log sequence**:
   ```
   WARNING: Alignment violations found: 2 total, 2 critical
@@ -126,9 +136,14 @@ The same code works cleanly with GPT-5 Nano (upstream default) because that mode
   2. Downgrade severity from `critical` to `warning` if the skill appears in master resume descriptions
   3. Alternative: add a `_extract_all_text(master)` check — if skill is found anywhere in master text, it's NOT fabricated
 
-### Error 8: PDF download 503 — `FRONTEND_BASE_URL` port mismatch
+### Error 8: PDF download 503 — `FRONTEND_BASE_URL` port mismatch ✅ FIXED
 
-- **Error**: `Failed to download resume (status 503): {"detail":"PDF rendering failed: Page.wait_for_selector: Timeout 30000ms exceeded.\nCall log:\n - waiting for locator(\".resume-print\") to be visible\n"}`
+- **Error**: `Failed to download resume (status 503): {"detail":"PDF rendering failed: Page.wait_for_selector: Timeout 30000ms exceeded..."}`
+- **Root cause**: `FRONTEND_BASE_URL` defaulted to port 3000; production frontend runs on port 3002.
+- **Fix applied**:
+  1. (`apps/backend/.env`): `FRONTEND_BASE_URL=http://localhost:3002` set explicitly.
+  2. (`apps/backend/app/config.py` line 142): Default changed from `"http://localhost:3000"` → `"http://localhost:3002"` so a missing `.env` no longer silently breaks PDF.
+  3. (`apps/backend/.env` `CORS_ORIGINS`): Removed `:3000` entries — now only `["http://localhost:3002","http://127.0.0.1:3002"]`.
 - **Location**: Backend `pdf.py` → `_render_page_to_pdf()` → `page.wait_for_selector(".resume-print")`
 - **What happens**: When user clicks "Download Resume" (from edit mode or preview page), the backend builds a print URL using `FRONTEND_BASE_URL` (default `http://localhost:3000`) and tells Playwright to visit it. Playwright navigates to the URL, waits up to 30s for a `.resume-print` CSS selector to appear, but it never does — resulting in a timeout and 503 error.
 - **Root cause**: **`FRONTEND_BASE_URL` points to the wrong port.** 
@@ -157,10 +172,15 @@ The same code works cleanly with GPT-5 Nano (upstream default) because that mode
   2. **Defensive**: Add a startup health check that verifies `FRONTEND_BASE_URL` is reachable
   3. **Better error**: Add a more descriptive error message when `.resume-print` selector times out (currently returns raw Playwright error)
 
-### Error 9: "Dead" Download button on preview page — no error feedback
+### Error 9: "Dead" Download button on preview page — no error feedback ✅ FIXED
 
 - **Error**: Button appears to do nothing when clicked (silent failure)
-- **Location**: `apps/frontend/app/(default)/resumes/[id]/page.tsx` — `handleDownload()` (line ~279)
+- **Location**: `apps/frontend/app/(default)/resumes/[id]/page.tsx` — `handleDownload()`
+- **Fix applied** (`app/(default)/resumes/[id]/page.tsx`):
+  1. Added `isDownloading` and `downloadError` state variables (pattern matching `isRetrying`/`deleteError` already in the same file).
+  2. `handleDownload` now: calls `setIsDownloading(true)` at entry; adds `finally { setIsDownloading(false) }`; on HTTP errors (503 etc.) sets `downloadError` message instead of silently swallowing.
+  3. Download button gets `disabled={isDownloading}` and shows `<Loader2 animate-spin>` + `t('common.loading')` while in-flight.
+  4. Error is displayed via a `<ConfirmDialog variant="danger">` (same component and pattern used for `deleteError` in the same file — no new components).
 - **What happens**: When the PDF download fails (e.g., with Error 8's 503), the `handleDownload` function on the resume preview page catches the error but **only logs it to console** — no toast, no alert, no visible feedback to the user. The button appears "dead" or unresponsive.
 - **Code**:
   ```tsx
@@ -226,11 +246,11 @@ The same code works cleanly with GPT-5 Nano (upstream default) because that mode
 
 ### Bug exists in BOTH codebases
 
-The fork is actually AHEAD of upstream (has `_sanitize_resume_dict()`, `coerce_none_to_empty_string` validators, reasoning model retry, Novita provider support, etc.), but neither version has:
-- Structural coercion for `customSections` or `sectionMeta`
-- Full-text alignment checking (both only compare skills list-to-list)
-- JSON unwrapping for non-schema wrapper keys
-- Preview page download error feedback
+The fork is actually AHEAD of upstream (has `_sanitize_resume_dict()`, `coerce_none_to_empty_string` validators, reasoning model retry, Novita provider support, etc.), and is now further ahead with the fixes listed above:
+- ✅ Structural coercion for `customSections` and `sectionMeta` (upstream still missing)
+- ✅ Full-text alignment checking (upstream still list-to-list only)
+- ✅ JSON unwrapping for non-schema wrapper keys (upstream still missing)
+- ✅ Preview page download error feedback (upstream still silent)
 
 Upstream works only because GPT-5 Nano is smart enough to produce correct JSON and doesn't promote skills from descriptions. PDF download works in upstream because default port 3000 is correct there.
 
@@ -238,8 +258,9 @@ Upstream works only because GPT-5 Nano is smart enough to produce correct JSON a
 
 | Issue | Fork | Upstream |
 |-------|------|----------|
-| `FRONTEND_BASE_URL` wrong port | **Broken** — port 3002, config says 3000 | Works — port 3000 matches default |
-| Preview `handleDownload` silent failure | **Same bug** — no error notification | **Same bug** — no error notification |
+| `FRONTEND_BASE_URL` wrong port | ✅ Fixed — `.env` + `config.py` default updated to 3002 | Works — port 3000 matches default |
+| `CORS_ORIGINS` included port 3000 | ✅ Fixed — removed `:3000` entries | N/A |
+| Preview `handleDownload` silent failure | ✅ Fixed — `ConfirmDialog` error + `isDownloading` state | Still broken |
 | Builder `handleDownload` error handling | Proper — has `showNotification` | Proper — has `showNotification` |
 
 ---
@@ -248,49 +269,46 @@ Upstream works only because GPT-5 Nano is smart enough to produce correct JSON a
 
 ### Critical (Errors 8, 9 — PDF download completely broken)
 
-1. **Set `FRONTEND_BASE_URL=http://localhost:3002`** in `apps/backend/.env` — immediate fix for PDF download *(Error 8)*
-2. **Add error notification to preview page `handleDownload`** — show user-visible error instead of silent failure *(Error 9)*
+1. ✅ **Set `FRONTEND_BASE_URL=http://localhost:3002`** in `apps/backend/.env` *(Error 8)*
+2. ✅ **Add error notification to preview page `handleDownload`** *(Error 9)*
 
 ### High Priority (Errors 5, 7 — data loss / degraded output)
 
-3. **Fix alignment checker false positives** — check skills against full master resume text, not just `technicalSkills` array. Downgrade to `warning` if skill exists in master descriptions. *(Error 7)*
-4. **Add JSON unwrapping for wrapper keys** — detect and unwrap `{"final": {...}}`, `{"result": {...}}`, `{"resume": {...}}` in `_extract_json()` *(Error 5)*
+3. ✅ **Fix alignment checker false positives** — full-text check, downgrade to `warning` if in master descriptions *(Error 7)*
+4. ✅ **Add JSON unwrapping for wrapper keys** — `_unwrap_json_envelope()` in `complete_json()` *(Error 5)*
 
-### Medium Priority (Errors 1-3, 6 — validation failures)
+### Medium Priority (Errors 1–3, 6 — validation failures)
 
-5. **Add `sectionMeta` example to `RESUME_SCHEMA_EXAMPLE`** — helps ALL models *(Error 2)*
-6. **Add `field_validator` on `ResumeData.customSections`** — coerce `[]` → `{}` *(Error 1)*
-7. **Add `field_validator` on `ResumeData.sectionMeta`** — drop malformed items *(Error 2)*
-8. **Add structural coercion in `_sanitize_resume_dict()`** — wrap raw lists into `CustomSection` *(Error 3)*
-9. **Reduce keyword injection prompt size** — send only relevant resume sections instead of full documents *(Error 6)*
+5. ✅ **Add `sectionMeta` example to `RESUME_SCHEMA_EXAMPLE`** *(Error 2)*
+6. ✅ **Add `field_validator` on `ResumeData.customSections`** *(Error 1)*
+7. ✅ **Add `field_validator` on `ResumeData.sectionMeta`** *(Error 2)*
+8. ✅ **Add structural coercion in `_sanitize_resume_dict()`** *(Error 3)*
+9. ⏳ **Reduce keyword injection prompt size** — send only relevant resume sections instead of full documents *(Error 6)*
 
 ### Low Priority (Nice to have)
 
-10. **Consider adding GLM to `_supports_json_mode()`** — if Novita supports it *(Error 1-3)*
-11. **Increase `max_tokens` for Novita models** — reduce truncation likelihood *(Error 5, 6)*
-12. **Optimize LLM call chain for Cloudflare timeout** *(Error 4)*
-13. **Add startup health check for `FRONTEND_BASE_URL`** — verify PDF rendering will work *(Error 8)*
+10. ⏳ **Consider adding GLM to `_supports_json_mode()`** — if Novita supports it *(Error 1-3)*
+11. ⏳ **Increase `max_tokens` for Novita models** — reduce truncation likelihood *(Error 5, 6)*
+12. ⏳ **Optimize LLM call chain for Cloudflare timeout** *(Error 4)*
+13. ⏳ **Add startup health check for `FRONTEND_BASE_URL`** *(Error 8)*
 
 ---
 
 ## Files Affected
 
-| File | Lines | Issue |
-|------|-------|-------|
-| `apps/backend/.env` | (missing) | `FRONTEND_BASE_URL` not set, defaults to port 3000 instead of 3002 *(Error 8)* |
-| `apps/backend/app/config.py` | 142 | Default `frontend_base_url = "http://localhost:3000"` *(Error 8)* |
-| `apps/backend/app/routers/resumes.py` | ~1453 (download_resume_pdf) | Builds print URL with wrong base URL *(Error 8)* |
-| `apps/backend/app/pdf.py` | ~143 (_render_page_to_pdf) | `wait_for_selector` with 30s timeout, no descriptive error *(Error 8)* |
-| `apps/frontend/app/(default)/resumes/[id]/page.tsx` | ~279 (handleDownload) | Silent error swallowing — no notification, no loading state *(Error 9)* |
-| `apps/backend/app/services/refiner.py` | ~245 (validate_master_alignment) | Alignment checker only compares skills list-to-list, not full resume text *(Error 7)* |
-| `apps/backend/app/services/refiner.py` | ~375 (inject_keywords) | Prompt too large for smaller models, causes truncation *(Error 6)* |
-| `apps/backend/app/llm.py` | ~596 (_extract_json) | No unwrapping for wrapper keys like `"final"` *(Error 5)* |
-| `apps/backend/app/llm.py` | ~500 (_appears_truncated) | Warns but proceeds with truncated data; no flag for callers *(Error 6)* |
-| `apps/backend/app/llm.py` | ~486 (_supports_json_mode) | GLM not in provider list *(Error 1-3)* |
-| `apps/backend/app/schemas/models.py` | ~361 (ResumeData) | Missing field_validators for customSections, sectionMeta *(Error 1-2)* |
-| `apps/backend/app/prompts/templates.py` | 19-91 (RESUME_SCHEMA_EXAMPLE) | Missing sectionMeta example *(Error 2)* |
-| `apps/backend/app/services/improver.py` | ~32 (_sanitize_resume_dict) | No structural coercion *(Error 3)* |
-| `apps/backend/app/routers/resumes.py` | 752 (improve_resume_preview) | Chained LLM calls cause timeout *(Error 4)* |
+| File | Change | Status |
+|------|--------|--------|
+| `apps/backend/.env` | Added `FRONTEND_BASE_URL=http://localhost:3002`; removed `:3000` from `CORS_ORIGINS` | ✅ Fixed |
+| `apps/backend/app/config.py` | Default `frontend_base_url` changed `3000` → `3002` | ✅ Fixed |
+| `apps/backend/app/llm.py` | Added `_unwrap_json_envelope()` + `_JSON_ENVELOPE_KEYS`; called in `complete_json()` after `json.loads()` | ✅ Fixed |
+| `apps/backend/app/schemas/models.py` | Added `logging` import; added `_normalize_custom_sections` and `_normalize_section_meta` `field_validator`s to `ResumeData` | ✅ Fixed |
+| `apps/backend/app/services/refiner.py` | `validate_master_alignment()`: added `_extract_all_text(master)` full-text check; skills/certs found in master text downgraded to `"warning"` | ✅ Fixed |
+| `apps/backend/app/services/improver.py` | `_sanitize_resume_dict()`: added structural coercion block for raw `customSections` list values | ✅ Fixed |
+| `apps/backend/app/prompts/templates.py` | Added `sectionMeta` array example to `RESUME_SCHEMA_EXAMPLE` | ✅ Fixed |
+| `apps/frontend/app/(default)/resumes/[id]/page.tsx` | Added `isDownloading`/`downloadError` state; `handleDownload` with `finally` + `ConfirmDialog` error; button `disabled` + spinner | ✅ Fixed |
+| `apps/backend/app/services/refiner.py` | `inject_keywords()` prompt size — still sends full resumes | ⏳ Open |
+| `apps/backend/app/llm.py` | `_supports_json_mode()` — GLM not in list | ⏳ Open |
+| `apps/backend/app/routers/resumes.py` | `improve_resume_preview_endpoint()` — chained LLM calls / Cloudflare timeout | ⏳ Open |
 
 ---
 

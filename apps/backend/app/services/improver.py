@@ -34,8 +34,26 @@ def _sanitize_resume_dict(data: Any) -> Any:
 
     Safety net: even if a field_validator is missing, an LLM-returned null won't
     crash the pipeline.  Covers LinkedIn PDFs where publications have no dates.
+    Also handles structural issues in customSections (Error 3 fix).
     """
     if isinstance(data, dict):
+        # Error 3: Structural coercion — customSections values that are raw lists.
+        # e.g. GLM returns "Publications": ["paper1", "paper2"] instead of
+        # "Publications": {"sectionType": "stringList", "strings": [...]}
+        if "customSections" in data and isinstance(data.get("customSections"), dict):
+            cs: dict = data["customSections"]
+            for k in list(cs.keys()):
+                v = cs[k]
+                if isinstance(v, list):
+                    # Determine CustomSection type from list content
+                    if v and isinstance(v[0], dict):
+                        cs[k] = {"sectionType": "itemList", "items": v}
+                    else:
+                        cs[k] = {
+                            "sectionType": "stringList",
+                            "strings": [str(i) for i in v if i is not None],
+                        }
+
         for key, val in list(data.items()):
             if key in _SANITIZE_STRING_FIELDS and val is None:
                 data[key] = ""

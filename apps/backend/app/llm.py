@@ -495,6 +495,39 @@ def _supports_json_mode(provider: str, model: str) -> bool:
     return False
 
 
+# LLM-FIX-005: Known single-key envelope names some models wrap their response in
+_JSON_ENVELOPE_KEYS = frozenset({
+    "final", "final_resume", "resume", "result", "output",
+    "response", "json", "data", "content", "answer",
+})
+
+
+def _unwrap_json_envelope(data: dict[str, Any]) -> dict[str, Any]:
+    """Unwrap single-key envelope dicts returned by some models.
+
+    Some models respond with {"final_resume": {<actual resume>}} instead of the
+    resume dict directly.  Only unwrap when ALL conditions hold:
+      1. Exactly one top-level key.
+      2. Key name is a known envelope word.
+      3. The value is a dict that contains 'personalInfo' (resume fingerprint).
+
+    This is intentionally narrow to avoid unwrapping legitimate resume keys.
+    """
+    if not isinstance(data, dict) or len(data) != 1:
+        return data
+
+    (key, value) = next(iter(data.items()))
+    if key.lower() not in _JSON_ENVELOPE_KEYS:
+        return data
+    if not isinstance(value, dict):
+        return data
+    if "personalInfo" not in value:
+        return data
+
+    logging.info("Unwrapped JSON envelope key '%s'", key)
+    return value
+
+
 def _appears_truncated(data: dict) -> bool:
     """LLM-001: Check if JSON data appears to be truncated.
 
@@ -734,6 +767,10 @@ async def complete_json(
             # Extract and parse JSON
             json_str = _extract_json(content)
             result = json.loads(json_str)
+
+            # LLM-FIX-005: Unwrap single-key envelope before truncation check
+            if isinstance(result, dict):
+                result = _unwrap_json_envelope(result)
 
             # LLM-001: Check if parsed result appears truncated
             if isinstance(result, dict) and _appears_truncated(result):
