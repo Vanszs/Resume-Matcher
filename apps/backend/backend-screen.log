@@ -1,258 +1,40 @@
-INFO:     Started server process [1224065]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/admin/me HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/admin/app-settings HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/admin/users HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/admin/roles HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/admin/users/871face1-8255-455b-a495-373c7ebfcc4f/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/admin/users/a955013a-774c-475c-92b3-f337c2b4f611/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/admin/users/871face1-8255-455b-a495-373c7ebfcc4f/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/admin/users/a63b2298-df4f-43a9-bb72-9804353642f7/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/admin/users/a350d813-0bb5-437f-9781-ea4d55c2f06a/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/admin/users/6a485667-267a-4bb4-a1be-06161240b871/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/admin/users/200e5f54-327b-427c-afdc-f8523836bfc6/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/admin/users/d3f9cc0c-2516-48c6-afd3-ba38c1c89f5c/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/admin/users/1c5a0db2-d6c7-451e-b30d-75e3ecd7759e/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
-INFO:     162.159.98.52:0 - "GET /api/v1/auth/register-status HTTP/1.1" 200 OK
-INFO:     162.159.98.52:0 - "GET /api/v1/auth/register-status HTTP/1.1" 200 OK
-INFO:     172.68.164.63:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.63:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.68.164.62:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
-INFO:     172.68.164.63:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.63:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.68.164.63:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     172.68.164.62:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.68.164.63:0 - "GET /api/v1/admin/users HTTP/1.1" 200 OK
-INFO:     172.68.164.63:0 - "GET /api/v1/admin/app-settings HTTP/1.1" 200 OK
-INFO:     172.68.164.63:0 - "GET /api/v1/admin/me HTTP/1.1" 200 OK
-INFO:     172.68.164.63:0 - "GET /api/v1/admin/roles HTTP/1.1" 200 OK
-INFO:     172.68.164.63:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.62:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/admin/users/871face1-8255-455b-a495-373c7ebfcc4f/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/admin/users/a955013a-774c-475c-92b3-f337c2b4f611/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/admin/users/1c5a0db2-d6c7-451e-b30d-75e3ecd7759e/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/admin/users/a63b2298-df4f-43a9-bb72-9804353642f7/detail HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.68.164.25:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.68.164.24:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     104.23.175.84:0 - "GET /api/v1/admin/users HTTP/1.1" 200 OK
-INFO:     104.23.175.85:0 - "GET /api/v1/admin/me HTTP/1.1" 200 OK
-INFO:     104.23.175.85:0 - "GET /api/v1/admin/app-settings HTTP/1.1" 200 OK
-INFO:     104.23.175.84:0 - "GET /api/v1/admin/roles HTTP/1.1" 200 OK
-INFO:     104.23.175.84:0 - "GET /api/v1/admin/users/871face1-8255-455b-a495-373c7ebfcc4f/detail HTTP/1.1" 200 OK
-INFO:     162.158.108.122:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
-INFO:     162.158.108.91:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     162.158.108.122:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     162.158.108.122:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     162.158.108.122:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     162.158.108.91:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     162.158.108.91:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     162.158.88.135:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     162.158.88.135:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     162.158.88.135:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     162.158.88.135:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     162.158.88.135:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     162.158.88.134:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
-INFO:     162.158.88.135:0 - "POST /api/v1/jobs/upload HTTP/1.1" 200 OK
-WARNING:root:Possible truncation detected: missing required section 'personalInfo'
-WARNING:root:Parsed JSON appears truncated, but proceeding with result
-WARNING:app.services.improver:ResumeData validation failed in improver (1 error(s)). Top-level keys: ['personalInfo', 'summary', 'workExperience', 'education', 'personalProjects', 'additional', 'sectionMeta', 'customSections']
-ERROR:app.routers.resumes:Resume preview failed during improve_resume: 1 validation error for ResumeData
-customSections
-  Input should be a valid dictionary [type=dict_type, input_value=[], input_type=list]
-    For further information visit https://errors.pydantic.dev/2.12/v/dict_type
-INFO:     162.158.88.135:0 - "POST /api/v1/jobs/upload HTTP/1.1" 200 OK
-WARNING:root:Possible truncation detected: missing required section 'personalInfo'
-WARNING:root:Parsed JSON appears truncated, but proceeding with result
-WARNING:root:JSON parse failed (attempt 1): Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
-WARNING:root:Reasoning model detected: upgrading retry hint to critical JSON-only prompt
-WARNING:app.services.improver:ResumeData validation failed in improver (9 error(s)). Top-level keys: ['personalInfo', 'summary', 'workExperience', 'education', 'personalProjects', 'additional', 'sectionMeta', 'customSections']
-ERROR:app.routers.resumes:Resume preview failed during improve_resume: 9 validation errors for ResumeData
-sectionMeta.0.id
-  Field required [type=missing, input_value={'title': 'Top Skills', 'type': 'list'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/missing
-sectionMeta.0.key
-  Field required [type=missing, input_value={'title': 'Top Skills', 'type': 'list'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/missing
-sectionMeta.0.displayName
-  Field required [type=missing, input_value={'title': 'Top Skills', 'type': 'list'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/missing
-sectionMeta.0.sectionType
-  Field required [type=missing, input_value={'title': 'Top Skills', 'type': 'list'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/missing
-sectionMeta.1.id
-  Field required [type=missing, input_value={'title': 'Certifications', 'type': 'list'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/missing
-sectionMeta.1.key
-  Field required [type=missing, input_value={'title': 'Certifications', 'type': 'list'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/missing
-sectionMeta.1.displayName
-  Field required [type=missing, input_value={'title': 'Certifications', 'type': 'list'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/missing
-sectionMeta.1.sectionType
-  Field required [type=missing, input_value={'title': 'Certifications', 'type': 'list'}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.12/v/missing
-customSections.Publications
-  Input should be a valid dictionary or instance of CustomSection [type=model_type, input_value=['Food Optimizing for Pat...m: A Literature Review'], input_type=list]
-    For further information visit https://errors.pydantic.dev/2.12/v/model_type
-INFO:     172.70.142.9:0 - "POST /api/v1/jobs/upload HTTP/1.1" 200 OK
-WARNING:root:Possible truncation detected: missing required section 'personalInfo'
-WARNING:root:Parsed JSON appears truncated, but proceeding with result
-ERROR:root:Could not extract JSON from response format. Content preview: 1.  **Analyze the Request:**
-    *   **Goal:** Tailor a resume for a "Software Engineer Intern" role at "Ritual".
-    *   **Input:** Job Description (JD) and Original Resume.
-    *   **Output Format:*
-WARNING:root:JSON parse failed (attempt 1): No JSON found in response: 1.  **Analyze the Request:**
-    *   **Goal:** Tailor a resume for a "Software Engineer Intern" role at "Ritual".
-    *   **Input:** Job Description (JD) and Original Resume.
-    *   **Output Format:*
-WARNING:root:Reasoning model detected: upgrading retry hint to critical JSON-only prompt
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=a85095ad-f181-4eef-bb4e-4504f7bb3a2b HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=a85095ad-f181-4eef-bb4e-4504f7bb3a2b HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=a85095ad-f181-4eef-bb4e-4504f7bb3a2b HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=a85095ad-f181-4eef-bb4e-4504f7bb3a2b HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=a85095ad-f181-4eef-bb4e-4504f7bb3a2b HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "PUT /api/v1/config/llm-api-key HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "GET /api/v1/status HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=a85095ad-f181-4eef-bb4e-4504f7bb3a2b HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=a85095ad-f181-4eef-bb4e-4504f7bb3a2b HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
-INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.70.142.8:0 - "POST /api/v1/jobs/upload HTTP/1.1" 200 OK
-ERROR:root:LLM health check failed
-Traceback (most recent call last):
-  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2546, in async_completion
-    response = await client.post(
-               ^^^^^^^^^^^^^^^^^^
-  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
-    result = await func(*args, **kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 510, in post
-    raise e
-  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 466, in post
-    response.raise_for_status()
-  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
-    raise HTTPStatusError(message, request=request, response=self)
-httpx.HTTPStatusError: Server error '503 Service Unavailable' for url 'https://generativelanguage.googleapis.com/v1alpha/models/gemini-3-flash-preview:generateContent?key=AIzaSyAggq0zaJg0R9QgT3Vg-6re8sZCpNuUXfI'
-For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
-    response = await init_response
-               ^^^^^^^^^^^^^^^^^^^
-  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2555, in async_completion
-    raise VertexAIError(
-litellm.llms.vertex_ai.common_utils.VertexAIError: {
-  "error": {
-    "code": 503,
-    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
-    "status": "UNAVAILABLE"
-  }
-}
-
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
-    response = await litellm.acompletion(**kwargs)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
-    raise e
-  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
-    result = await original_function(*args, **kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
-    raise exception_type(
-          ^^^^^^^^^^^^^^^
-  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
-    raise e
-  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 1468, in exception_type
-    raise ServiceUnavailableError(
-litellm.exceptions.ServiceUnavailableError: litellm.ServiceUnavailableError: GeminiException - {
-  "error": {
-    "code": 503,
-    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
-    "status": "UNAVAILABLE"
-  }
-}
-
-WARNING:root:LLM config saved but health check failed
-WARNING:root:LLM call failed (attempt 1): litellm.ServiceUnavailableError: GeminiException - {
-  "error": {
-    "code": 503,
-    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
-    "status": "UNAVAILABLE"
-  }
-}
-
-WARNING:root:LLM call failed (attempt 2): litellm.ServiceUnavailableError: GeminiException - {
-  "error": {
-    "code": 503,
-    "message": "This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.",
-    "status": "UNAVAILABLE"
-  }
-}
-
 WARNING:root:Possible truncation detected: missing required section 'personalInfo'
 WARNING:root:Parsed JSON appears truncated, but proceeding with result
 WARNING:app.services.refiner:Alignment violations found: 2 total, 2 critical
-ERROR:app.services.refiner:Critical alignment violations detected - blocking resume: ['typescript', 'machine learning']
+ERROR:app.services.refiner:Critical alignment violations detected - blocking resume: ['typescript', 'javascript']
+INFO:     172.69.176.90:0 - "POST /api/v1/resumes/improve/preview HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "POST /api/v1/resumes/improve/confirm HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/resumes?resume_id=a0ba9cf5-39cc-44d2-8873-47970ebbb368 HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.68.164.24:0 - "PATCH /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/title HTTP/1.1" 200 OK
+INFO:     172.68.164.24:0 - "GET /api/v1/resumes?resume_id=a0ba9cf5-39cc-44d2-8873-47970ebbb368 HTTP/1.1" 200 OK
+INFO:     172.68.164.24:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/job-description HTTP/1.1" 200 OK
+INFO:     172.68.164.24:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/pdf?template=swiss-single&pageSize=A4&marginTop=10&marginBottom=10&marginLeft=10&marginRight=10&sectionSpacing=3&itemSpacing=2&lineHeight=3&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=true&showContactIcons=true&accentColor=blue&lang=en HTTP/1.1" 503 Service Unavailable
+INFO:     172.68.164.24:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/pdf?template=swiss-single&pageSize=A4&marginTop=10&marginBottom=10&marginLeft=10&marginRight=10&sectionSpacing=3&itemSpacing=2&lineHeight=3&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=true&showContactIcons=true&accentColor=blue&lang=en HTTP/1.1" 503 Service Unavailable
+INFO:     172.70.208.157:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.208.157:0 - "GET /api/v1/resumes?resume_id=a85095ad-f181-4eef-bb4e-4504f7bb3a2b HTTP/1.1" 200 OK
+INFO:     172.70.208.156:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+INFO:     172.70.208.156:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
+INFO:     172.70.208.157:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
+INFO:     172.70.208.156:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/job-description HTTP/1.1" 200 OK
+INFO:     172.70.208.156:0 - "GET /api/v1/resumes?resume_id=a0ba9cf5-39cc-44d2-8873-47970ebbb368 HTTP/1.1" 200 OK
+INFO:     172.70.208.156:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.208.157:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/pdf?template=swiss-single&pageSize=A4&lang=en HTTP/1.1" 503 Service Unavailable
+INFO:     172.70.208.48:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/pdf?template=swiss-single&pageSize=A4&lang=en HTTP/1.1" 503 Service Unavailable
+INFO:     172.70.208.48:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/pdf?template=swiss-single&pageSize=A4&lang=en HTTP/1.1" 503 Service Unavailable
+INFO:     172.70.208.48:0 - "GET /api/v1/resumes?resume_id=a0ba9cf5-39cc-44d2-8873-47970ebbb368 HTTP/1.1" 200 OK
+INFO:     172.70.208.48:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/job-description HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/maintenance-status HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/job-description HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
+INFO:     172.70.208.48:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/pdf?template=swiss-single&pageSize=A4&marginTop=10&marginBottom=10&marginLeft=10&marginRight=10&sectionSpacing=3&itemSpacing=2&lineHeight=3&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=true&showContactIcons=true&accentColor=blue&lang=en HTTP/1.1" 503 Service Unavailable
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=5b96f478-8c58-4137-9475-ba1098c55e0e HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=a0ba9cf5-39cc-44d2-8873-47970ebbb368 HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes/a0ba9cf5-39cc-44d2-8873-47970ebbb368/pdf?template=swiss-single&pageSize=A4&lang=en HTTP/1.1" 503 Service Unavailable
+INFO:     108.162.227.23:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.70.208.49:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK

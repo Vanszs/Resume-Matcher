@@ -40,6 +40,8 @@ export default function ResumeViewerPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [showDownloadSuccessDialog, setShowDownloadSuccessDialog] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showEnrichmentModal, setShowEnrichmentModal] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -277,6 +279,7 @@ export default function ResumeViewerPage() {
   };
 
   const handleDownload = async () => {
+    setIsDownloading(true);
     try {
       const blob = await downloadResumePdf(resumeId, undefined, uiLanguage);
       const filename = sanitizeFilename(resumeTitle, resumeId, 'resume');
@@ -292,6 +295,9 @@ export default function ResumeViewerPage() {
         }
         return;
       }
+      setDownloadError(t('resumeViewer.errors.downloadFailed'));
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -492,9 +498,9 @@ export default function ResumeViewerPage() {
               {isNavigating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Edit className="w-4 h-4" />}
               {t('dashboard.editResume')}
             </Button>
-            <Button variant="success" onClick={handleDownload}>
-              <Download className="w-4 h-4" />
-              {t('resumeViewer.downloadResume')}
+            <Button variant="success" onClick={handleDownload} disabled={isDownloading}>
+              {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              {isDownloading ? t('common.loading') : t('resumeViewer.downloadResume')}
             </Button>
           </div>
         </div>
@@ -613,6 +619,19 @@ export default function ResumeViewerPage() {
         variant="success"
         showCancelButton={false}
       />
+
+      {downloadError && (
+        <ConfirmDialog
+          open={!!downloadError}
+          onOpenChange={() => setDownloadError(null)}
+          title={t('common.error')}
+          description={downloadError}
+          confirmLabel={t('common.ok')}
+          onConfirm={() => setDownloadError(null)}
+          variant="danger"
+          showCancelButton={false}
+        />
+      )}
 
       {deleteError && (
         <ConfirmDialog

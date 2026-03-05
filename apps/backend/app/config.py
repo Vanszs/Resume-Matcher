@@ -139,7 +139,7 @@ class Settings(BaseSettings):
     # Server Configuration
     host: str = "0.0.0.0"
     port: int = 8000
-    frontend_base_url: str = "http://localhost:3000"
+    frontend_base_url: str = "http://localhost:3002"
 
     # JWT Authentication
     jwt_secret_key: str = "super-secret-key-please-change-in-production"

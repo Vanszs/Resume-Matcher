@@ -196,10 +196,12 @@ export function StatusCacheProvider({ children }: { children: React.ReactNode })
     });
   }, []);
 
-  // Initial fetch on mount — use full LLM health check so llm_error_code is populated
+  // Initial fetch on mount — use fast path (no live LLM call) to avoid blocking
+  // the UI for up to 30s on network timeouts. LLM health is checked in the background
+  // via refreshLlmHealth() every 30 minutes, or on explicit user action (Refresh button).
   useEffect(() => {
     mountedRef.current = true;
-    refreshStatus(true);
+    refreshStatus(false);
 
     return () => {
       mountedRef.current = false;
