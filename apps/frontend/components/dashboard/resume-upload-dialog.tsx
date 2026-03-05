@@ -53,6 +53,9 @@ export function ResumeUploadDialog({
   } | null>(null);
   const [failedResumeId, setFailedResumeId] = useState<string | null>(null);
   const [isRetryingProcessing, setIsRetryingProcessing] = useState(false);
+  // Raw error message from LLM/backend, shown behind a toggle for UX.
+  const [rawErrorDetail, setRawErrorDetail] = useState<string | null>(null);
+  const [showErrorDetail, setShowErrorDetail] = useState(false);
   // Tracks a resume whose AI parsing is still running in the background.
   // While set, the dialog stays open showing a processing indicator.
   const [pendingResumeId, setPendingResumeId] = useState<string | null>(null);
@@ -146,6 +149,7 @@ export function ResumeUploadDialog({
         resume_id?: string;
         processing_status?: 'pending' | 'processing' | 'ready' | 'failed';
         is_master?: boolean;
+        error_message?: string | null;
       };
       if (data.resume_id) {
         const processingFailed = data.processing_status === 'failed';
@@ -158,6 +162,8 @@ export function ResumeUploadDialog({
             type: 'error',
             message: t('dashboard.uploadDialog.parsingFailedKeepOpen'),
           });
+          setRawErrorDetail(data.error_message ?? null);
+          setShowErrorDetail(false);
           setFailedResumeId(data.resume_id);
           return;
         }
@@ -194,6 +200,8 @@ export function ResumeUploadDialog({
                   type: 'error',
                   message: t('dashboard.uploadDialog.parsingFailedKeepOpen'),
                 });
+                setRawErrorDetail(res.raw_resume?.error_message ?? null);
+                setShowErrorDetail(false);
                 setFailedResumeId(pending_id);
                 setPendingResumeId(null);
               }
@@ -249,6 +257,8 @@ export function ResumeUploadDialog({
       const result = await retryProcessing(resumeIdToRetry);
       if (result.processing_status !== 'ready') {
         setUploadFeedback({ type: 'error', message: t('dashboard.retryFailed') });
+        setRawErrorDetail(result.error_message ?? null);
+        setShowErrorDetail(false);
         return;
       }
 
@@ -390,13 +400,33 @@ export function ResumeUploadDialog({
 
           {/* Feedback Messages */}
           {displayErrors.length > 0 && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 flex items-start gap-2 text-red-700 text-sm">
-              <AlertCircleIcon className="w-5 h-5 shrink-0" />
-              <div>
-                {displayErrors.map((err, i) => (
-                  <p key={i}>{err}</p>
-                ))}
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm">
+              <div className="flex items-start gap-2">
+                <AlertCircleIcon className="w-5 h-5 shrink-0" />
+                <div className="flex-1">
+                  {displayErrors.map((err, i) => (
+                    <p key={i}>{err}</p>
+                  ))}
+                </div>
               </div>
+              {rawErrorDetail && (
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    className="font-mono text-xs uppercase underline underline-offset-2 hover:text-red-900 transition-colors"
+                    onClick={() => setShowErrorDetail((v) => !v)}
+                  >
+                    {showErrorDetail
+                      ? t('dashboard.uploadDialog.hideErrorDetail')
+                      : t('dashboard.uploadDialog.showErrorDetail')}
+                  </button>
+                  {showErrorDetail && (
+                    <pre className="mt-2 p-2 bg-red-100/50 border border-red-200 text-xs font-mono whitespace-pre-wrap break-words max-h-32 overflow-y-auto">
+                      {rawErrorDetail}
+                    </pre>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -431,6 +461,8 @@ export function ResumeUploadDialog({
                 if (files[0]) removeFile(files[0].id);
                 setUploadFeedback(null);
                 setFailedResumeId(null);
+                setRawErrorDetail(null);
+                setShowErrorDetail(false);
               }}
             >
               {t('dashboard.uploadDialog.tryDifferentFile')}

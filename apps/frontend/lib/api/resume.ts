@@ -59,6 +59,7 @@ interface ResumeResponse {
       content_type: string;
       created_at: string;
       processing_status: 'pending' | 'processing' | 'ready' | 'failed';
+      error_message?: string | null;
     };
     processed_resume: ProcessedResume | null;
     cover_letter?: string | null;
@@ -75,6 +76,7 @@ export interface ResumeUploadResponse {
   resume_id: string;
   processing_status: 'pending' | 'processing' | 'ready' | 'failed';
   is_master: boolean;
+  error_message?: string | null;
 }
 
 interface ImproveResumeConfirmRequest {
@@ -104,6 +106,7 @@ export interface ResumeListItem {
   created_at: string;
   updated_at: string;
   title?: string | null;
+  error_message?: string | null;
   // Optional lightweight snippet of associated job description (populated client-side)
   jobSnippet?: string;
 }

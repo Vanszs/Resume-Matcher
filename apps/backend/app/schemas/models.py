@@ -353,6 +353,7 @@ class ResumeUploadResponse(BaseModel):
     resume_id: str
     processing_status: Literal["pending", "processing", "ready", "failed"] = "pending"
     is_master: bool = False
+    error_message: str | None = None
 
 
 class RawResume(BaseModel):
@@ -363,6 +364,7 @@ class RawResume(BaseModel):
     content_type: str = "md"
     created_at: str
     processing_status: str = "pending"  # pending, processing, ready, failed
+    error_message: str | None = None
 
 
 class ResumeFetchData(BaseModel):
@@ -395,6 +397,7 @@ class ResumeSummary(BaseModel):
     created_at: str
     updated_at: str
     title: str | None = None
+    error_message: str | None = None
 
 
 class ResumeListResponse(BaseModel):

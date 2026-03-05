@@ -2,3 +2,2149 @@ INFO:     Started server process [677874]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     172.70.108.217:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.70.108.216:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     172.68.234.147:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     172.68.234.146:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.70.93.18:0 - "GET /api/v1/config/language HTTP/1.1" 401 Unauthorized
+INFO:     172.70.93.18:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.71.124.232:0 - "GET /api/v1/auth/register-status HTTP/1.1" 200 OK
+INFO:     104.23.175.85:0 - "GET /api/v1/auth/register-status HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/admin/users HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/admin/roles HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/admin/me HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/admin/app-settings HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     172.71.164.210:0 - "GET /api/v1/internships HTTP/1.1" 403 Forbidden
+INFO:     162.158.170.18:0 - "GET /api/v1/auth/register-status HTTP/1.1" 200 OK
+INFO:     162.158.170.19:0 - "POST /api/v1/auth/register HTTP/1.1" 200 OK
+INFO:     162.158.170.18:0 - "POST /api/v1/auth/verify-email HTTP/1.1" 200 OK
+INFO:     162.158.170.19:0 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     162.158.170.19:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.170.18:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     162.158.170.18:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     162.158.170.18:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     162.158.170.18:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     162.158.170.19:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "PUT /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+
+[1;31mProvider List: https://docs.litellm.ai/docs/providers[0m
+
+
+[1;31mProvider List: https://docs.litellm.ai/docs/providers[0m
+
+INFO:     104.23.175.84:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 840, in acompletion
+    headers, response = await self.make_openai_chat_completion_request(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 460, in make_openai_chat_completion_request
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 437, in make_openai_chat_completion_request
+    await openai_aclient.chat.completions.with_raw_response.create(
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_legacy_response.py", line 381, in wrapped
+    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 2676, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1884, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1669, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Invalid Authentication', 'type': 'invalid_authentication_error'}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 887, in acompletion
+    raise OpenAIError(
+litellm.llms.openai.common_utils.OpenAIError: Error code: 401 - {'error': {'message': 'Invalid Authentication', 'type': 'invalid_authentication_error'}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 509, in exception_type
+    raise AuthenticationError(
+litellm.exceptions.AuthenticationError: litellm.AuthenticationError: AuthenticationError: OpenAIException - Invalid Authentication
+WARNING:root:LLM config saved but health check failed
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 840, in acompletion
+    headers, response = await self.make_openai_chat_completion_request(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 460, in make_openai_chat_completion_request
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 437, in make_openai_chat_completion_request
+    await openai_aclient.chat.completions.with_raw_response.create(
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_legacy_response.py", line 381, in wrapped
+    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 2676, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1884, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1669, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Invalid Authentication', 'type': 'invalid_authentication_error'}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 887, in acompletion
+    raise OpenAIError(
+litellm.llms.openai.common_utils.OpenAIError: Error code: 401 - {'error': {'message': 'Invalid Authentication', 'type': 'invalid_authentication_error'}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 509, in exception_type
+    raise AuthenticationError(
+litellm.exceptions.AuthenticationError: litellm.AuthenticationError: AuthenticationError: OpenAIException - Invalid Authentication
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+
+[1;31mProvider List: https://docs.litellm.ai/docs/providers[0m
+
+
+[1;31mProvider List: https://docs.litellm.ai/docs/providers[0m
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     104.23.175.84:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 840, in acompletion
+    headers, response = await self.make_openai_chat_completion_request(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 460, in make_openai_chat_completion_request
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 437, in make_openai_chat_completion_request
+    await openai_aclient.chat.completions.with_raw_response.create(
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_legacy_response.py", line 381, in wrapped
+    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 2676, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1884, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1669, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Invalid Authentication', 'type': 'invalid_authentication_error'}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 887, in acompletion
+    raise OpenAIError(
+litellm.llms.openai.common_utils.OpenAIError: Error code: 401 - {'error': {'message': 'Invalid Authentication', 'type': 'invalid_authentication_error'}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 509, in exception_type
+    raise AuthenticationError(
+litellm.exceptions.AuthenticationError: litellm.AuthenticationError: AuthenticationError: OpenAIException - Invalid Authentication
+
+[1;31mProvider List: https://docs.litellm.ai/docs/providers[0m
+
+
+[1;31mProvider List: https://docs.litellm.ai/docs/providers[0m
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     104.23.175.84:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "PUT /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/aiohttp_transport.py", line 60, in map_aiohttp_exceptions
+    yield
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/aiohttp_transport.py", line 273, in handle_async_request
+    response = await self._make_aiohttp_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/aiohttp_transport.py", line 240, in _make_aiohttp_request
+    response = await client_session.request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/aiohttp/client.py", line 1510, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/aiohttp/client.py", line 779, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/aiohttp/client.py", line 757, in _connect_and_send_request
+    await resp.start(conn)
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/aiohttp/client_reqrep.py", line 539, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/aiohttp/streams.py", line 703, in read
+    await self._waiter
+aiohttp.client_exceptions.SocketTimeoutError: Timeout on reading data from socket
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 465, in post
+    response = await self.client.send(req, stream=stream)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/httpx/_client.py", line 1629, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/httpx/_client.py", line 1657, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/httpx/_client.py", line 1694, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/httpx/_client.py", line 1730, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/aiohttp_transport.py", line 272, in handle_async_request
+    with map_aiohttp_exceptions():
+  File "/usr/lib/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/aiohttp_transport.py", line 74, in map_aiohttp_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout: Timeout on reading data from socket
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2546, in async_completion
+    response = await client.post(
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 494, in post
+    raise litellm.Timeout(
+litellm.exceptions.Timeout: litellm.Timeout: Connection timed out. Timeout passed=30.0, time taken=30.001 seconds
+INFO:     172.69.176.90:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.68.164.25:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.68.164.25:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.68.164.25:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+INFO:     172.68.164.25:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.68.164.24:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     172.68.164.25:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     172.68.164.25:0 - "DELETE /api/v1/config/api-keys?confirm=CLEAR_ALL_KEYS&scope=self HTTP/1.1" 200 OK
+INFO:     172.68.164.25:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.68.164.25:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.68.164.25:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.68.164.25:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.68.164.25:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+INFO:     172.68.164.25:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     172.68.164.24:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 840, in acompletion
+    headers, response = await self.make_openai_chat_completion_request(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 460, in make_openai_chat_completion_request
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 437, in make_openai_chat_completion_request
+    await openai_aclient.chat.completions.with_raw_response.create(
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_legacy_response.py", line 381, in wrapped
+    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 2676, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1884, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1669, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Invalid Authentication', 'type': 'invalid_authentication_error'}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 887, in acompletion
+    raise OpenAIError(
+litellm.llms.openai.common_utils.OpenAIError: Error code: 401 - {'error': {'message': 'Invalid Authentication', 'type': 'invalid_authentication_error'}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 509, in exception_type
+    raise AuthenticationError(
+litellm.exceptions.AuthenticationError: litellm.AuthenticationError: AuthenticationError: OpenAIException - Invalid Authentication
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.71.81.9:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+INFO:     172.71.81.231:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 840, in acompletion
+    headers, response = await self.make_openai_chat_completion_request(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 460, in make_openai_chat_completion_request
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 437, in make_openai_chat_completion_request
+    await openai_aclient.chat.completions.with_raw_response.create(
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_legacy_response.py", line 381, in wrapped
+    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 2676, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1884, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/openai/_base_client.py", line 1669, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Invalid Authentication', 'type': 'invalid_authentication_error'}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/openai/openai.py", line 887, in acompletion
+    raise OpenAIError(
+litellm.llms.openai.common_utils.OpenAIError: Error code: 401 - {'error': {'message': 'Invalid Authentication', 'type': 'invalid_authentication_error'}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 509, in exception_type
+    raise AuthenticationError(
+litellm.exceptions.AuthenticationError: litellm.AuthenticationError: AuthenticationError: OpenAIException - Invalid Authentication
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.71.81.9:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+INFO:     172.71.81.9:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.71.81.9:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+INFO:     172.71.81.9:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "PUT /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2546, in async_completion
+    response = await client.post(
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 510, in post
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 466, in post
+    response.raise_for_status()
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '404 Not Found' for url 'https://generativelanguage.googleapis.com/v1beta/models/g:generateContent?key=AIzaSyDVTmgNElz_2SgnMD3hUvnhKRv3WLcxmac'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2555, in async_completion
+    raise VertexAIError(
+litellm.llms.vertex_ai.common_utils.VertexAIError: {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 1418, in exception_type
+    raise NotFoundError(
+litellm.exceptions.NotFoundError: litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:root:LLM config saved but health check failed
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.70.142.8:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "PUT /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "PUT /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "PUT /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "PUT /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "POST /api/v1/resumes/upload HTTP/1.1" 200 OK
+WARNING:root:LLM call failed (attempt 1): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:root:LLM call failed (attempt 2): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:root:LLM call failed (attempt 3): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:app.routers.resumes:Background processing failed for resume b8815997-6d8a-49b4-ab4c-1f020d54bbe4: litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "POST /api/v1/resumes/upload HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+WARNING:root:LLM call failed (attempt 1): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:root:LLM call failed (attempt 2): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:root:LLM call failed (attempt 3): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:app.routers.resumes:Background processing failed for resume fe7bd654-fe2e-4858-be5e-98f6be791875: litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:root:LLM call failed (attempt 1): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:root:LLM call failed (attempt 2): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:root:LLM call failed (attempt 3): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:app.routers.resumes:Retry processing failed for resume b8815997-6d8a-49b4-ab4c-1f020d54bbe4: litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.70.142.9:0 - "POST /api/v1/resumes/b8815997-6d8a-49b4-ab4c-1f020d54bbe4/retry-processing HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=fe7bd654-fe2e-4858-be5e-98f6be791875 HTTP/1.1" 200 OK
+WARNING:root:LLM call failed (attempt 1): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:root:LLM call failed (attempt 2): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:root:LLM call failed (attempt 3): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:app.routers.resumes:Retry processing failed for resume b8815997-6d8a-49b4-ab4c-1f020d54bbe4: litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.70.142.8:0 - "POST /api/v1/resumes/b8815997-6d8a-49b4-ab4c-1f020d54bbe4/retry-processing HTTP/1.1" 200 OK
+WARNING:root:LLM call failed (attempt 1): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:root:LLM call failed (attempt 2): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:root:LLM call failed (attempt 3): litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+WARNING:app.routers.resumes:Retry processing failed for resume b8815997-6d8a-49b4-ab4c-1f020d54bbe4: litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.70.142.9:0 - "POST /api/v1/resumes/b8815997-6d8a-49b4-ab4c-1f020d54bbe4/retry-processing HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2546, in async_completion
+    response = await client.post(
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 510, in post
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 466, in post
+    response.raise_for_status()
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '404 Not Found' for url 'https://generativelanguage.googleapis.com/v1beta/models/g:generateContent?key=AIzaSyDVTmgNElz_2SgnMD3hUvnhKRv3WLcxmac'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2555, in async_completion
+    raise VertexAIError(
+litellm.llms.vertex_ai.common_utils.VertexAIError: {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 1418, in exception_type
+    raise NotFoundError(
+litellm.exceptions.NotFoundError: litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.70.142.9:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2546, in async_completion
+    response = await client.post(
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 510, in post
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 466, in post
+    response.raise_for_status()
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '404 Not Found' for url 'https://generativelanguage.googleapis.com/v1beta/models/g:generateContent?key=AIzaSyDVTmgNElz_2SgnMD3hUvnhKRv3WLcxmac'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2555, in async_completion
+    raise VertexAIError(
+litellm.llms.vertex_ai.common_utils.VertexAIError: {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 1418, in exception_type
+    raise NotFoundError(
+litellm.exceptions.NotFoundError: litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/g is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.70.142.8:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "DELETE /api/v1/config/api-keys?confirm=CLEAR_ALL_KEYS&scope=self HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.70.188.67:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.70.188.67:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.188.67:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.70.188.57:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.70.188.57:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+INFO:     172.70.188.57:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "PUT /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.70.188.57:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.70.188.57:0 - "POST /api/v1/resumes/b8815997-6d8a-49b4-ab4c-1f020d54bbe4/retry-processing HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes?resume_id=fe7bd654-fe2e-4858-be5e-98f6be791875 HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "DELETE /api/v1/resumes/fe7bd654-fe2e-4858-be5e-98f6be791875 HTTP/1.1" 200 OK
+INFO:     172.70.188.57:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.188.57:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.70.188.56:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     162.158.106.248:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.106.248:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     162.158.106.248:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     162.158.106.249:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.106.248:0 - "POST /api/v1/resumes/upload?as_master=true HTTP/1.1" 200 OK
+INFO:     162.158.106.248:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     162.158.106.248:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     162.158.106.249:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     162.158.106.249:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     162.158.106.248:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     162.158.106.248:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     162.158.106.248:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.106.249:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     162.158.106.248:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     162.158.106.248:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.106.249:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "PATCH /api/v1/resumes/b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.69.165.21:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.69.165.21:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.165.21:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.69.165.21:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.69.165.21:0 - "GET /api/v1/resumes?resume_id=b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.69.165.21:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "DELETE /api/v1/resumes/b8815997-6d8a-49b4-ab4c-1f020d54bbe4 HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.69.165.58:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.69.165.58:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.165.58:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.69.165.58:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.69.165.58:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.69.165.58:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.165.58:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+INFO:     162.158.88.135:0 - "POST /api/v1/jobs/upload HTTP/1.1" 200 OK
+WARNING:root:Possible truncation detected: missing required section 'personalInfo'
+WARNING:root:Parsed JSON appears truncated, but proceeding with result
+WARNING:app.services.refiner:Alignment violations found: 10 total, 10 critical
+ERROR:app.services.refiner:Critical alignment violations detected - blocking resume: ['jetpack compose', 'api restful integration', 'modularization', 'google play store publishing', 'android jetpack library', 'firebase services', 'android studio', 'solid', 'git flow', 'oop']
+INFO:     162.158.88.135:0 - "POST /api/v1/resumes/improve/preview HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "POST /api/v1/jobs/upload HTTP/1.1" 200 OK
+WARNING:root:Possible truncation detected: missing required section 'personalInfo'
+WARNING:root:Parsed JSON appears truncated, but proceeding with result
+WARNING:app.services.refiner:Alignment violations found: 9 total, 9 critical
+ERROR:app.services.refiner:Critical alignment violations detected - blocking resume: ['jetpack compose', 'modularization', 'google play store publishing', 'android jetpack library', 'firebase services', 'android studio', 'solid', 'git flow', 'oop']
+INFO:     172.70.142.9:0 - "POST /api/v1/resumes/improve/preview HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "POST /api/v1/resumes/improve/confirm HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/job-description HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "PATCH /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/job-description HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes?resume_id=204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.248.64:0 - "GET /api/v1/resumes?resume_id=204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/pdf?template=swiss-single&pageSize=A4&lang=en HTTP/1.1" 200 OK
+INFO:     172.70.208.156:0 - "GET /api/v1/resumes?resume_id=204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.70.208.156:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/job-description HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "PATCH /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.68.194.146:0 - "GET /api/v1/resumes?resume_id=204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/pdf?template=swiss-single&pageSize=LETTER&marginTop=8&marginBottom=8&marginLeft=8&marginRight=8&sectionSpacing=2&itemSpacing=2&lineHeight=2&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=false&showContactIcons=false&accentColor=blue&lang=en HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "PATCH /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     104.23.225.107:0 - "GET /api/v1/resumes?resume_id=204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/pdf?template=swiss-single&pageSize=LETTER&marginTop=8&marginBottom=8&marginLeft=8&marginRight=8&sectionSpacing=2&itemSpacing=2&lineHeight=2&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=false&showContactIcons=false&accentColor=blue&lang=en HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "PATCH /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/job-description HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.87.197:0 - "GET /api/v1/resumes?resume_id=204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/pdf?template=swiss-single&pageSize=A4&lang=en HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/job-description HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "PATCH /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.68.194.146:0 - "GET /api/v1/resumes?resume_id=204c0f38-ed9e-4595-8f6d-0c69fc8c85a4 HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/pdf?template=swiss-single&pageSize=A4&marginTop=8&marginBottom=8&marginLeft=8&marginRight=8&sectionSpacing=2&itemSpacing=2&lineHeight=2&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=false&showContactIcons=false&accentColor=blue&lang=en HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/job-description HTTP/1.1" 200 OK
+INFO:     108.162.227.23:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     108.162.227.23:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     108.162.227.23:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.70.208.156:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.70.208.156:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     172.70.208.49:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.70.208.48:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.208.49:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.70.208.48:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/job-description HTTP/1.1" 200 OK
+INFO:     172.70.208.48:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.70.208.49:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     172.70.208.48:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2546, in async_completion
+    response = await client.post(
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 510, in post
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 466, in post
+    response.raise_for_status()
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1alpha/models/gemini-3.1-pro-preview:generateContent?key=AIzaSyDVTmgNElz_2SgnMD3hUvnhKRv3WLcxmac'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2555, in async_completion
+    raise VertexAIError(
+litellm.llms.vertex_ai.common_utils.VertexAIError: {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-pro\nPlease retry in 32.032292429s.",
+    "status": "RESOURCE_EXHAUSTED",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.Help",
+        "links": [
+          {
+            "description": "Learn more about Gemini API quotas",
+            "url": "https://ai.google.dev/gemini-api/docs/rate-limits"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+        "violations": [
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count",
+            "quotaId": "GenerateContentInputTokensPerModelPerDay-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3.1-pro"
+            }
+          },
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count",
+            "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3.1-pro"
+            }
+          },
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3.1-pro"
+            }
+          },
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3.1-pro"
+            }
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.RetryInfo",
+        "retryDelay": "32s"
+      }
+    ]
+  }
+}
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 1355, in exception_type
+    raise RateLimitError(
+litellm.exceptions.RateLimitError: litellm.RateLimitError: litellm.RateLimitError: geminiException - {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3.1-pro\nPlease retry in 32.032292429s.",
+    "status": "RESOURCE_EXHAUSTED",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.Help",
+        "links": [
+          {
+            "description": "Learn more about Gemini API quotas",
+            "url": "https://ai.google.dev/gemini-api/docs/rate-limits"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+        "violations": [
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count",
+            "quotaId": "GenerateContentInputTokensPerModelPerDay-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3.1-pro"
+            }
+          },
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count",
+            "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3.1-pro"
+            }
+          },
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3.1-pro"
+            }
+          },
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3.1-pro"
+            }
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.RetryInfo",
+        "retryDelay": "32s"
+      }
+    ]
+  }
+}
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     172.69.176.91:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+INFO:     172.69.176.120:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2546, in async_completion
+    response = await client.post(
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 510, in post
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 466, in post
+    response.raise_for_status()
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '429 Too Many Requests' for url 'https://generativelanguage.googleapis.com/v1alpha/models/gemini-3-pro-preview:generateContent?key=AIzaSyDVTmgNElz_2SgnMD3hUvnhKRv3WLcxmac'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2555, in async_completion
+    raise VertexAIError(
+litellm.llms.vertex_ai.common_utils.VertexAIError: {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3-pro\nPlease retry in 40.456598708s.",
+    "status": "RESOURCE_EXHAUSTED",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.Help",
+        "links": [
+          {
+            "description": "Learn more about Gemini API quotas",
+            "url": "https://ai.google.dev/gemini-api/docs/rate-limits"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+        "violations": [
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count",
+            "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3-pro"
+            }
+          },
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3-pro"
+            }
+          },
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3-pro"
+            }
+          },
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count",
+            "quotaId": "GenerateContentInputTokensPerModelPerDay-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3-pro"
+            }
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.RetryInfo",
+        "retryDelay": "40s"
+      }
+    ]
+  }
+}
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 1355, in exception_type
+    raise RateLimitError(
+litellm.exceptions.RateLimitError: litellm.RateLimitError: litellm.RateLimitError: geminiException - {
+  "error": {
+    "code": 429,
+    "message": "You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 0, model: gemini-3-pro\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 0, model: gemini-3-pro\nPlease retry in 40.456598708s.",
+    "status": "RESOURCE_EXHAUSTED",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.Help",
+        "links": [
+          {
+            "description": "Learn more about Gemini API quotas",
+            "url": "https://ai.google.dev/gemini-api/docs/rate-limits"
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+        "violations": [
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count",
+            "quotaId": "GenerateContentInputTokensPerModelPerMinute-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3-pro"
+            }
+          },
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3-pro"
+            }
+          },
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_requests",
+            "quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3-pro"
+            }
+          },
+          {
+            "quotaMetric": "generativelanguage.googleapis.com/generate_content_free_tier_input_token_count",
+            "quotaId": "GenerateContentInputTokensPerModelPerDay-FreeTier",
+            "quotaDimensions": {
+              "location": "global",
+              "model": "gemini-3-pro"
+            }
+          }
+        ]
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.RetryInfo",
+        "retryDelay": "40s"
+      }
+    ]
+  }
+}
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     162.158.108.90:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+INFO:     162.158.108.122:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+ERROR:root:LLM health check failed
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2546, in async_completion
+    response = await client.post(
+               ^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/logging_utils.py", line 190, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 510, in post
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/custom_httpx/http_handler.py", line 466, in post
+    response.raise_for_status()
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '404 Not Found' for url 'https://generativelanguage.googleapis.com/v1alpha/models/gemini-3-pro:generateContent?key=AIzaSyDVTmgNElz_2SgnMD3hUvnhKRv3WLcxmac'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 611, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2555, in async_completion
+    raise VertexAIError(
+litellm.llms.vertex_ai.common_utils.VertexAIError: {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-3-pro is not found for API version v1alpha, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/bevan/code/Resume-Matcher/apps/backend/app/llm.py", line 377, in check_llm_health
+    response = await litellm.acompletion(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 2040, in wrapper_async
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/utils.py", line 1861, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/main.py", line 630, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2378, in exception_type
+    raise e
+  File "/home/bevan/code/Resume-Matcher/apps/backend/venv/lib/python3.12/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 1418, in exception_type
+    raise NotFoundError(
+litellm.exceptions.NotFoundError: litellm.NotFoundError: GeminiException - {
+  "error": {
+    "code": 404,
+    "message": "models/gemini-3-pro is not found for API version v1alpha, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.",
+    "status": "NOT_FOUND"
+  }
+}
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm._turn_on_debug()'.
+
+INFO:     162.158.108.90:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+INFO:     162.158.108.90:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "POST /api/v1/config/llm-test HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/204c0f38-ed9e-4595-8f6d-0c69fc8c85a4/job-description HTTP/1.1" 200 OK
+INFO:     162.158.108.90:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.108.90:0 - "GET /api/v1/resumes?resume_id=b6f397f1-9b24-4f2e-a32c-31601c94ce01 HTTP/1.1" 200 OK
+INFO:     162.158.108.90:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.108.91:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+INFO:     162.158.108.90:0 - "POST /api/v1/jobs/upload HTTP/1.1" 200 OK
+WARNING:root:Possible truncation detected: missing required section 'personalInfo'
+WARNING:root:Parsed JSON appears truncated, but proceeding with result
+WARNING:app.services.refiner:Alignment violations found: 11 total, 11 critical
+ERROR:app.services.refiner:Critical alignment violations detected - blocking resume: ['android development', 'ui/ux implementation', 'api integration', 'data structures', 'system performance monitoring', 'security best practices', 'design patterns', 'sdk integration', 'documentation', 'algorithms', 'multi-threading']
+INFO:     162.158.108.91:0 - "POST /api/v1/resumes/improve/preview HTTP/1.1" 200 OK
+INFO:     162.158.108.90:0 - "POST /api/v1/jobs/upload HTTP/1.1" 200 OK
+WARNING:root:Possible truncation detected: missing required section 'personalInfo'
+WARNING:root:Parsed JSON appears truncated, but proceeding with result
+WARNING:app.services.refiner:Alignment violations found: 11 total, 11 critical
+ERROR:app.services.refiner:Critical alignment violations detected - blocking resume: ['android development', 'ui/ux implementation', 'api integration', 'data structures', 'system performance monitoring', 'security best practices', 'design patterns', 'sdk integration', 'documentation', 'algorithms', 'multi-threading']
+INFO:     162.158.108.90:0 - "POST /api/v1/resumes/improve/preview HTTP/1.1" 200 OK
+INFO:     162.158.108.90:0 - "POST /api/v1/resumes/improve/confirm HTTP/1.1" 200 OK
+INFO:     162.158.108.90:0 - "GET /api/v1/resumes?resume_id=57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     162.158.108.91:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.108.91:0 - "GET /api/v1/resumes?resume_id=57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     162.158.108.90:0 - "GET /api/v1/resumes/57b07425-fafc-4aa1-97e3-9e24b989d334/job-description HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "PATCH /api/v1/resumes/57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     162.158.94.153:0 - "GET /api/v1/resumes?resume_id=57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     172.71.124.232:0 - "GET /api/v1/resumes/57b07425-fafc-4aa1-97e3-9e24b989d334/pdf?template=swiss-single&pageSize=A4&marginTop=7&marginBottom=7&marginLeft=8&marginRight=8&sectionSpacing=2&itemSpacing=2&lineHeight=1&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=false&showContactIcons=false&accentColor=blue&lang=en HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "PATCH /api/v1/resumes/57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     172.70.248.65:0 - "GET /api/v1/resumes?resume_id=57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/57b07425-fafc-4aa1-97e3-9e24b989d334/pdf?template=swiss-single&pageSize=A4&marginTop=7&marginBottom=7&marginLeft=8&marginRight=8&sectionSpacing=2&itemSpacing=2&lineHeight=1&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=false&showContactIcons=false&accentColor=blue&lang=en HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "PATCH /api/v1/resumes/57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "PATCH /api/v1/resumes/57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     172.69.150.56:0 - "GET /api/v1/resumes?resume_id=57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/57b07425-fafc-4aa1-97e3-9e24b989d334/pdf?template=swiss-single&pageSize=A4&marginTop=7&marginBottom=7&marginLeft=7&marginRight=7&sectionSpacing=2&itemSpacing=2&lineHeight=1&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=false&showContactIcons=false&accentColor=blue&lang=en HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "PATCH /api/v1/resumes/57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     172.70.250.250:0 - "GET /api/v1/resumes?resume_id=57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/57b07425-fafc-4aa1-97e3-9e24b989d334/pdf?template=swiss-single&pageSize=A4&marginTop=7&marginBottom=7&marginLeft=7&marginRight=7&sectionSpacing=2&itemSpacing=1&lineHeight=1&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=false&showContactIcons=false&accentColor=blue&lang=en HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "PATCH /api/v1/resumes/57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     172.71.148.24:0 - "GET /api/v1/resumes?resume_id=57b07425-fafc-4aa1-97e3-9e24b989d334 HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/57b07425-fafc-4aa1-97e3-9e24b989d334/pdf?template=swiss-single&pageSize=A4&marginTop=8&marginBottom=8&marginLeft=8&marginRight=8&sectionSpacing=2&itemSpacing=1&lineHeight=1&fontSize=3&headerScale=3&headerFont=serif&bodyFont=sans-serif&compactMode=false&showContactIcons=false&accentColor=blue&lang=en HTTP/1.1" 200 OK
+INFO:     162.158.88.134:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.70.142.58:0 - "GET /api/v1/auth/register-status HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/admin/app-settings HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/admin/users HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/admin/roles HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/admin/me HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "DELETE /api/v1/admin/users/2659631f-3ee0-4cbb-ba1a-165a8a944657 HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/admin/users HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/admin/me HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/admin/app-settings HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/admin/roles HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "DELETE /api/v1/admin/users/b9ec6e5f-6024-4b24-8108-757fe031c5f7 HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/admin/app-settings HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/admin/roles HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/admin/me HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/admin/users HTTP/1.1" 200 OK
+INFO:     172.71.81.10:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     108.162.227.10:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     108.162.227.10:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     108.162.227.10:0 - "GET /api/bybit/stream HTTP/1.1" 404 Not Found
+INFO:     108.162.227.9:0 - "GET /api/watcher/signals HTTP/1.1" 404 Not Found
+INFO:     108.162.227.9:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     108.162.227.10:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     108.162.227.10:0 - "GET /api/bybit/stream HTTP/1.1" 404 Not Found
+INFO:     108.162.227.24:0 - "GET /api/bybit/stream HTTP/1.1" 404 Not Found
+INFO:     108.162.227.24:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     108.162.227.24:0 - "GET /api/bybit/stream HTTP/1.1" 404 Not Found
+INFO:     108.162.227.24:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     108.162.227.24:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     108.162.227.23:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     108.162.227.24:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     108.162.227.24:0 - "GET /api/watcher/signals HTTP/1.1" 404 Not Found
+INFO:     108.162.227.24:0 - "GET /api/bybit/stream HTTP/1.1" 404 Not Found
+INFO:     108.162.227.24:0 - "GET /api/bybit/stream HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.93.62:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.70.93.62:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     172.70.93.62:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/wallet/history?type=deposits&limit=30 HTTP/1.1" 404 Not Found
+INFO:     172.70.93.62:0 - "GET /api/bybit/stream?topics=wallet%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.70.93.62:0 - "GET /api/bybit/wallet HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/stream?topics=wallet%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/transactions?tab=executions&limit=100 HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.93.62:0 - "GET /api/bybit/market/tickers HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.93.62:0 - "GET /api/bybit/account HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     172.70.93.62:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.70.93.62:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.70.93.62:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/bybit/account HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/account HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/bybit/wallet HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/wallet/history?type=deposits&limit=30 HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/stream?topics=wallet%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/transactions?tab=executions&limit=100 HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/wallet/history?type=deposits&limit=30 HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/wallet HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/bybit/stream?topics=wallet%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/transactions?tab=executions&limit=100 HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/market/tickers HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/account HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.142:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     172.71.143.142:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     172.71.143.143:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     172.71.143.143:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     172.71.143.143:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.143:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.143:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.142:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/account HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/transactions?tab=executions&limit=100 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/market/tickers HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/account HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/market/tickers HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "POST /api/watcher/toggle HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "POST /api/watcher/toggle HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/account HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/market/tickers HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/transactions?tab=executions&limit=100 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/wallet HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/wallet/history?type=deposits&limit=30 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/stream?topics=wallet%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/bybit/transactions?tab=executions&limit=100 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/transactions?tab=txlog&limit=100 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/transactions?tab=feerate HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.81.9:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.176.90:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.9:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.68.242.120:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/transactions?tab=txlog&limit=100 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/bybit/transactions?tab=executions&limit=100 HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.88.134:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     162.158.88.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/wallet HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/wallet/history?type=deposits&limit=30 HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.134:0 - "GET /api/bybit/stream?topics=wallet%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.88.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/transactions?tab=executions&limit=100 HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/market/tickers HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/account HTTP/1.1" 404 Not Found
+INFO:     162.158.88.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/market/tickers HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     162.158.88.134:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     162.158.88.134:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.170.18:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.81.9:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.124.233:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.188.56:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.108.90:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.208.48:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     108.162.227.23:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     104.23.175.74:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.68.164.25:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.93.62:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.124.233:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.208.49:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.176.90:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.108.90:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.9:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.208.49:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.20:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.124.233:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.81.9:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.68.164.24:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.124.233:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.68.164.24:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.81.10:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.124.232:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.208.49:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     104.23.175.74:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.176.91:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     104.23.175.75:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.124.190:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.108.91:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.108.91:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.81.9:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.9:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/bybit/balance HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/positions HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/history?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/watcher/signals?limit=50 HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stats?period=all HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/watcher/status HTTP/1.1" 404 Not Found
+INFO:     162.158.106.248:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     162.158.106.249:0 - "GET /api/bybit/stream?topics=wallet%2Cpositions%2Cexecution%2Cstatus HTTP/1.1" 404 Not Found
+INFO:     104.23.175.74:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.58:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.88.134:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.124.233:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.93.63:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.69.165.59:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.124.232:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     104.23.175.74:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/config/language HTTP/1.1" 401 Unauthorized
+INFO:     172.71.144.44:0 - "GET /api/v1/internships HTTP/1.1" 403 Forbidden
+INFO:     104.23.175.74:0 - "GET /api/v1/auth/register-status HTTP/1.1" 200 OK
+INFO:     172.69.165.59:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     104.23.175.74:0 - "GET /api/v1/auth/register-status HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/admin/me HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/admin/app-settings HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/admin/roles HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/admin/users HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "POST /api/v1/resumes/upload?as_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.70.93.63:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+ERROR:root:Could not extract JSON from response format. Content preview: 1.  **Analyze the Request:**
+    *   **Goal:** Parse a provided resume text into a specific JSON structure.
+    *   **Input:** Resume text for "Bevantyo Satria Pinandhita".
+    *   **Output Format:** 
+WARNING:root:LLM call failed (attempt 1): No JSON found in response: 1.  **Analyze the Request:**
+    *   **Goal:** Parse a provided resume text into a specific JSON structure.
+    *   **Input:** Resume text for "Bevantyo Satria Pinandhita".
+    *   **Output Format:** 
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     162.158.108.91:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+ERROR:root:Could not extract JSON from response format. Content preview: 1.  **Analyze the Request:**
+    *   **Goal:** Parse a provided resume text into a specific JSON structure.
+    *   **Input:** A resume text for "Bevantyo Satria Pinandhita".
+    *   **Output Format:*
+WARNING:root:LLM call failed (attempt 2): No JSON found in response: 1.  **Analyze the Request:**
+    *   **Goal:** Parse a provided resume text into a specific JSON structure.
+    *   **Input:** A resume text for "Bevantyo Satria Pinandhita".
+    *   **Output Format:*
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     162.158.108.91:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.75:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+WARNING:root:JSON parse failed (attempt 3): Expecting property name enclosed in double quotes: line 2 column 25 (char 26)
+WARNING:app.routers.resumes:Background processing failed for resume 27df4e78-80cf-454b-a4d2-4f704e9ede4d: Failed to parse JSON after 3 attempts: Expecting property name enclosed in double quotes: line 2 column 25 (char 26)
+INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.71.124.233:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.93.62:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.93.62:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.93.62:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.93.62:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.93.62:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.70.93.62:0 - "GET /api/v1/resumes?resume_id=27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.70.93.63:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.93.63:0 - "DELETE /api/v1/resumes/27df4e78-80cf-454b-a4d2-4f704e9ede4d HTTP/1.1" 200 OK
+INFO:     172.70.93.62:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.93.62:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.93.63:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.93.62:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.93.63:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found

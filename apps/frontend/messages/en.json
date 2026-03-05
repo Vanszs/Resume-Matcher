@@ -76,6 +76,8 @@
     "processingFailedHint": "AI parsing failed. Retry or delete and upload a different file.",
     "retrySuccess": "Processing succeeded!",
     "retryFailed": "Retry failed. Try uploading a different file.",
+    "showErrorDetail": "Show error details",
+    "hideErrorDetail": "Hide error details",
     "createResume": "Create Resume",
     "addAnotherMasterResume": "Add Another Master Resume",
     "edited": "Edited {date}",
@@ -101,7 +103,10 @@
       "dropzoneSubtitle": "PDF, DOC, DOCX (Max 4MB)",
       "tryDifferentFile": "Try Different File",
       "parsingFailedKeepOpen": "AI parsing failed. Try a different file or close this dialog.",
-      "aiProcessing": "AI is parsing your resume\u2026 Please wait."
+      "aiProcessing": "AI is parsing your resume\u2026 Please wait.",
+      "errorDetail": "Error",
+      "showErrorDetail": "Show error details",
+      "hideErrorDetail": "Hide error details"
     }
   },
   "builder": {

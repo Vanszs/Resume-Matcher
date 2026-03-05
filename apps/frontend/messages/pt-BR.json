@@ -76,6 +76,8 @@
     "processingFailedHint": "A análise de IA falhou. Tente novamente ou exclua e envie outro arquivo.",
     "retrySuccess": "Processamento concluído com sucesso!",
     "retryFailed": "A nova tentativa falhou. Tente enviar outro arquivo.",
+    "showErrorDetail": "Mostrar detalhes do erro",
+    "hideErrorDetail": "Ocultar detalhes do erro",
     "createResume": "Criar Currículo",
     "addAnotherMasterResume": "Adicionar outro currículo principal",
     "edited": "Editado {date}",
@@ -101,7 +103,10 @@
       "dropzoneSubtitle": "PDF, DOC, DOCX (Máximo 4MB)",
       "tryDifferentFile": "Tentar outro arquivo",
       "parsingFailedKeepOpen": "A análise de IA falhou. Tente outro arquivo ou feche este diálogo.",
-      "aiProcessing": "A IA está analisando seu currículo… Aguarde."
+      "aiProcessing": "A IA está analisando seu currículo… Aguarde.",
+      "errorDetail": "Erro",
+      "showErrorDetail": "Mostrar detalhes do erro",
+      "hideErrorDetail": "Ocultar detalhes do erro"
     }
   },
   "builder": {

@@ -76,6 +76,8 @@
     "processingFailedHint": "Pemrosesan AI gagal. Coba lagi atau hapus dan unggah file lain.",
     "retrySuccess": "Pemrosesan berhasil!",
     "retryFailed": "Gagal mencoba ulang. Coba unggah file yang berbeda.",
+    "showErrorDetail": "Tampilkan detail error",
+    "hideErrorDetail": "Sembunyikan detail error",
     "createResume": "Buat Resume",
     "addAnotherMasterResume": "Tambah Resume Master Lain",
     "edited": "Diubah {date}",
@@ -101,7 +103,10 @@
       "dropzoneSubtitle": "PDF, DOC, DOCX (Maks. 4MB)",
       "tryDifferentFile": "Coba File Lain",
       "parsingFailedKeepOpen": "Pemrosesan AI gagal. Coba file lain atau tutup dialog ini.",
-      "aiProcessing": "AI sedang mengurai resume Anda… Mohon tunggu."
+      "aiProcessing": "AI sedang mengurai resume Anda… Mohon tunggu.",
+      "errorDetail": "Error",
+      "showErrorDetail": "Tampilkan detail error",
+      "hideErrorDetail": "Sembunyikan detail error"
     }
   },
   "builder": {

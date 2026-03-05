@@ -95,7 +95,12 @@ export default function ResumeViewerPage() {
             setError(t('resumeViewer.errors.processingFailed'));
           }
         } else if (status === 'failed') {
-          setError(t('resumeViewer.errors.processingFailed'));
+          const rawErr = data.raw_resume?.error_message;
+          setError(
+            rawErr
+              ? `${t('resumeViewer.errors.processingFailed')}\n${rawErr}`
+              : t('resumeViewer.errors.processingFailed')
+          );
         } else if (status === 'processing') {
           setError(t('resumeViewer.errors.stillProcessing'));
         } else if (data.raw_resume?.content) {
@@ -170,7 +175,12 @@ export default function ResumeViewerPage() {
           clearInterval(pollingRef.current!);
           pollingRef.current = null;
           setProcessingStatus('failed');
-          setError(t('resumeViewer.errors.processingFailed'));
+          const rawErr = data.raw_resume?.error_message;
+          setError(
+            rawErr
+              ? `${t('resumeViewer.errors.processingFailed')}\n${rawErr}`
+              : t('resumeViewer.errors.processingFailed')
+          );
         }
       } catch {
         // ignore transient poll errors
@@ -199,7 +209,12 @@ export default function ResumeViewerPage() {
         window.location.reload();
       } else {
         setProcessingStatus('failed');
-        setError(t('resumeViewer.errors.processingFailed'));
+        const rawErr = result.error_message;
+        setError(
+          rawErr
+            ? `${t('resumeViewer.errors.processingFailed')}\n${rawErr}`
+            : t('resumeViewer.errors.processingFailed')
+        );
       }
     } catch (err) {
       console.error('Retry processing failed:', err);

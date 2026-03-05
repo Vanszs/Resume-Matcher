@@ -76,6 +76,8 @@
     "processingFailedHint": "El análisis de IA falló. Reintenta o elimina y sube otro archivo.",
     "retrySuccess": "¡Procesamiento completado!",
     "retryFailed": "El reintento falló. Prueba a subir otro archivo.",
+    "showErrorDetail": "Mostrar detalles del error",
+    "hideErrorDetail": "Ocultar detalles del error",
     "createResume": "Crear currículum",
     "addAnotherMasterResume": "Agregar otro currículum maestro",
     "edited": "Editado {date}",
@@ -101,7 +103,10 @@
       "dropzoneSubtitle": "PDF, DOC, DOCX (Máx. 4MB)",
       "tryDifferentFile": "Probar otro archivo",
       "parsingFailedKeepOpen": "El análisis de IA falló. Prueba otro archivo o cierra este diálogo.",
-      "aiProcessing": "La IA está analizando tu currículum… Por favor, espera."
+      "aiProcessing": "La IA está analizando tu currículum\u2026 Por favor espera.",
+      "errorDetail": "Error",
+      "showErrorDetail": "Mostrar detalles del error",
+      "hideErrorDetail": "Ocultar detalles del error"
     }
   },
   "builder": {

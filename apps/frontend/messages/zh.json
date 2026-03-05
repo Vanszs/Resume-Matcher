@@ -76,6 +76,8 @@
     "processingFailedHint": "AI 解析失败。请重试，或删除后上传其他文件。",
     "retrySuccess": "处理成功！",
     "retryFailed": "重试失败。请尝试上传其他文件。",
+    "showErrorDetail": "显示错误详情",
+    "hideErrorDetail": "隐藏错误详情",
     "createResume": "创建简历",
     "addAnotherMasterResume": "添加另一份主简历",
     "edited": "编辑于 {date}",
@@ -101,7 +103,10 @@
       "dropzoneSubtitle": "PDF、DOC、DOCX（最大 4MB）",
       "tryDifferentFile": "尝试其他文件",
       "parsingFailedKeepOpen": "AI 解析失败。请尝试其他文件，或关闭此对话框。",
-      "aiProcessing": "AI 正在解析您的简历… 请稍候。"
+      "aiProcessing": "AI 正在解析您的简历……请稍候。",
+      "errorDetail": "错误",
+      "showErrorDetail": "显示错误详情",
+      "hideErrorDetail": "隐藏错误详情"
     }
   },
   "builder": {

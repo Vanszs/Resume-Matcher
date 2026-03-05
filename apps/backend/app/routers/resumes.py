@@ -393,7 +393,14 @@ async def _process_resume_background(resume_id: str, markdown_content: str, user
         )
         if not has_content:
             logger.warning(f"Background processing returned empty data for resume {resume_id}")
-            db.update_resume(resume_id, {"processing_status": "failed"}, user_id=user_id)
+            db.update_resume(
+                resume_id,
+                {
+                    "processing_status": "failed",
+                    "error_message": "AI returned empty data — no recognizable resume content found.",
+                },
+                user_id=user_id,
+            )
             return
 
         derived_title = (
@@ -406,14 +413,23 @@ async def _process_resume_background(resume_id: str, markdown_content: str, user
             {
                 "processed_data": processed_data,
                 "processing_status": "ready",
+                "error_message": None,
                 **title_update,
             },
             user_id=user_id,
         )
         logger.info(f"Background processing completed for resume {resume_id}")
     except Exception as e:
-        logger.warning(f"Background processing failed for resume {resume_id}: {e}")
-        db.update_resume(resume_id, {"processing_status": "failed"}, user_id=user_id)
+        error_detail = str(e)
+        logger.warning(f"Background processing failed for resume {resume_id}: {error_detail}")
+        db.update_resume(
+            resume_id,
+            {
+                "processing_status": "failed",
+                "error_message": error_detail,
+            },
+            user_id=user_id,
+        )
 
 
 ALLOWED_TYPES = {
@@ -569,12 +585,16 @@ async def resume_status_stream(
         pending_ids = set(resume_ids)
 
         while pending_ids and elapsed < _SSE_MAX_DURATION:
-            statuses: dict[str, str] = {}
+            statuses: dict[str, str | dict] = {}
             for rid in list(pending_ids):
                 resume = db.get_resume(rid, user_id=user_id)
                 if resume:
                     s = resume.get("processing_status", "pending")
-                    statuses[rid] = s
+                    err = resume.get("error_message")
+                    if s == "failed" and err:
+                        statuses[rid] = {"status": s, "error_message": err}
+                    else:
+                        statuses[rid] = s
                     if s in TERMINAL_STATES:
                         pending_ids.discard(rid)
 
@@ -631,6 +651,7 @@ async def get_resume(
         content_type=resume["content_type"],
         created_at=resume["created_at"],
         processing_status=processing_status,
+        error_message=resume.get("error_message"),
     )
 
     # Get processed data if available (no more on-demand parsing)
@@ -703,6 +724,7 @@ async def list_resumes(
                 .get("personalInfo", {})
                 .get("title")
             ) or None,
+            error_message=resume.get("error_message"),
         )
         for resume in resumes
     ]
@@ -1434,13 +1456,19 @@ async def retry_processing(
             )
         )
         if not has_content:
-            db.update_resume(resume_id, {"processing_status": "failed"}, user_id=user.id)
+            empty_msg = "AI returned empty data — no recognizable resume content found."
+            db.update_resume(
+                resume_id,
+                {"processing_status": "failed", "error_message": empty_msg},
+                user_id=user.id,
+            )
             return ResumeUploadResponse(
                 message="Retry processing returned empty data",
                 request_id=str(uuid4()),
                 resume_id=resume_id,
                 processing_status="failed",
                 is_master=resume.get("is_master", False),
+                error_message=empty_msg,
             )
 
         derived_title = (
@@ -1452,6 +1480,7 @@ async def retry_processing(
             {
                 "processed_data": processed_data,
                 "processing_status": "ready",
+                "error_message": None,
                 **title_update,
             },
             user_id=user.id,
@@ -1464,14 +1493,20 @@ async def retry_processing(
             is_master=resume.get("is_master", False),
         )
     except Exception as e:
-        logger.warning(f"Retry processing failed for resume {resume_id}: {e}")
-        db.update_resume(resume_id, {"processing_status": "failed"}, user_id=user.id)
+        error_detail = str(e)
+        logger.warning(f"Retry processing failed for resume {resume_id}: {error_detail}")
+        db.update_resume(
+            resume_id,
+            {"processing_status": "failed", "error_message": error_detail},
+            user_id=user.id,
+        )
         return ResumeUploadResponse(
             message="Retry processing failed",
             request_id=str(uuid4()),
             resume_id=resume_id,
             processing_status="failed",
             is_master=resume.get("is_master", False),
+            error_message=error_detail,
         )
 
 

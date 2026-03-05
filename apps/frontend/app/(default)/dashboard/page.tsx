@@ -96,6 +96,8 @@ export default function DashboardPage() {
     return cached?.masterId ?? localStorage.getItem('master_resume_id');
   });
   const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>('loading');
+  const [masterErrorMessage, setMasterErrorMessage] = useState<string | null>(null);
+  const [showMasterError, setShowMasterError] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [tailoredResumes, setTailoredResumes] = useState<ResumeListItem[]>(() => {
     if (typeof window === 'undefined') return [];
@@ -161,6 +163,7 @@ export default function DashboardPage() {
       const data = await fetchResume(resumeId);
       const status = data.raw_resume?.processing_status || 'pending';
       setProcessingStatus(status as ProcessingStatus);
+      setMasterErrorMessage(status === 'failed' ? (data.raw_resume?.error_message ?? null) : null);
     } catch (err: unknown) {
       console.error('Failed to check resume status:', err);
       // If resume not found (404), clear the stale localStorage
@@ -180,6 +183,7 @@ export default function DashboardPage() {
       const data = await fetchResume(resumeId);
       const status = data.raw_resume?.processing_status || 'pending';
       setProcessingStatus(status as ProcessingStatus);
+      setMasterErrorMessage(status === 'failed' ? (data.raw_resume?.error_message ?? null) : null);
     } catch (err: unknown) {
       // On 404, clear stale id — same as the non-silent version
       if (err instanceof Error && err.message.includes('404')) {
@@ -335,8 +339,17 @@ export default function DashboardPage() {
       try {
         const rawUpdates = JSON.parse(event.data) as Record<string, unknown>;
         const updates: Record<string, ResumeProcessingStatus> = {};
-        for (const [id, status] of Object.entries(rawUpdates)) {
-          const parsedStatus = asResumeProcessingStatus(status);
+        const errorMessages: Record<string, string | null> = {};
+        for (const [id, value] of Object.entries(rawUpdates)) {
+          // SSE now sends either a plain string ("ready") or an object
+          // ({ status: "failed", error_message: "..." }) for failed IDs.
+          let statusStr: unknown = value;
+          if (typeof value === 'object' && value !== null && 'status' in value) {
+            const obj = value as { status: string; error_message?: string };
+            statusStr = obj.status;
+            errorMessages[id] = obj.error_message ?? null;
+          }
+          const parsedStatus = asResumeProcessingStatus(statusStr);
           if (parsedStatus) {
             updates[id] = parsedStatus;
           }
@@ -345,6 +358,11 @@ export default function DashboardPage() {
         // Update master status silently (no loading flash)
         if (masterResumeId && updates[masterResumeId]) {
           setProcessingStatus(updates[masterResumeId] as ProcessingStatus);
+          if (updates[masterResumeId] === 'failed') {
+            setMasterErrorMessage(errorMessages[masterResumeId] ?? null);
+          } else {
+            setMasterErrorMessage(null);
+          }
         }
 
         // Update tailored resume statuses in-place
@@ -418,13 +436,16 @@ export default function DashboardPage() {
       const result = await retryProcessing(masterResumeId);
       if (result.processing_status === 'ready') {
         setProcessingStatus('ready');
+        setMasterErrorMessage(null);
       } else if (
         result.processing_status === 'processing' ||
         result.processing_status === 'pending'
       ) {
         setProcessingStatus(result.processing_status);
+        setMasterErrorMessage(null);
       } else {
         setProcessingStatus('failed');
+        setMasterErrorMessage(result.error_message ?? null);
       }
     } catch (err) {
       console.error('Retry processing failed:', err);
@@ -677,6 +698,24 @@ export default function DashboardPage() {
                       </div>
                       {isActiveMaster && processingStatus === 'failed' && (
                         <div className="flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
+                          {masterErrorMessage && (
+                            <div>
+                              <button
+                                type="button"
+                                className="font-mono text-xs text-red-600 uppercase underline underline-offset-2 hover:text-red-800 transition-colors"
+                                onClick={() => setShowMasterError((v) => !v)}
+                              >
+                                {showMasterError
+                                  ? t('dashboard.hideErrorDetail')
+                                  : t('dashboard.showErrorDetail')}
+                              </button>
+                              {showMasterError && (
+                                <pre className="mt-1 p-2 bg-red-50 border border-red-200 text-xs font-mono text-red-700 normal-case whitespace-pre-wrap break-words max-h-24 overflow-y-auto">
+                                  {masterErrorMessage}
+                                </pre>
+                              )}
+                            </div>
+                          )}
                           <Button
                             variant="outline"
                             size="sm"
