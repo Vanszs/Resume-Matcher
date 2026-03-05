@@ -674,7 +674,7 @@ async def complete_json(
     system_prompt: str | None = None,
     config: LLMConfig | None = None,
     user_id: str | None = None,
-    max_tokens: int = 4096,
+    max_tokens: int = 15000,
     retries: int = 2,
 ) -> dict[str, Any]:
     """Make a completion request expecting JSON response.
