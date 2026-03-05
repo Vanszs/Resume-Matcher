@@ -1,59 +1,33 @@
-INFO:     Started server process [1182341]
+INFO:     Started server process [1187605]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/status HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/status HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/status HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/config/features HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "PUT /api/v1/config/llm-api-key HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/config/llm-api-key HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/status HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/status HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/status HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
-INFO:     172.71.81.10:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
-INFO:     172.71.81.9:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     104.23.175.74:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     104.23.175.74:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     104.23.175.74:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
-INFO:     108.162.227.23:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/status HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "POST /api/v1/resumes/upload?as_master=true HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/v1/resumes?resume_id=27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/resumes?resume_id=27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/v1/resumes/status-stream?ids=27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 401 Unauthorized
+INFO:     172.69.176.91:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/resumes?resume_id=27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/v1/resumes?resume_id=27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/v1/resumes?resume_id=27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 200 OK
+INFO:     172.69.176.91:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.69.176.90:0 - "GET /api/v1/resumes?resume_id=27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 200 OK
+ERROR:root:Could not extract JSON from response format. Content preview: 1.  **Analyze the Request:**
+    *   **Goal:** Parse a resume into a specific JSON format.
+    *   **Input:** A raw resume text containing personal info, summary, skills, experience, education, and cu
+WARNING:root:LLM call failed (attempt 1): No JSON found in response: 1.  **Analyze the Request:**
+    *   **Goal:** Parse a resume into a specific JSON format.
+    *   **Input:** A raw resume text containing personal info, summary, skills, experience, education, and cu

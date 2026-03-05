@@ -95,7 +95,15 @@ export default function DashboardPage() {
     const cached = readResumeCache();
     return cached?.masterId ?? localStorage.getItem('master_resume_id');
   });
-  const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>('loading');
+  const [processingStatus, setProcessingStatus] = useState<ProcessingStatus>(() => {
+    if (typeof window === 'undefined') return 'loading';
+    const cached = readResumeCache();
+    if (!cached) return 'loading';
+    const masterId = cached.masterId ?? localStorage.getItem('master_resume_id');
+    const cachedMaster = cached.masters.find((m) => m.resume_id === masterId);
+    const cachedStatus = cachedMaster?.processing_status as ProcessingStatus | undefined;
+    return cachedStatus ?? 'loading';
+  });
   const [masterErrorMessage, setMasterErrorMessage] = useState<string | null>(null);
   const [showMasterError, setShowMasterError] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -193,10 +201,17 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // On mount, kick off a status check for the lazily-initialized master resume
+  // On mount, kick off a status check for the lazily-initialized master resume.
+  // If cache exists, use the silent variant so cached status shows instantly
+  // without a 'loading' flash — the background fetch still updates it.
   useEffect(() => {
     if (masterResumeId) {
-      checkResumeStatus(masterResumeId);
+      const hasCachedData = readResumeCache() !== null;
+      if (hasCachedData) {
+        silentCheckMasterStatus(masterResumeId);
+      } else {
+        checkResumeStatus(masterResumeId);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // intentionally omit deps — runs once with the lazy-init value
