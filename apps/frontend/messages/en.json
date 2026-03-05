@@ -103,7 +103,7 @@
       "dropzoneSubtitle": "PDF, DOC, DOCX (Max 4MB)",
       "tryDifferentFile": "Try Different File",
       "parsingFailedKeepOpen": "AI parsing failed. Try a different file or close this dialog.",
-      "aiProcessing": "AI is parsing your resume\u2026 Please wait.",
+      "aiProcessing": "AI is parsing your resume… Please wait.",
       "errorDetail": "Error",
       "showErrorDetail": "Show error details",
       "hideErrorDetail": "Hide error details"
@@ -526,6 +526,10 @@
       "full": {
         "label": "Full tailor",
         "description": "Comprehensive tailoring using the job description."
+      },
+      "focused": {
+        "label": "Focused tailor",
+        "description": "Remove irrelevant experiences and projects, then tailor the rest."
       }
     },
     "analyzeJob": "Analyze Job",
@@ -558,7 +562,11 @@
       "projectChanges": "Project Changes",
       "certificationChanges": "Certification Changes",
       "rejectButton": "Reject & Regenerate",
-      "confirmButton": "Confirm & Save"
+      "confirmButton": "Confirm & Save",
+      "entriesRemoved": "Entries removed",
+      "removedEntriesTitle": "Removed Entries",
+      "removedReason": "Reason",
+      "allRelevant": "All experiences and projects were relevant — nothing removed."
     },
     "regenerateDialog": {
       "title": "Regenerate tailored resume?",
@@ -577,6 +585,12 @@
       "failedToGenerate": "Failed to generate resume. Please check your settings and try again.",
       "failedToPreview": "Failed to preview resume. Please check your settings and try again.",
       "failedToConfirm": "Failed to confirm resume. Please try again."
+    },
+    "focusedWarning": "Focused tailoring will remove work experiences and projects that are not relevant to the job description. Only matching entries will be kept and rewritten.",
+    "allRemovedDialog": {
+      "title": "No Relevant Experience Found",
+      "description": "The AI determined that none of your work experiences or projects are relevant to this job description. Try a different intensity level or update your master resume.",
+      "tryKeywords": "Try Keyword Enhance"
     }
   },
   "settings": {

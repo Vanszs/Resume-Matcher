@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, CheckCircle, X, ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle, X, ChevronDown, ChevronRight, Loader2, Briefcase, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTranslations } from '@/lib/i18n';
 import type {
   ResumeDiffSummary,
   ResumeFieldDiff,
+  RemovedEntry,
 } from '@/components/common/resume_previewer_context';
 
 interface DiffPreviewModalProps {
@@ -18,6 +19,8 @@ interface DiffPreviewModalProps {
   isSubmitting?: boolean;
   diffSummary?: ResumeDiffSummary;
   detailedChanges?: ResumeFieldDiff[];
+  removedEntries?: RemovedEntry[];
+  promptId?: string;
   errorMessage?: string;
 }
 
@@ -29,11 +32,13 @@ export function DiffPreviewModal({
   isSubmitting = false,
   diffSummary,
   detailedChanges,
+  removedEntries,
+  promptId,
   errorMessage,
 }: DiffPreviewModalProps) {
   const { t } = useTranslations();
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(['summary', 'skills', 'descriptions', 'experience'])
+    new Set(['removed', 'summary', 'skills', 'descriptions', 'experience'])
   );
 
   if (!diffSummary || !detailedChanges) {
@@ -91,7 +96,7 @@ export function DiffPreviewModal({
     setExpandedSections(newExpanded);
   };
 
-  // Group changes by type
+  // Group changes by type (exclude removed_entry — handled in separate panel)
   const summaryChanges = detailedChanges.filter((c) => c.field_type === 'summary');
   const skillChanges = detailedChanges.filter((c) => c.field_type === 'skill');
   const descChanges = detailedChanges.filter((c) => c.field_type === 'description');
@@ -99,6 +104,9 @@ export function DiffPreviewModal({
   const experienceChanges = detailedChanges.filter((c) => c.field_type === 'experience');
   const educationChanges = detailedChanges.filter((c) => c.field_type === 'education');
   const projectChanges = detailedChanges.filter((c) => c.field_type === 'project');
+
+  const isFocused = promptId === 'focused';
+  const removedCount = removedEntries?.length ?? 0;
 
   return (
     <Dialog
@@ -119,6 +127,64 @@ export function DiffPreviewModal({
             {t('tailor.diffModal.subtitle')}
           </p>
         </DialogHeader>
+
+        {/* Removed Entries panel (focused mode only) */}
+        {isFocused && (
+          <div className="border-2 border-amber-500 bg-white mt-4">
+            <button
+              onClick={() => toggleSection('removed')}
+              className="w-full flex items-center justify-between p-3 hover:bg-amber-50"
+            >
+              <div className="flex items-center gap-2">
+                {expandedSections.has('removed') ? (
+                  <ChevronDown className="w-4 h-4" />
+                ) : (
+                  <ChevronRight className="w-4 h-4" />
+                )}
+                <span className="font-mono text-sm font-bold uppercase tracking-wider text-amber-800">
+                  {t('tailor.diffModal.removedEntriesTitle')}
+                </span>
+                <span className="ml-1 bg-amber-500 text-white font-mono text-xs px-1.5 py-0.5 font-bold">
+                  {removedCount}
+                </span>
+              </div>
+            </button>
+
+            {expandedSections.has('removed') && (
+              <div className="border-t-2 border-amber-500 p-4 space-y-3">
+                {removedCount === 0 ? (
+                  <div className="flex items-center gap-2 text-[#15803D] font-mono text-xs">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>{t('tailor.diffModal.allRelevant')}</span>
+                  </div>
+                ) : (
+                  (removedEntries ?? []).map((entry, idx) => (
+                    <div key={idx} className="border-l-4 border-amber-500 bg-amber-50 p-3">
+                      <div className="flex items-start gap-2">
+                        {entry.type === 'workExperience' ? (
+                          <Briefcase className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                        ) : (
+                          <FolderOpen className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1">
+                          <div className="font-mono text-sm font-bold text-amber-900">
+                            {entry.label}
+                          </div>
+                          {entry.reason && (
+                            <div className="font-mono text-xs text-amber-700 mt-0.5">
+                              <span className="font-bold uppercase">{t('tailor.diffModal.removedReason')}:</span>{' '}
+                              {entry.reason}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Summary cards */}
         <div className="border-2 border-black bg-white p-4 mt-4">
@@ -155,6 +221,13 @@ export function DiffPreviewModal({
               value={diffSummary.high_risk_changes}
               variant={diffSummary.high_risk_changes > 0 ? 'danger' : 'success'}
             />
+            {isFocused && (
+              <StatCard
+                label={t('tailor.diffModal.entriesRemoved')}
+                value={diffSummary.entries_removed ?? removedCount}
+                variant={removedCount > 0 ? 'warning' : 'success'}
+              />
+            )}
           </div>
 
           {diffSummary.high_risk_changes > 0 && (

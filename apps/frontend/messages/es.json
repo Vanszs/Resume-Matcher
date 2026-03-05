@@ -103,7 +103,7 @@
       "dropzoneSubtitle": "PDF, DOC, DOCX (Máx. 4MB)",
       "tryDifferentFile": "Probar otro archivo",
       "parsingFailedKeepOpen": "El análisis de IA falló. Prueba otro archivo o cierra este diálogo.",
-      "aiProcessing": "La IA está analizando tu currículum\u2026 Por favor espera.",
+      "aiProcessing": "La IA está analizando tu currículum… Por favor espera.",
       "errorDetail": "Error",
       "showErrorDetail": "Mostrar detalles del error",
       "hideErrorDetail": "Ocultar detalles del error"
@@ -526,6 +526,10 @@
       "full": {
         "label": "Ajuste completo",
         "description": "Ajuste integral usando la descripción del puesto."
+      },
+      "focused": {
+        "label": "Adaptación enfocada",
+        "description": "Elimina experiencias y proyectos irrelevantes, luego adapta el resto."
       }
     },
     "analyzeJob": "Analizar Trabajo",
@@ -558,7 +562,11 @@
       "projectChanges": "Cambios en proyectos",
       "certificationChanges": "Cambios en certificaciones",
       "rejectButton": "Rechazar y regenerar",
-      "confirmButton": "Confirmar y guardar"
+      "confirmButton": "Confirmar y guardar",
+      "entriesRemoved": "Entradas eliminadas",
+      "removedEntriesTitle": "Entradas Eliminadas",
+      "removedReason": "Razón",
+      "allRelevant": "Todas las experiencias y proyectos eran relevantes — nada eliminado."
     },
     "regenerateDialog": {
       "title": "¿Regenerar el currículum personalizado?",
@@ -577,6 +585,12 @@
       "failedToGenerate": "No se pudo generar el currículum. Revisa tu configuración e inténtalo de nuevo.",
       "failedToPreview": "No se pudo previsualizar el currículum. Revisa tu configuración e inténtalo de nuevo.",
       "failedToConfirm": "No se pudo confirmar el currículum. Inténtalo de nuevo."
+    },
+    "focusedWarning": "La adaptación enfocada eliminará experiencias laborales y proyectos que no sean relevantes para la descripción del trabajo. Solo se conservarán y reescribirán las entradas que coincidan.",
+    "allRemovedDialog": {
+      "title": "No se encontró experiencia relevante",
+      "description": "La IA determinó que ninguna de sus experiencias laborales o proyectos es relevante para esta descripción de trabajo. Pruebe un nivel de intensidad diferente o actualice su currículum maestro.",
+      "tryKeywords": "Probar mejora de palabras clave"
     }
   },
   "settings": {
@@ -722,8 +736,10 @@
     "loading": "Cargando el currículum...",
     "useTailorFeature": "Usar función de personalización",
     "retryProcessing": "Reintentar procesamiento",
-    "deleteAndStartOver": "Eliminar y empezar de nuevo",    "refreshStatus": "Actualizar estado",
-    "cancelProcessing": "Cancelar y eliminar",    "returnToDashboard": "Volver al Panel",
+    "deleteAndStartOver": "Eliminar y empezar de nuevo",
+    "refreshStatus": "Actualizar estado",
+    "cancelProcessing": "Cancelar y eliminar",
+    "returnToDashboard": "Volver al Panel",
     "enhanceResume": "Mejorar currículum",
     "downloadResume": "Descargar currículum",
     "deletedTitle": "Currículum eliminado",

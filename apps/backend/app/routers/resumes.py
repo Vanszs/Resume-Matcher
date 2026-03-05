@@ -28,6 +28,7 @@ from app.schemas import (
     ImproveResumeResponse,
     ImproveResumeData,
     RefinementStats,
+    RemovedEntry,
     ResumeDiffSummary,
     ResumeFieldDiff,
     ResumeData,
@@ -143,6 +144,11 @@ def _raise_improve_error(
     error: Exception,
     detail: str,
 ) -> NoReturn:
+    # Re-raise HTTPException as-is — do NOT swallow intentional HTTP errors
+    # (e.g. ALL_ENTRIES_REMOVED 422, auth failures already converted to HTTPException)
+    if isinstance(error, HTTPException):
+        raise error
+
     logger.error("Resume %s failed during %s: %s", action, stage, error)
 
     # Detect LiteLLM-specific error types for better UX
@@ -252,6 +258,7 @@ def _preserve_personal_info(
 def _calculate_diff_from_resume(
     resume: dict[str, Any],
     improved_data: dict[str, Any],
+    removed_entries: list[dict[str, Any]] | None = None,
 ) -> tuple[ResumeDiffSummary | None, list[ResumeFieldDiff] | None, str | None]:
     """Calculate resume diffs when structured data is available.
 
@@ -264,7 +271,7 @@ def _calculate_diff_from_resume(
     from app.services.improver import calculate_resume_diff
 
     try:
-        summary, changes = calculate_resume_diff(original_data, improved_data)
+        summary, changes = calculate_resume_diff(original_data, improved_data, removed_entries)
         return summary, changes, None
     except Exception as e:
         logger.warning("Skipping resume diff due to calculation failure: %s", e)
@@ -789,7 +796,7 @@ async def improve_resume_preview_endpoint(
                     e,
                 )
         stage = "improve_resume"
-        improved_data = await improve_resume(
+        improved_data, removed_entries = await improve_resume(
             original_resume=resume["content"],
             job_description=job["content"],
             job_keywords=job_keywords,
@@ -797,6 +804,31 @@ async def improve_resume_preview_endpoint(
             prompt_id=prompt_id,
             user_id=user.id,
         )
+
+        # Focused mode: guard against all entries removed
+        if prompt_id == "focused":
+            has_work = bool(improved_data.get("workExperience"))
+            has_projects = bool(improved_data.get("personalProjects"))
+            if not has_work and not has_projects:
+                raise HTTPException(
+                    status_code=422,
+                    detail=(
+                        "ALL_ENTRIES_REMOVED: The AI determined that none of your work "
+                        "experiences or projects are relevant to this job description."
+                    ),
+                )
+
+            # Restore education if the LLM incorrectly removed entries from it
+            original_data_for_edu = _get_original_resume_data(resume)
+            if original_data_for_edu:
+                orig_edu = original_data_for_edu.get("education", [])
+                if orig_edu and len(improved_data.get("education", [])) < len(orig_edu):
+                    logger.warning(
+                        "Focused mode removed education entries; restoring originals"
+                    )
+                    improved_data = dict(improved_data)
+                    improved_data["education"] = copy.deepcopy(orig_edu)
+
         # Collect warnings throughout the process
         response_warnings: list[str] = []
 
@@ -888,11 +920,22 @@ async def improve_resume_preview_endpoint(
         diff_summary, detailed_changes, diff_error = _calculate_diff_from_resume(
             resume,
             improved_data,
+            removed_entries=removed_entries if prompt_id == "focused" else None,
         )
         if diff_error:
             response_warnings.append(f"Could not calculate changes: {diff_error}")
         stage = "generate_improvements"
         improvements = generate_improvements(job_keywords)
+
+        # Convert removed_entries dicts to RemovedEntry schema objects
+        removed_entry_objects = [
+            RemovedEntry(
+                type=e.get("type", "workExperience"),  # type: ignore[arg-type]
+                label=e.get("label", ""),
+                reason=e.get("reason", ""),
+            )
+            for e in removed_entries
+        ]
 
         request_id = str(uuid4())
         return ImproveResumeResponse(
@@ -915,6 +958,7 @@ async def improve_resume_preview_endpoint(
                 outreach_message=None,
                 diff_summary=diff_summary,
                 detailed_changes=detailed_changes,
+                removed_entries=removed_entry_objects,
                 refinement_stats=refinement_stats,
                 warnings=response_warnings,
                 refinement_attempted=refinement_attempted,
@@ -1095,7 +1139,7 @@ async def improve_resume_endpoint(
         # Generate improved resume in the configured language
         prompt_id = request.prompt_id or _get_default_prompt_id()
 
-        improved_data = await improve_resume(
+        improved_data, removed_entries = await improve_resume(
             original_resume=resume["content"],
             job_description=job["content"],
             job_keywords=job_keywords,
@@ -1103,6 +1147,30 @@ async def improve_resume_endpoint(
             prompt_id=prompt_id,
             user_id=user.id,
         )
+
+        # Focused mode: guard against all entries removed
+        if prompt_id == "focused":
+            has_work = bool(improved_data.get("workExperience"))
+            has_projects = bool(improved_data.get("personalProjects"))
+            if not has_work and not has_projects:
+                raise HTTPException(
+                    status_code=422,
+                    detail=(
+                        "ALL_ENTRIES_REMOVED: The AI determined that none of your work "
+                        "experiences or projects are relevant to this job description."
+                    ),
+                )
+            # Restore education if the LLM incorrectly removed entries from it
+            original_data_for_edu = _get_original_resume_data(resume)
+            if original_data_for_edu:
+                orig_edu = original_data_for_edu.get("education", [])
+                if orig_edu and len(improved_data.get("education", [])) < len(orig_edu):
+                    logger.warning(
+                        "Focused mode removed education entries; restoring originals"
+                    )
+                    improved_data = dict(improved_data)
+                    improved_data["education"] = copy.deepcopy(orig_edu)
+
         # Collect warnings throughout the process
         response_warnings: list[str] = []
 
@@ -1171,6 +1239,7 @@ async def improve_resume_endpoint(
         diff_summary, detailed_changes, diff_error = _calculate_diff_from_resume(
             resume,
             improved_data,
+            removed_entries=removed_entries if prompt_id == "focused" else None,
         )
         if diff_error:
             response_warnings.append(f"Could not calculate changes: {diff_error}")
@@ -1240,6 +1309,14 @@ async def improve_resume_endpoint(
                 # Diff metadata
                 diff_summary=diff_summary,
                 detailed_changes=detailed_changes,
+                removed_entries=[
+                    RemovedEntry(
+                        type=e.get("type", "workExperience"),  # type: ignore[arg-type]
+                        label=e.get("label", ""),
+                        reason=e.get("reason", ""),
+                    )
+                    for e in removed_entries
+                ],
                 refinement_stats=refinement_stats,
                 warnings=response_warnings,
                 refinement_attempted=refinement_attempted,

@@ -161,6 +161,13 @@ CRITICAL_TRUTHFULNESS_RULES = {
     "full": _build_truthfulness_rules(
         "You may expand existing bullet points or add new ones that elaborate on existing work, but DO NOT invent entirely new responsibilities"
     ),
+    "focused": _build_truthfulness_rules(
+        "You may remove work experience and project entries that are clearly irrelevant to the target job. "
+        "You may expand remaining bullet points or add new ones that elaborate on existing work, "
+        "but DO NOT invent entirely new responsibilities. "
+        "DO NOT remove education entries, customSections, additional info, or personalInfo — "
+        "only workExperience and personalProjects entries may be removed."
+    ),
 }
 
 IMPROVE_RESUME_PROMPT_NUDGE = """Lightly nudge this resume toward the job description. Output ONLY the JSON object, no other text.
@@ -251,6 +258,58 @@ Original Resume:
 Output in this JSON format:
 {schema}"""
 
+IMPROVE_RESUME_PROMPT_FOCUSED = """Remove irrelevant experiences/projects, then fully tailor the remaining ones. Output ONLY the JSON object, no other text.
+
+{critical_truthfulness_rules}
+
+IMPORTANT: Generate ALL text content (summary, descriptions, skills) in {output_language}.
+
+This prompt operates in two phases:
+
+PHASE 1 — RELEVANCE FILTERING:
+- Evaluate each workExperience entry against the job description and keywords.
+- Evaluate each personalProjects entry against the job description and keywords.
+- Remove entries that have NO meaningful relevance to the target role.
+- An entry is relevant if it demonstrates skills, responsibilities, or domain knowledge that directly or transferably applies.
+- When relevance is ambiguous or the job description is vague, err on the side of KEEPING the entry.
+- DO NOT remove education entries, customSections, additional info, or personalInfo — only workExperience and personalProjects may be removed.
+- For each removed entry, record it in the top-level "removed_entries" array with a one-sentence reason.
+
+PHASE 2 — TAILORED REWRITING (applied to RETAINED entries only):
+- Rephrase content to highlight relevant experience
+- DO NOT invent new information
+- Use action verbs and quantifiable achievements
+- Keep proper nouns (names, company names, locations) unchanged
+- Translate job titles, descriptions, and skills to {output_language}
+- Preserve the structure of any customSections from the original resume
+- Preserve original date ranges exactly - do not modify years
+- Do NOT use em dash ("—") anywhere in the writing/output, even if it exists, remove it
+
+Job Description:
+{job_description}
+
+Keywords to emphasize:
+{job_keywords}
+
+Original Resume:
+{original_resume}
+
+Output in this JSON format (standard resume JSON PLUS a removed_entries array at the top level):
+{{
+  "personalInfo": {{ ... }},
+  "summary": "...",
+  "workExperience": [ ... ],
+  "education": [ ... ],
+  "personalProjects": [ ... ],
+  "additional": {{ ... }},
+  "sectionMeta": [ ... ],
+  "customSections": {{ ... }},
+  "removed_entries": [
+    {{"type": "workExperience", "label": "Title | Company | Years", "reason": "One-sentence reason for removal"}},
+    {{"type": "personalProjects", "label": "Project Name | Role | Years", "reason": "One-sentence reason for removal"}}
+  ]
+}}"""
+
 IMPROVE_PROMPT_OPTIONS = [
     {
         "id": "nudge",
@@ -267,12 +326,18 @@ IMPROVE_PROMPT_OPTIONS = [
         "label": "Full tailor",
         "description": "Comprehensive tailoring using the job description.",
     },
+    {
+        "id": "focused",
+        "label": "Focused tailor",
+        "description": "Remove irrelevant experiences and projects, then tailor the rest.",
+    },
 ]
 
 IMPROVE_RESUME_PROMPTS = {
     "nudge": IMPROVE_RESUME_PROMPT_NUDGE,
     "keywords": IMPROVE_RESUME_PROMPT_KEYWORDS,
     "full": IMPROVE_RESUME_PROMPT_FULL,
+    "focused": IMPROVE_RESUME_PROMPT_FOCUSED,
 }
 
 DEFAULT_IMPROVE_PROMPT_ID = "keywords"

@@ -526,6 +526,10 @@
       "full": {
         "label": "完全に調整",
         "description": "求人情報を使って全面的に調整。"
+      },
+      "focused": {
+        "label": "集中カスタマイズ",
+        "description": "関連性のない職歴・プロジェクトを削除し、残りをカスタマイズします。"
       }
     },
     "analyzeJob": "求人を分析",
@@ -558,7 +562,11 @@
       "projectChanges": "プロジェクトの変更",
       "certificationChanges": "資格の変更",
       "rejectButton": "拒否して再生成",
-      "confirmButton": "確認して保存"
+      "confirmButton": "確認して保存",
+      "entriesRemoved": "削除されたエントリ",
+      "removedEntriesTitle": "削除されたエントリ",
+      "removedReason": "理由",
+      "allRelevant": "全ての職歴とプロジェクトが関連していました — 削除なし。"
     },
     "regenerateDialog": {
       "title": "カスタマイズ済み履歴書を再生成しますか？",
@@ -577,6 +585,12 @@
       "failedToGenerate": "履歴書の生成に失敗しました。設定を確認して再試行してください。",
       "failedToPreview": "履歴書のプレビューに失敗しました。設定を確認して再試行してください。",
       "failedToConfirm": "履歴書の確定に失敗しました。もう一度お試しください。"
+    },
+    "focusedWarning": "集中カスタマイズでは、求人内容に関連しない職歴とプロジェクトが削除されます。関連するエントリのみ保持・書き直されます。",
+    "allRemovedDialog": {
+      "title": "関連する経験が見つかりませんでした",
+      "description": "AIはあなたの職歴やプロジェクトのいずれもこの求人内容に関連していないと判断しました。別の強度レベルを試すか、マスター履歴書を更新してください。",
+      "tryKeywords": "キーワード強化を試す"
     }
   },
   "settings": {

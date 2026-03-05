@@ -98,7 +98,7 @@ async def improve_resume(
     language: str = "en",
     prompt_id: str | None = None,
     user_id: str | None = None,
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Improve resume to better match job description.
 
     Args:
@@ -106,9 +106,12 @@ async def improve_resume(
         job_description: Target job description
         job_keywords: Extracted job keywords
         language: Output language code (en, es, zh, ja)
+        prompt_id: Tailoring intensity identifier
+        user_id: Caller's user ID (for LLM routing)
 
     Returns:
-        Improved resume data matching ResumeData schema
+        Tuple of (improved_resume_dict, removed_entries_list).
+        removed_entries_list is non-empty only for the "focused" prompt.
 
     LLM-006: Validates for truncation before Pydantic validation.
     LLM-011: Sanitizes job description to prevent prompt injection.
@@ -151,9 +154,29 @@ async def improve_resume(
     # LLM-006: Pre-validation check for truncation signs
     _check_for_truncation(result)
 
+    # For focused mode: extract and validate removed_entries BEFORE Pydantic validation
+    # (Pydantic would silently drop unknown top-level keys)
+    removed_entries: list[dict[str, Any]] = []
+    if selected_prompt_id == "focused":
+        raw_removed = result.pop("removed_entries", None)
+        if isinstance(raw_removed, list):
+            for entry in raw_removed:
+                if isinstance(entry, dict):
+                    entry_type = entry.get("type", "")
+                    if entry_type in ("workExperience", "personalProjects"):
+                        removed_entries.append({
+                            "type": entry_type,
+                            "label": str(entry.get("label", "")),
+                            "reason": str(entry.get("reason", "")),
+                        })
+        logger.info(
+            "Focused tailoring: %d entries removed by LLM",
+            len(removed_entries),
+        )
+
     # Validate against schema
     validated = ResumeData.model_validate(result)
-    return validated.model_dump()
+    return validated.model_dump(), removed_entries
 
 
 def _format_entry_label(parts: list[str], fallback: str) -> str:
@@ -391,12 +414,15 @@ def _append_list_changes(
 def calculate_resume_diff(
     original: dict[str, Any],
     improved: dict[str, Any],
+    removed_entries: list[dict[str, Any]] | None = None,
 ) -> tuple[ResumeDiffSummary, list[ResumeFieldDiff]]:
     """Compute the diff between original and improved resumes.
 
     Args:
         original: Original resume data dict
         improved: Improved resume data dict
+        removed_entries: For focused mode, list of entries removed by Phase 1 filtering.
+            Each entry has keys: type, label, reason.
 
     Returns:
         (diff summary, detailed change list)
@@ -533,7 +559,23 @@ def calculate_resume_diff(
         _format_project_entry,
     )
 
-    # 6. Build summary
+    # 6. Add removed_entries changes (focused mode only)
+    removed_list = removed_entries or []
+    for i, entry in enumerate(removed_list):
+        entry_type = entry.get("type", "workExperience")
+        field_type: str = "experience" if entry_type == "workExperience" else "project"
+        changes.append(
+            ResumeFieldDiff(
+                field_path=f"{entry_type}[removed_{i}]",
+                field_type="removed_entry",  # type: ignore[arg-type]
+                change_type="removed",
+                original_value=entry.get("label", ""),
+                confidence="medium",
+                reason=entry.get("reason", ""),
+            )
+        )
+
+    # 7. Build summary
     summary = ResumeDiffSummary(
         total_changes=len(changes),
         skills_added=len([c for c in changes if c.field_type == "skill" and c.change_type == "added"]),
@@ -546,7 +588,8 @@ def calculate_resume_diff(
             ]
         ),
         certifications_added=len([c for c in changes if c.field_type == "certification" and c.change_type == "added"]),
-        high_risk_changes=len([c for c in changes if c.confidence == "high"])
+        high_risk_changes=len([c for c in changes if c.confidence == "high"]),
+        entries_removed=len(removed_list),
     )
 
     return summary, changes

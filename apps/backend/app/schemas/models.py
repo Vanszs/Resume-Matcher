@@ -445,6 +445,14 @@ class ImprovementSuggestion(BaseModel):
     lineNumber: int | None = None
 
 
+class RemovedEntry(BaseModel):
+    """An entry removed by the focused tailoring phase."""
+
+    type: Literal["workExperience", "personalProjects"]
+    label: str  # "Title | Company | Years" or "Project | Role | Years"
+    reason: str = ""
+
+
 class ResumeFieldDiff(BaseModel):
     """Single field change record."""
 
@@ -457,11 +465,13 @@ class ResumeFieldDiff(BaseModel):
         "experience",
         "education",
         "project",
+        "removed_entry",
     ]
     change_type: Literal["added", "removed", "modified"]
     original_value: str | None = None
     new_value: str | None = None
     confidence: Literal["low", "medium", "high"] = "medium"
+    reason: str | None = None  # Used for removed_entry changes
 
 
 class ResumeDiffSummary(BaseModel):
@@ -473,6 +483,7 @@ class ResumeDiffSummary(BaseModel):
     descriptions_modified: int
     certifications_added: int
     high_risk_changes: int  # High-risk additions
+    entries_removed: int = 0  # For focused mode: count of removed experience/project entries
 
 
 class RefinementStats(BaseModel):
@@ -518,6 +529,9 @@ class ImproveResumeData(BaseModel):
     # Diff metadata
     diff_summary: ResumeDiffSummary | None = None
     detailed_changes: list[ResumeFieldDiff] | None = None
+
+    # Focused mode: entries removed during phase-1 filtering
+    removed_entries: list["RemovedEntry"] = Field(default_factory=list)
 
     # Refinement metadata (multi-pass refinement stats)
     refinement_stats: "RefinementStats | None" = None

@@ -526,6 +526,10 @@
       "full": {
         "label": "完全定制",
         "description": "基于职位描述进行全面定制。"
+      },
+      "focused": {
+        "label": "精准定制",
+        "description": "移除不相关的经历和项目，然后对剩余内容进行定制。"
       }
     },
     "analyzeJob": "分析职位",
@@ -558,7 +562,11 @@
       "projectChanges": "项目变更",
       "certificationChanges": "认证变更",
       "rejectButton": "拒绝并重新生成",
-      "confirmButton": "确认并保存"
+      "confirmButton": "确认并保存",
+      "entriesRemoved": "已删除条目",
+      "removedEntriesTitle": "已删除条目",
+      "removedReason": "原因",
+      "allRelevant": "所有经历和项目均相关 — 未删除任何内容。"
     },
     "regenerateDialog": {
       "title": "重新生成定制简历？",
@@ -577,6 +585,12 @@
       "failedToGenerate": "生成简历失败。请检查设置后重试。",
       "failedToPreview": "预览简历失败。请检查设置后重试。",
       "failedToConfirm": "确认简历失败。请重试。"
+    },
+    "focusedWarning": "精准定制将删除与职位描述不相关的工作经历和项目。只保留并重写相关条目。",
+    "allRemovedDialog": {
+      "title": "未找到相关经历",
+      "description": "AI判定您的工作经历或项目均与该职位描述不相关。请尝试不同的强度级别或更新您的主要简历。",
+      "tryKeywords": "尝试关键词增强"
     }
   },
   "settings": {

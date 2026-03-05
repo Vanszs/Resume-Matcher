@@ -48,6 +48,7 @@ export default function TailorPage() {
   const [showMissingDiffDialog, setShowMissingDiffDialog] = useState(false);
   const [missingDiffResult, setMissingDiffResult] = useState<ImprovedResult | null>(null);
   const [missingDiffError, setMissingDiffError] = useState<string | null>(null);
+  const [showAllRemovedDialog, setShowAllRemovedDialog] = useState(false);
 
   const router = useRouter();
   const { setImprovedData } = useResumePreview();
@@ -219,6 +220,12 @@ export default function TailorPage() {
       // Check for common error patterns
       const errorMessage = err instanceof Error ? err.message : '';
       if (
+        errorMessage.includes('ALL_ENTRIES_REMOVED')
+      ) {
+        setShowAllRemovedDialog(true);
+        return;
+      }
+      if (
         errorMessage.toLowerCase().includes('api key') ||
         errorMessage.toLowerCase().includes('unauthorized') ||
         errorMessage.toLowerCase().includes('authentication') ||
@@ -350,6 +357,38 @@ export default function TailorPage() {
     }
   };
 
+  const handleAllRemovedTryKeywords = async () => {
+    setShowAllRemovedDialog(false);
+    hasUserSelectedPrompt.current = true;
+    setSelectedPromptId('keywords');
+    const trimmedDescription = jobDescription.trim();
+    if (!trimmedDescription || !masterResumeId) return;
+    const resumeId = masterResumeId;
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Use 'keywords' explicitly — React state update for selectedPromptId
+      // may not have propagated yet at this point in the async flow.
+      const jobId = await uploadJobDescriptions([trimmedDescription], resumeId);
+      incrementJobs();
+      const result = await previewImproveResume(resumeId, jobId, 'keywords');
+      if (!result?.data?.diff_summary || !result?.data?.detailed_changes) {
+        setMissingDiffResult(result);
+        setShowMissingDiffDialog(true);
+        return;
+      }
+      setDiffConfirmError(null);
+      setMissingDiffError(null);
+      setPendingResult(result);
+      setShowDiffModal(true);
+    } catch (err) {
+      console.error(err);
+      setError(t('tailor.errors.failedToPreview'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div
       className="min-h-screen w-full bg-[#F6F5EE] flex flex-col items-center justify-center p-4 md:p-8 font-sans"
@@ -443,6 +482,11 @@ export default function TailorPage() {
                       label: t('tailor.promptOptions.full.label'),
                       description: t('tailor.promptOptions.full.description'),
                     },
+                    {
+                      id: 'focused',
+                      label: t('tailor.promptOptions.focused.label'),
+                      description: t('tailor.promptOptions.focused.description'),
+                    },
                   ]
             }
             value={selectedPromptId}
@@ -454,6 +498,18 @@ export default function TailorPage() {
             description={t('tailor.promptDescription')}
             disabled={isLoading || promptLoading}
           />
+
+          {/* Focused tailoring warning banner */}
+          {selectedPromptId === 'focused' && (
+            <div className="border-2 border-amber-500 bg-amber-50 p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <p className="font-mono text-xs text-amber-800">
+                  {t('tailor.focusedWarning')}
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="relative">
             <Textarea
@@ -516,6 +572,8 @@ export default function TailorPage() {
           isSubmitting={isLoading}
           diffSummary={pendingResult?.data?.diff_summary}
           detailedChanges={pendingResult?.data?.detailed_changes}
+          removedEntries={pendingResult?.data?.removed_entries}
+          promptId={selectedPromptId}
           errorMessage={diffConfirmError ?? undefined}
         />
       )}
@@ -549,6 +607,22 @@ export default function TailorPage() {
         confirmLoading={isLoading}
         confirmDisabled={isLoading || !missingDiffResult}
         errorMessage={missingDiffError ?? undefined}
+      />
+
+      {/* All entries removed dialog (focused mode only) */}
+      <ConfirmDialog
+        open={showAllRemovedDialog}
+        onOpenChange={(open) => {
+          if (!open && !isLoading) setShowAllRemovedDialog(false);
+        }}
+        title={t('tailor.allRemovedDialog.title')}
+        description={t('tailor.allRemovedDialog.description')}
+        confirmLabel={t('tailor.allRemovedDialog.tryKeywords')}
+        cancelLabel={t('common.close')}
+        variant="warning"
+        onConfirm={handleAllRemovedTryKeywords}
+        onCancel={() => setShowAllRemovedDialog(false)}
+        confirmLoading={isLoading}
       />
     </div>
   );

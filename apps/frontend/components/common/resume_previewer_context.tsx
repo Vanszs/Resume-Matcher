@@ -52,6 +52,13 @@ export interface ResumeDiffSummary {
   descriptions_modified: number;
   certifications_added: number;
   high_risk_changes: number;
+  entries_removed?: number;
+}
+
+export interface RemovedEntry {
+  type: 'workExperience' | 'personalProjects';
+  label: string;
+  reason: string;
 }
 
 export interface ResumeFieldDiff {
@@ -63,11 +70,13 @@ export interface ResumeFieldDiff {
     | 'certification'
     | 'experience'
     | 'education'
-    | 'project';
+    | 'project'
+    | 'removed_entry';
   change_type: 'added' | 'removed' | 'modified';
   original_value?: string;
   new_value?: string;
   confidence: 'low' | 'medium' | 'high';
+  reason?: string;
 }
 
 export interface ResumePreview {
@@ -98,6 +107,7 @@ export interface Data {
   outreach_message?: string;
   diff_summary?: ResumeDiffSummary;
   detailed_changes?: ResumeFieldDiff[];
+  removed_entries?: RemovedEntry[];
 }
 
 export interface ImprovedResult {

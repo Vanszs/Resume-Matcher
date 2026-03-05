@@ -526,6 +526,10 @@
       "full": {
         "label": "Personalização completa",
         "description": "Personalização abrangente usando a descrição da vaga."
+      },
+      "focused": {
+        "label": "Adaptação focada",
+        "description": "Remove experiências e projetos irrelevantes e adapta o restante."
       }
     },
     "analyzeJob": "Analisar Vaga",
@@ -558,7 +562,11 @@
       "projectChanges": "Alterações de projetos",
       "certificationChanges": "Alterações de certificações",
       "rejectButton": "Rejeitar e regenerar",
-      "confirmButton": "Confirmar e salvar"
+      "confirmButton": "Confirmar e salvar",
+      "entriesRemoved": "Entradas removidas",
+      "removedEntriesTitle": "Entradas Removidas",
+      "removedReason": "Motivo",
+      "allRelevant": "Todas as experiências e projetos eram relevantes — nada removido."
     },
     "regenerateDialog": {
       "title": "Regenerar o currículo personalizado?",
@@ -577,6 +585,12 @@
       "failedToGenerate": "Falha ao gerar currículo. Verifique suas configurações e tente novamente.",
       "failedToPreview": "Falha ao pré-visualizar o currículo. Verifique suas configurações e tente novamente.",
       "failedToConfirm": "Falha ao confirmar o currículo. Tente novamente."
+    },
+    "focusedWarning": "A adaptação focada removerá experiências de trabalho e projetos não relevantes para a descrição do cargo. Apenas as entradas correspondentes serão mantidas e reescritas.",
+    "allRemovedDialog": {
+      "title": "Nenhuma Experiência Relevante Encontrada",
+      "description": "A IA determinou que nenhuma das suas experiências de trabalho ou projetos é relevante para esta descrição de cargo. Tente um nível de intensidade diferente ou atualize seu currículo principal.",
+      "tryKeywords": "Tentar Melhoria de Palavras-chave"
     }
   },
   "settings": {
@@ -722,8 +736,10 @@
     "loading": "Carregando Currículo...",
     "useTailorFeature": "Usar Recurso de Personalização",
     "retryProcessing": "Tentar novamente",
-    "deleteAndStartOver": "Excluir e recomeçar",    "refreshStatus": "Atualizar status",
-    "cancelProcessing": "Cancelar e excluir",    "returnToDashboard": "Voltar ao Painel",
+    "deleteAndStartOver": "Excluir e recomeçar",
+    "refreshStatus": "Atualizar status",
+    "cancelProcessing": "Cancelar e excluir",
+    "returnToDashboard": "Voltar ao Painel",
     "enhanceResume": "Aprimorar Currículo",
     "downloadResume": "Baixar Currículo",
     "deletedTitle": "Currículo Excluído",

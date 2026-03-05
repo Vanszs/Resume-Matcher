@@ -526,6 +526,10 @@
       "full": {
         "label": "Penyesuaian penuh",
         "description": "Penyesuaian komprehensif menggunakan deskripsi pekerjaan."
+      },
+      "focused": {
+        "label": "Kustomisasi terfokus",
+        "description": "Hapus pengalaman dan proyek yang tidak relevan, lalu sesuaikan sisanya."
       }
     },
     "analyzeJob": "Analisis Pekerjaan",
@@ -558,7 +562,11 @@
       "projectChanges": "Perubahan Proyek",
       "certificationChanges": "Perubahan Sertifikasi",
       "rejectButton": "Tolak & Hasilkan Ulang",
-      "confirmButton": "Konfirmasi & Simpan"
+      "confirmButton": "Konfirmasi & Simpan",
+      "entriesRemoved": "Entri dihapus",
+      "removedEntriesTitle": "Entri yang Dihapus",
+      "removedReason": "Alasan",
+      "allRelevant": "Semua pengalaman dan proyek relevan — tidak ada yang dihapus."
     },
     "regenerateDialog": {
       "title": "Hasilkan ulang resume yang disesuaikan?",
@@ -577,6 +585,12 @@
       "failedToGenerate": "Gagal menghasilkan resume. Periksa pengaturan Anda dan coba lagi.",
       "failedToPreview": "Gagal mempratinjau resume. Periksa pengaturan Anda dan coba lagi.",
       "failedToConfirm": "Gagal mengonfirmasi resume. Silakan coba lagi."
+    },
+    "focusedWarning": "Kustomisasi terfokus akan menghapus pengalaman kerja dan proyek yang tidak relevan dengan deskripsi pekerjaan. Hanya entri yang cocok yang akan disimpan dan ditulis ulang.",
+    "allRemovedDialog": {
+      "title": "Tidak Ada Pengalaman Relevan",
+      "description": "AI menentukan bahwa tidak ada pengalaman kerja atau proyek Anda yang relevan dengan deskripsi pekerjaan ini. Coba level intensitas yang berbeda atau perbarui resume utama Anda.",
+      "tryKeywords": "Coba Peningkatan Kata Kunci"
     }
   },
   "settings": {
