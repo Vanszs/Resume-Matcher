@@ -516,3 +516,5 @@ INFO:     172.71.124.232:0 - "GET /api/v1/resumes/list?include_master=true HTTP/
 INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=a85095ad-f181-4eef-bb4e-4504f7bb3a2b HTTP/1.1" 200 OK
 INFO:     172.71.124.232:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
 INFO:     172.71.124.233:0 - "GET /api/v1/resumes?resume_id=a85095ad-f181-4eef-bb4e-4504f7bb3a2b HTTP/1.1" 200 OK
+INFO:     162.158.88.135:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     162.158.88.135:0 - "GET /api/v1/resumes?resume_id=a85095ad-f181-4eef-bb4e-4504f7bb3a2b HTTP/1.1" 200 OK

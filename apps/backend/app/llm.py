@@ -700,6 +700,7 @@ async def complete_json(
 
     last_error = None
     for attempt in range(retries + 1):
+        content: str | None = None  # reset per attempt; used in retry hint detection
         try:
             # Build request kwargs
             # Pass API key directly to avoid race conditions with global os.environ
@@ -747,7 +748,8 @@ async def complete_json(
             logging.warning(f"JSON parse failed (attempt {attempt + 1}): {e}")
             if attempt < retries:
                 # B2: Detect reasoning patterns and use stronger retry hint
-                prev_content = content if 'content' in dir() else ""
+                # content is always assigned before any JSONDecodeError/ValueError is raised
+                prev_content: str = content if isinstance(content, str) else ""
                 is_reasoning = _is_reasoning_response(prev_content) if prev_content else False
                 if is_reasoning:
                     logging.warning(
