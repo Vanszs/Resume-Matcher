@@ -147,6 +147,12 @@ class Experience(BaseModel):
     years: str = ""
     description: list[str] = Field(default_factory=list)
 
+    @field_validator("title", "company", "years", mode="before")
+    @classmethod
+    def coerce_none_to_empty_string(cls, v: str | None) -> str:
+        """LLM may return null for missing fields; coerce to empty string."""
+        return v if v is not None else ""
+
     @field_validator("description", mode="before")
     @classmethod
     def _normalize_description(cls, value: Any) -> list[str]:
@@ -161,6 +167,12 @@ class Education(BaseModel):
     degree: str = ""
     years: str = ""
     description: str | None = None
+
+    @field_validator("institution", "degree", "years", mode="before")
+    @classmethod
+    def coerce_none_to_empty_string(cls, v: str | None) -> str:
+        """LLM may return null for missing fields; coerce to empty string."""
+        return v if v is not None else ""
 
     @field_validator("description", mode="before")
     @classmethod
@@ -178,6 +190,12 @@ class Project(BaseModel):
     github: str | None = None
     website: str | None = None
     description: list[str] = Field(default_factory=list)
+
+    @field_validator("name", "role", "years", mode="before")
+    @classmethod
+    def coerce_none_to_empty_string(cls, v: str | None) -> str:
+        """LLM may return null for missing fields; coerce to empty string."""
+        return v if v is not None else ""
 
     @field_validator("description", mode="before")
     @classmethod
@@ -227,6 +245,12 @@ class CustomSectionItem(BaseModel):
     location: str | None = None
     years: str = ""
     description: list[str] = Field(default_factory=list)
+
+    @field_validator("title", "years", mode="before")
+    @classmethod
+    def coerce_none_to_empty_string(cls, v: str | None) -> str:
+        """LLM may return null for missing fields; coerce to empty string."""
+        return v if v is not None else ""
 
     @field_validator("description", mode="before")
     @classmethod

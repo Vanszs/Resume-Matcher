@@ -102,7 +102,10 @@ Custom section types:
 - "stringList": Simple list of strings (e.g., hobbies, interests)
 
 Rules:
-- Use "" for missing text fields, [] for missing arrays, null for optional fields
+- Use "" for ALL missing text fields — including years, title, company, name, role, institution, degree
+- Use [] for missing arrays
+- null is ONLY allowed for: website, linkedin, github, location, subtitle, description (when the field is genuinely absent)
+- NEVER use null for: years, title, company, name, role, institution, degree — use "" instead
 - Number IDs starting from 1
 - Format years as "YYYY - YYYY" or "YYYY - Present"
 - Use snake_case for custom section keys (e.g., "volunteer_work", "publications")
@@ -110,6 +113,8 @@ Rules:
 - Normalize dates: "Jan 2020" → "2020", "2020-2021" → "2020 - 2021", "Current"/"Ongoing" → "Present"
 - For ambiguous dates like "3 years experience", infer approximate years from context or use "~YYYY"
 - Flag overlapping dates (concurrent roles) by preserving both, don't merge
+- LinkedIn PDF exports may have sidebar content (publications, certifications, skills) interleaved with main body text due to two-column layout extraction — treat these as separate sections, not part of the summary
+- If a section (e.g. Publications) contains no dates whatsoever, set years to "" for each item — do NOT use null
 
 Resume to parse:
 {resume_text}"""
