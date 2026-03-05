@@ -329,7 +329,7 @@ export default function DashboardPage() {
       sseRef.current = null;
     }
 
-    const es = new EventSource(url);
+    const es = new EventSource(url, { withCredentials: true });
     sseRef.current = es;
 
     es.onmessage = (event) => {

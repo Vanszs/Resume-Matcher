@@ -56,6 +56,32 @@ async def lifespan(app: FastAPI):
         logger.warning("Failed to seed default roles: %s", e)
     # PDF renderer uses lazy initialization - will initialize on first use
     # await init_pdf_renderer()
+
+    # Startup sweep: reset any resumes stuck in 'processing' or 'pending' to
+    # 'failed'. These are orphaned tasks from a previous server run that was
+    # interrupted mid-processing and will never complete on their own.
+    try:
+        from tinydb import Query as TinyQuery
+        from datetime import datetime, timezone
+        stuck_states = {"processing", "pending"}
+        all_resumes = db.list_resumes()
+        stuck = [r for r in all_resumes if r.get("processing_status") in stuck_states]
+        if stuck:
+            logger.warning(
+                "Startup sweep: resetting %d stuck resume(s) to 'failed'",
+                len(stuck),
+            )
+            RQ = TinyQuery()
+            db.resumes.update(
+                {
+                    "processing_status": "failed",
+                    "error_message": "Processing interrupted by server restart.",
+                    "updated_at": datetime.now(timezone.utc).isoformat(),
+                },
+                RQ.processing_status.one_of(list(stuck_states)),
+            )
+    except Exception as e:
+        logger.error("Startup sweep failed: %s", e)
     yield
     # Shutdown - wrap each cleanup in try-except to ensure all resources are released
     try:

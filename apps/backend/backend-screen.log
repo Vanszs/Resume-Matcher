@@ -113,3 +113,18 @@ INFO:     162.158.108.91:0 - "GET /api/v1/resumes/list?include_master=true HTTP/
 INFO:     162.158.108.91:0 - "GET /api/v1/resumes?resume_id=27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 200 OK
 INFO:     162.158.108.91:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
 INFO:     162.158.108.91:0 - "GET /api/v1/resumes?resume_id=27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "DELETE /api/v1/resumes/27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=27ed2ff7-adca-4464-9f40-9c343192e74b HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/3370268d-9f1f-4154-b640-f72ece78696b/job-description HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes/list?include_master=true HTTP/1.1" 200 OK
+INFO:     172.70.142.8:0 - "GET /api/v1/resumes?resume_id=3a47b2d9-dc5e-4baa-af60-0bd8a636975a HTTP/1.1" 200 OK
+INFO:     104.23.175.74:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     104.23.175.75:0 - "GET /api/v1/auth/register-status HTTP/1.1" 200 OK
