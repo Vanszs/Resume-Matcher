@@ -130,6 +130,12 @@ class PersonalInfo(BaseModel):
     linkedin: str | None = None
     github: str | None = None
 
+    @field_validator("name", "title", "email", "phone", "location", mode="before")
+    @classmethod
+    def coerce_none_to_empty_string(cls, v: str | None) -> str:
+        """LLM may return null for missing fields; coerce to empty string."""
+        return v if v is not None else ""
+
 
 class Experience(BaseModel):
     """Work experience entry."""
