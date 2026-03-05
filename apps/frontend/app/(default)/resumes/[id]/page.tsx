@@ -43,6 +43,8 @@ export default function ResumeViewerPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showEnrichmentModal, setShowEnrichmentModal] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [rawErrorDetail, setRawErrorDetail] = useState<string | null>(null);
+  const [showErrorDetail, setShowErrorDetail] = useState(false);
   const { isNavigating, navigateTo } = useNavigating();
   const [resumeTitle, setResumeTitle] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -96,11 +98,9 @@ export default function ResumeViewerPage() {
           }
         } else if (status === 'failed') {
           const rawErr = data.raw_resume?.error_message;
-          setError(
-            rawErr
-              ? `${t('resumeViewer.errors.processingFailed')}\n${rawErr}`
-              : t('resumeViewer.errors.processingFailed')
-          );
+          setRawErrorDetail(rawErr ?? null);
+          setShowErrorDetail(false);
+          setError(t('resumeViewer.errors.processingFailed'));
         } else if (status === 'processing') {
           setError(t('resumeViewer.errors.stillProcessing'));
         } else if (data.raw_resume?.content) {
@@ -176,11 +176,9 @@ export default function ResumeViewerPage() {
           pollingRef.current = null;
           setProcessingStatus('failed');
           const rawErr = data.raw_resume?.error_message;
-          setError(
-            rawErr
-              ? `${t('resumeViewer.errors.processingFailed')}\n${rawErr}`
-              : t('resumeViewer.errors.processingFailed')
-          );
+          setRawErrorDetail(rawErr ?? null);
+          setShowErrorDetail(false);
+          setError(t('resumeViewer.errors.processingFailed'));
         }
       } catch {
         // ignore transient poll errors
@@ -210,11 +208,9 @@ export default function ResumeViewerPage() {
       } else {
         setProcessingStatus('failed');
         const rawErr = result.error_message;
-        setError(
-          rawErr
-            ? `${t('resumeViewer.errors.processingFailed')}\n${rawErr}`
-            : t('resumeViewer.errors.processingFailed')
-        );
+        setRawErrorDetail(rawErr ?? null);
+        setShowErrorDetail(false);
+        setError(t('resumeViewer.errors.processingFailed'));
       }
     } catch (err) {
       console.error('Retry processing failed:', err);
@@ -384,6 +380,24 @@ export default function ResumeViewerPage() {
           >
             {error || t('resumeViewer.resumeNotFound')}
           </p>
+          {isFailed && rawErrorDetail && (
+            <div className="mb-4 text-left">
+              <button
+                type="button"
+                className="font-mono text-xs uppercase underline underline-offset-2 text-orange-700 hover:text-orange-900 transition-colors"
+                onClick={() => setShowErrorDetail((v) => !v)}
+              >
+                {showErrorDetail
+                  ? t('dashboard.hideErrorDetail')
+                  : t('dashboard.showErrorDetail')}
+              </button>
+              {showErrorDetail && (
+                <pre className="mt-2 p-2 bg-orange-100/50 border border-orange-200 text-xs font-mono whitespace-pre-wrap break-words max-h-32 overflow-y-auto text-orange-900">
+                  {rawErrorDetail}
+                </pre>
+              )}
+            </div>
+          )}
           <div className="flex flex-col gap-2">
             {/* Show retry+delete for both stuck-processing AND failed resumes */}
             {(isFailed || isProcessing) && (

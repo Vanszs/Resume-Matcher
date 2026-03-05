@@ -2148,3 +2148,23 @@ INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not F
 INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
 INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
 INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     162.158.190.113:0 - "GET /api/v1/status?include_llm_health=true HTTP/1.1" 200 OK
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.71.143.135:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.142.8:0 - "GET /api/watcher/notifications HTTP/1.1" 404 Not Found
+INFO:     172.70.188.56:0 - "GET /api/v1/config/language HTTP/1.1" 200 OK
+INFO:     172.70.188.57:0 - "GET /api/v1/status HTTP/1.1" 200 OK
