@@ -242,7 +242,7 @@ export default function TailorPage() {
         errorMessage.toLowerCase().includes('service unavailable') ||
         errorMessage.toLowerCase().includes('temporarily unavailable')
       ) {
-        setError(t('tailor.errors.failedToGenerate'));
+        setError(t('tailor.errors.serviceUnavailable'));
       } else {
         setError(t('tailor.errors.failedToPreview'));
       }

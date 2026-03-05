@@ -588,6 +588,7 @@
       "rateLimit": "Rate limit reached. Please wait a moment and try again.",
       "failedToGenerate": "Failed to generate resume. Please check your settings and try again.",
       "failedToPreview": "Failed to preview resume. Please check your settings and try again.",
+      "serviceUnavailable": "The AI model is currently experiencing high demand. Please try again later.",
       "failedToConfirm": "Failed to confirm resume. Please try again."
     },
     "focusedWarning": "Focused tailoring will remove work experiences and projects that are not relevant to the job description. Only matching entries will be kept and rewritten.",

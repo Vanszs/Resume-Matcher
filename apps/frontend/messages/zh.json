@@ -588,6 +588,7 @@
       "rateLimit": "触发速率限制，请稍后再试。",
       "failedToGenerate": "生成简历失败。请检查设置后重试。",
       "failedToPreview": "预览简历失败。请检查设置后重试。",
+      "serviceUnavailable": "AI模型目前需求量较高，请稍后再试。",
       "failedToConfirm": "确认简历失败。请重试。"
     },
     "focusedWarning": "精准定制将删除与职位描述不相关的工作经历和项目。只保留并重写相关条目。",
