@@ -57,6 +57,19 @@ apps/backend/data/config.json
 
 .DS_Store
 
+# Test PDF files
+*.pdf
+
+# One-off scripts / artifacts
+reference.html
+rewrite_config.py
+
+# Broken pip install artifact
+apps/backend/=*
+
+# Backend logs
+apps/backend/*.log
+
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
