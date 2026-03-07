@@ -34,11 +34,16 @@ const MAX_TAILOR_POLLS = 90; // 90 × 2 s = 3 min hard timeout
 async function pollTailorTask(
   taskId: string,
   abortRef: React.MutableRefObject<boolean>,
+  generationRef: React.MutableRefObject<number>,
+  generation: number,
   onProgress: (progress: number, stage: string) => void,
 ): Promise<ImprovedResult> {
+  // True if user cancelled OR a newer generation has superseded this one.
+  const isCancelled = () => abortRef.current || generationRef.current !== generation;
+
   let polls = 0;
   while (true) {
-    if (abortRef.current) throw new DOMException('Aborted', 'AbortError');
+    if (isCancelled()) throw new DOMException('Aborted', 'AbortError');
 
     if (++polls > MAX_TAILOR_POLLS) {
       throw Object.assign(
@@ -48,14 +53,15 @@ async function pollTailorTask(
     }
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    if (abortRef.current) throw new DOMException('Aborted', 'AbortError');
+    if (isCancelled()) throw new DOMException('Aborted', 'AbortError');
 
     const status = await getTailorTaskStatus(taskId);
-    if (abortRef.current) throw new DOMException('Aborted', 'AbortError');
+    if (isCancelled()) throw new DOMException('Aborted', 'AbortError');
 
     onProgress(status.progress, status.stage);
 
     if (status.status === 'completed' && status.result) {
+      if (isCancelled()) throw new DOMException('Aborted', 'AbortError');
       return { data: status.result as ImprovedResult['data'] };
     }
     if (status.status === 'failed') {
@@ -81,6 +87,9 @@ export default function TailorPage() {
   const confirmInFlight = useRef(false);
   const navigationInProgress = useRef(false);
   const abortRef = useRef(false);
+  // Incremented on every new generate invocation — lets stale poll loops detect they
+  // have been superseded even after abortRef has been reset for the new generation.
+  const generationRef = useRef(0);
   const { isNavigating, navigateBack } = useNavigating();
 
   // Polling progress state
@@ -238,6 +247,8 @@ export default function TailorPage() {
 
   // Classify a caught error and set the appropriate i18n error message in state.
   const handleTailorError = (err: unknown, context: string) => {
+    // AbortError means user cancelled or a newer generation superseded this one — ignore silently.
+    if (err instanceof Error && err.name === 'AbortError') return;
     if (abortRef.current) return;
     const rawMessage = err instanceof Error ? err.message : String(err);
     const errorMessage = rawMessage.length > 500 ? rawMessage.slice(0, 500) + '…' : rawMessage;
@@ -253,8 +264,7 @@ export default function TailorPage() {
       errorMessage.toLowerCase().includes('timed out') ||
       errorMessage.toLowerCase().includes('request timed out') ||
       errorMessage.includes('524') ||
-      errorMessage.includes('504') ||
-      errorMessage.toLowerCase().includes('aborterror')
+      errorMessage.includes('504')
     ) {
       setError(t('tailor.errors.timeout'));
     } else if (
@@ -301,6 +311,7 @@ export default function TailorPage() {
   };
 
   const runGenerate = async (resumeId: string, description: string) => {
+    const generation = ++generationRef.current;
     abortRef.current = false;
     setTailorProgress(0);
     setTailorStage('queued');
@@ -308,22 +319,21 @@ export default function TailorPage() {
     try {
       // 1. Upload Job Description
       const jobId = await uploadJobDescriptions([description], resumeId);
-      if (abortRef.current) return;
+      if (abortRef.current || generationRef.current !== generation) return;
       incrementJobs();
 
       // 2. Start async tailor task — returns immediately with task_id
       const taskId = await startTailorTask(resumeId, jobId, selectedPromptId);
-      if (abortRef.current) return;
+      if (abortRef.current || generationRef.current !== generation) return;
 
       // 3. Poll until the task completes or fails (max 3 min)
-      const result = await pollTailorTask(taskId, abortRef, (progress, stage) => {
+      const result = await pollTailorTask(taskId, abortRef, generationRef, generation, (progress, stage) => {
         setTailorProgress(progress);
         setTailorStage(stage);
       });
-      if (abortRef.current) return;
+      if (abortRef.current || generationRef.current !== generation) return;
       handlePollResult(result);
     } catch (err) {
-      if (abortRef.current) return;
       handleTailorError(err, 'runGenerate');
     }
   };
@@ -453,6 +463,7 @@ export default function TailorPage() {
     const trimmedDescription = jobDescription.trim();
     if (!trimmedDescription || !masterResumeId) return;
     const resumeId = masterResumeId;
+    const generation = ++generationRef.current;
     abortRef.current = false;
     setTailorProgress(0);
     setTailorStage('queued');
@@ -462,19 +473,18 @@ export default function TailorPage() {
       // Use 'keywords' explicitly — React state update for selectedPromptId
       // may not have propagated yet at this point in the async flow.
       const jobId = await uploadJobDescriptions([trimmedDescription], resumeId);
-      if (abortRef.current) return;
+      if (abortRef.current || generationRef.current !== generation) return;
       incrementJobs();
       const taskId = await startTailorTask(resumeId, jobId, 'keywords');
-      if (abortRef.current) return;
+      if (abortRef.current || generationRef.current !== generation) return;
 
-      const result = await pollTailorTask(taskId, abortRef, (progress, stage) => {
+      const result = await pollTailorTask(taskId, abortRef, generationRef, generation, (progress, stage) => {
         setTailorProgress(progress);
         setTailorStage(stage);
       });
-      if (abortRef.current) return;
+      if (abortRef.current || generationRef.current !== generation) return;
       handlePollResult(result);
     } catch (err) {
-      if (abortRef.current) return;
       handleTailorError(err, 'handleAllRemovedTryKeywords');
     } finally {
       setIsLoading(false);
