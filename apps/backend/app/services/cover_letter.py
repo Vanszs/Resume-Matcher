@@ -58,6 +58,9 @@ def _extract_fallback_title(job_description: str, max_len: int = 60) -> str:
         cleaned = line.strip().strip("#").strip("*").strip()
         if not cleaned:
             continue
+        # Skip very short fragments (e.g. "IT", "HR", breadcrumb labels, single words)
+        if len(cleaned) < 5:
+            continue
         # Skip lines that look like full sentences (too long or contain period+space)
         if len(cleaned) > max_len or ". " in cleaned:
             continue

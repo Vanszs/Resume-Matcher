@@ -27,6 +27,18 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { TailorProgress } from '@/components/tailor/tailor-progress';
 
 // ---------------------------------------------------------------------------
+// Resumable tailor task — persist to localStorage so navigating away doesn't lose
+// an in-flight backend task.
+// ---------------------------------------------------------------------------
+const TAILOR_TASK_STORAGE_KEY = 'tailor_active_task';
+
+interface TailorTaskState {
+  taskId: string;
+  resumeId: string;
+  startedAt: number; // Date.now() — for staleness check
+}
+
+// ---------------------------------------------------------------------------
 // Shared polling utility — used by both runGenerate and handleAllRemovedTryKeywords
 // ---------------------------------------------------------------------------
 const MAX_TAILOR_POLLS = 90; // 90 × 2 s = 3 min hard timeout
@@ -90,6 +102,7 @@ export default function TailorPage() {
   // Incremented on every new generate invocation — lets stale poll loops detect they
   // have been superseded even after abortRef has been reset for the new generation.
   const generationRef = useRef(0);
+  const hasCheckedSavedTaskRef = useRef(false);
   const { isNavigating, navigateBack } = useNavigating();
 
   // Polling progress state
@@ -190,6 +203,37 @@ export default function TailorPage() {
     };
   }, []);
 
+  // Check for a saved task from a previous navigation and resume polling if it's recent.
+  // Runs once after masterResumeId is available so we can poll and eventually confirm.
+  useEffect(() => {
+    if (!masterResumeId || hasCheckedSavedTaskRef.current) return;
+    hasCheckedSavedTaskRef.current = true;
+
+    const checkSavedTask = async () => {
+      const saved = localStorage.getItem(TAILOR_TASK_STORAGE_KEY);
+      if (!saved) return;
+
+      let task: TailorTaskState;
+      try {
+        task = JSON.parse(saved) as TailorTaskState;
+      } catch {
+        localStorage.removeItem(TAILOR_TASK_STORAGE_KEY);
+        return;
+      }
+
+      // Treat tasks older than 5 minutes as stale — backend TTL will have removed them.
+      if (!task.taskId || Date.now() - task.startedAt > 5 * 60 * 1000) {
+        localStorage.removeItem(TAILOR_TASK_STORAGE_KEY);
+        return;
+      }
+
+      await resumeExistingTask(task);
+    };
+
+    checkSavedTask();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [masterResumeId]);
+
   const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter') e.stopPropagation();
   };
@@ -250,6 +294,8 @@ export default function TailorPage() {
     // AbortError means user cancelled or a newer generation superseded this one — ignore silently.
     if (err instanceof Error && err.name === 'AbortError') return;
     if (abortRef.current) return;
+    // Clear any saved task — it has failed or been superseded.
+    localStorage.removeItem(TAILOR_TASK_STORAGE_KEY);
     const rawMessage = err instanceof Error ? err.message : String(err);
     const errorMessage = rawMessage.length > 500 ? rawMessage.slice(0, 500) + '…' : rawMessage;
     const errorType = (err as Record<string, unknown>).errorType as string | undefined;
@@ -294,6 +340,8 @@ export default function TailorPage() {
 
   // Shared: handle a completed poll result — check diff and open appropriate modal.
   const handlePollResult = (result: ImprovedResult) => {
+    // Clear the persisted task — it has now completed.
+    localStorage.removeItem(TAILOR_TASK_STORAGE_KEY);
     if (!result?.data?.diff_summary || !result?.data?.detailed_changes) {
       console.warn('Diff data missing for tailor preview; requesting user confirmation.');
       setDiffConfirmError(null);
@@ -326,6 +374,12 @@ export default function TailorPage() {
       const taskId = await startTailorTask(resumeId, jobId, selectedPromptId);
       if (abortRef.current || generationRef.current !== generation) return;
 
+      // Persist task_id so the user can resume if they navigate away mid-poll.
+      localStorage.setItem(
+        TAILOR_TASK_STORAGE_KEY,
+        JSON.stringify({ taskId, resumeId, startedAt: Date.now() } satisfies TailorTaskState),
+      );
+
       // 3. Poll until the task completes or fails (max 3 min)
       const result = await pollTailorTask(taskId, abortRef, generationRef, generation, (progress, stage) => {
         setTailorProgress(progress);
@@ -338,8 +392,57 @@ export default function TailorPage() {
     }
   };
 
+  const resumeExistingTask = async (task: TailorTaskState) => {
+    if (isLoading) return; // already busy
+    const generation = ++generationRef.current;
+    abortRef.current = false;
+    setIsLoading(true);
+    setTailorProgress(0);
+    setTailorStage('resuming');
+    setError(null);
+
+    try {
+      // Single poll to check if it completed while we were away.
+      const status = await getTailorTaskStatus(task.taskId);
+      if (abortRef.current || generationRef.current !== generation) return;
+
+      if (status.status === 'completed' && status.result) {
+        handlePollResult({ data: status.result as ImprovedResult['data'] });
+        return;
+      }
+      if (status.status === 'failed') {
+        localStorage.removeItem(TAILOR_TASK_STORAGE_KEY);
+        const msg = status.error ?? t('tailor.errors.failedToPreview');
+        setError(msg);
+        return;
+      }
+
+      // Still running — continue polling.
+      const result = await pollTailorTask(
+        task.taskId,
+        abortRef,
+        generationRef,
+        generation,
+        (progress, stage) => {
+          setTailorProgress(progress);
+          setTailorStage(stage);
+        },
+      );
+      if (abortRef.current || generationRef.current !== generation) return;
+      handlePollResult(result);
+    } catch (err) {
+      localStorage.removeItem(TAILOR_TASK_STORAGE_KEY);
+      handleTailorError(err, 'resumeExistingTask');
+    } finally {
+      if (!navigationInProgress.current) {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const handleCancel = () => {
     abortRef.current = true;
+    localStorage.removeItem(TAILOR_TASK_STORAGE_KEY);
     setIsLoading(false);
     setTailorProgress(0);
     setTailorStage('queued');

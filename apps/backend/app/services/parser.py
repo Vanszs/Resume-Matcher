@@ -27,8 +27,29 @@ def _sanitize_resume_dict(data: Any) -> Any:
 
     Safety net: even if a field_validator is missing, an LLM-returned null won't
     crash the pipeline.  Covers LinkedIn PDFs where publications have no dates.
+    Also coerces unknown sectionType values to valid enum members.
     """
+    _VALID_SECTION_TYPES = frozenset({"personalInfo", "text", "itemList", "stringList"})
+    _SECTION_TYPE_FALLBACK: dict[str, str] = {
+        "keyValue": "itemList",
+        "key_value": "itemList",
+        "bulletList": "stringList",
+        "bullet_list": "stringList",
+        "list": "stringList",
+    }
     if isinstance(data, dict):
+        if "sectionMeta" in data and isinstance(data.get("sectionMeta"), list):
+            for meta in data["sectionMeta"]:
+                if isinstance(meta, dict):
+                    st = meta.get("sectionType")
+                    if st is not None and st not in _VALID_SECTION_TYPES:
+                        coerced = _SECTION_TYPE_FALLBACK.get(st, "text")
+                        logger.warning(
+                            "Coerced unknown sectionType '%s' → '%s' in sectionMeta",
+                            st,
+                            coerced,
+                        )
+                        meta["sectionType"] = coerced
         for key, val in list(data.items()):
             if key in _SANITIZE_STRING_FIELDS and val is None:
                 data[key] = ""

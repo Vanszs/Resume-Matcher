@@ -305,7 +305,11 @@ export async function downloadResumePdf(
   locale?: Locale
 ): Promise<Blob> {
   const url = getResumePdfUrl(resumeId, settings, locale);
-  const res = await apiFetch(url);
+  // getResumePdfUrl returns a URL that already includes API_BASE.
+  // apiFetch would prepend API_BASE again on relative paths, causing double /api/v1/.
+  // Strip API_BASE prefix so apiFetch normalizes it correctly.
+  const endpoint = url.startsWith(API_BASE) ? url.slice(API_BASE.length) : url;
+  const res = await apiFetch(endpoint);
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`Failed to download resume (status ${res.status}): ${text}`);
@@ -371,7 +375,9 @@ export async function downloadCoverLetterPdf(
   locale?: Locale
 ): Promise<Blob> {
   const url = getCoverLetterPdfUrl(resumeId, pageSize, locale);
-  const res = await apiFetch(url);
+  // Same fix: strip API_BASE before passing to apiFetch to prevent double prefix.
+  const endpoint = url.startsWith(API_BASE) ? url.slice(API_BASE.length) : url;
+  const res = await apiFetch(endpoint);
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`Failed to download cover letter (status ${res.status}): ${text}`);

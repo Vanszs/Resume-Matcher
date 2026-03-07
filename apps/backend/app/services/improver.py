@@ -60,6 +60,29 @@ def _sanitize_resume_dict(data: Any) -> Any:
                             "strings": [str(i) for i in v if i is not None],
                         }
 
+        # LLM sometimes emits unknown sectionType values (e.g. "keyValue", "bulletList").
+        # Coerce them to valid SectionType enum values before Pydantic validation.
+        _VALID_SECTION_TYPES = {"personalInfo", "text", "itemList", "stringList"}
+        _SECTION_TYPE_FALLBACK: dict[str, str] = {
+            "keyValue": "itemList",
+            "key_value": "itemList",
+            "bulletList": "stringList",
+            "bullet_list": "stringList",
+            "list": "stringList",
+        }
+        if "sectionMeta" in data and isinstance(data.get("sectionMeta"), list):
+            for meta in data["sectionMeta"]:
+                if isinstance(meta, dict):
+                    st = meta.get("sectionType")
+                    if st is not None and st not in _VALID_SECTION_TYPES:
+                        coerced = _SECTION_TYPE_FALLBACK.get(st, "text")
+                        logger.warning(
+                            "Coerced unknown sectionType '%s' → '%s' in sectionMeta",
+                            st,
+                            coerced,
+                        )
+                        meta["sectionType"] = coerced
+
         for key, val in list(data.items()):
             if key in _SANITIZE_STRING_FIELDS and val is None:
                 data[key] = ""

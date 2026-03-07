@@ -101,6 +101,12 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
+      // Proxy all API calls to the backend — works in WSL2 because the
+      // Next.js server (not the browser) makes the upstream request.
+      {
+        source: '/api/v1/:path*',
+        destination: `${API_URL}/api/v1/:path*`,
+      },
       {
         source: '/api_be/:path*',
         destination: `${API_URL}/:path*`,

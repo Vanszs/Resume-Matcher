@@ -172,13 +172,15 @@ start_backend() {
     ensure_venv
     cd "$BACKEND_DIR"
 
-    info "Starting backend on :$BACKEND_PORT (log-level=info, reload=on)..."
+    BACKEND_LOG="$BACKEND_DIR/backend-screen.log"
+    : > "$BACKEND_LOG"
+    info "Starting backend on :$BACKEND_PORT (log → $BACKEND_LOG)..."
     DATABASE_URL="$DATABASE_URL" \
         uvicorn app.main:app \
         --host 0.0.0.0 \
         --port "$BACKEND_PORT" \
         --reload \
-        --log-level info &
+        --log-level info >> "$BACKEND_LOG" 2>&1 &
     BACKEND_PID=$!
 
     # Wait for backend to be ready
@@ -197,8 +199,11 @@ start_frontend() {
     kill_port "$FRONTEND_PORT" "Frontend"
     cd "$FRONTEND_DIR"
 
-    # Write local env so NEXT_PUBLIC_API_URL points to local backend
-    echo "NEXT_PUBLIC_API_URL=http://localhost:$BACKEND_PORT" > .env.local
+    # Leave NEXT_PUBLIC_API_URL empty so the browser uses relative /api/v1/...
+    # requests that Next.js proxies server-side to the backend.
+    # This is required for WSL2 where "localhost" in the Windows browser
+    # points to Windows, not the WSL instance.
+    echo "NEXT_PUBLIC_API_URL=" > .env.local
 
     info "Building frontend (next build)..."
     npm run build

@@ -82,6 +82,18 @@ RESUME_SCHEMA_EXAMPLE = """{
         }
       ]
     },
+    "competitions": {
+      "sectionType": "itemList",
+      "items": [
+        {
+          "id": 1,
+          "title": "AI Hackathon 2023",
+          "subtitle": "1st Place",
+          "years": "Nov 2023",
+          "description": ["Built NLP pipeline that won first place among 50 teams"]
+        }
+      ]
+    },
     "volunteer_work": {
       "sectionType": "text",
       "text": "Description of volunteer activities..."
@@ -118,8 +130,17 @@ Example output format:
 
 Custom section types:
 - "text": Single text block (e.g., objective, statement)
-- "itemList": List of items with title, subtitle, years, description (e.g., publications, research)
+- "itemList": List of items with title, subtitle, years, description (e.g., publications, research, competitions)
 - "stringList": Simple list of strings (e.g., hobbies, interests)
+
+Section classification — use this to decide which section an entry belongs to:
+- workExperience: Formal employment, internships, contract/freelance work WITH a client or employer
+- personalProjects: Personal projects, open source contributions, side projects, solo or team builds WITHOUT an employer
+- education: Degrees, coursework, bootcamps, certifications with an institution
+- customSections["competitions"]: Hackathons, competitive programming, design contests, case competitions (itemList)
+- customSections["organizations"]: Student clubs, communities, professional associations (itemList or text)
+- customSections["research"]: Academic research, lab work, published papers (itemList)
+- When in doubt between workExperience and personalProjects: if there is a company/employer → workExperience; if self-initiated without an employer → personalProjects
 
 Rules:
 - Use "" for ALL missing text fields — including years, title, company, name, role, institution, degree
@@ -127,13 +148,15 @@ Rules:
 - null is ONLY allowed for: website, linkedin, github, location, subtitle, description (when the field is genuinely absent)
 - NEVER use null for: years, title, company, name, role, institution, degree — use "" instead
 - Number IDs starting from 1
-- Format years as "YYYY - YYYY" or "YYYY - Present"
+- Format years as "YYYY - YYYY", "Mon YYYY - Mon YYYY", or "Mon YYYY - Present" — preserve month information when available
 - Use snake_case for custom section keys (e.g., "volunteer_work", "publications")
 - Preserve the original section name as a descriptive key
-- Normalize dates: "Jan 2020" → "2020", "2020-2021" → "2020 - 2021", "Current"/"Ongoing" → "Present"
+- Normalize date ranges: "2020-2021" → "2020 - 2021", "Current"/"Ongoing" → "Present"
+- Preserve months when they are given: "Jan 2020" stays "Jan 2020" (do NOT reduce to just "2020")
 - For ambiguous dates like "3 years experience", infer approximate years from context or use "~YYYY"
 - Flag overlapping dates (concurrent roles) by preserving both, don't merge
 - LinkedIn PDF exports may have sidebar content (publications, certifications, skills) interleaved with main body text due to two-column layout extraction — treat these as separate sections, not part of the summary
+- LinkedIn PDFs often show dates adjacent to job titles; if the date appears out of order due to column extraction, match it to the nearest preceding company/title using context clues
 - If a section (e.g. Publications) contains no dates whatsoever, set years to "" for each item — do NOT use null
 
 Resume to parse:
