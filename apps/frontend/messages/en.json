@@ -579,7 +579,7 @@
     },
     "missingDiffDialog": {
       "title": "Unable to calculate changes",
-      "description": "We could not compute a diff for this resume. This can happen with legacy resumes that lack structured data. You can continue to save the tailored resume or cancel to review later.",
+      "description": "We could not compute a diff for this resume. This usually means your master resume needs to be re-uploaded. Please delete and re-upload your master resume, then try tailoring again.",
       "confirmLabel": "Continue without diff"
     },
     "errors": {

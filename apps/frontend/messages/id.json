@@ -579,7 +579,7 @@
     },
     "missingDiffDialog": {
       "title": "Tidak dapat menghitung perubahan",
-      "description": "Kami tidak dapat menghitung perbandingan untuk resume ini. Ini mungkin terjadi pada resume lama tanpa data terstruktur. Anda dapat melanjutkan untuk menyimpan resume yang disesuaikan atau batalkan untuk ditinjau nanti.",
+      "description": "Kami tidak dapat menghitung perbandingan untuk resume ini. Ini biasanya berarti resume master Anda perlu diunggah ulang. Silakan hapus dan unggah ulang resume master Anda, lalu coba sesuaikan kembali.",
       "confirmLabel": "Lanjutkan tanpa perbandingan"
     },
     "errors": {

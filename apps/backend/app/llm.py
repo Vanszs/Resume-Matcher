@@ -10,6 +10,10 @@ from pydantic import BaseModel
 
 from app.config import settings
 
+# Drop unsupported params (e.g. reasoning_effort) instead of raising
+# UnsupportedParamsError — lets the same config work across model families.
+litellm.drop_params = True
+
 # LLM timeout configuration (seconds) - base values
 LLM_TIMEOUT_HEALTH_CHECK = 30
 LLM_TIMEOUT_COMPLETION = 120

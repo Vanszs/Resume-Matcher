@@ -579,7 +579,7 @@
     },
     "missingDiffDialog": {
       "title": "Não foi possível calcular as alterações",
-      "description": "Não foi possível calcular um diff para este currículo. Isso pode acontecer com currículos antigos sem dados estruturados. Você pode continuar para salvar o currículo personalizado ou cancelar para revisar mais tarde.",
+      "description": "Não foi possível calcular as diferenças para este currículo. Isso geralmente significa que seu currículo mestre precisa ser reenviado. Por favor, exclua e reenvie seu currículo mestre, depois tente personalizar novamente.",
       "confirmLabel": "Continuar sem diff"
     },
     "errors": {

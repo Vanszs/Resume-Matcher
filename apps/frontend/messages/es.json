@@ -579,7 +579,7 @@
     },
     "missingDiffDialog": {
       "title": "No se pudieron calcular los cambios",
-      "description": "No pudimos calcular un diff para este currículum. Esto puede ocurrir con currículums antiguos sin datos estructurados. Puedes continuar para guardar el currículum personalizado o cancelar para revisarlo más tarde.",
+      "description": "No pudimos calcular las diferencias para este currículum. Esto generalmente significa que tu currículum maestro necesita ser re-subido. Por favor, elimina y vuelve a subir tu currículum maestro, luego intenta personalizar de nuevo.",
       "confirmLabel": "Continuar sin diff"
     },
     "errors": {
