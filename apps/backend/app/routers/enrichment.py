@@ -9,6 +9,8 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.exceptions import DebugHTTPException
+
 from app.config import settings
 from app.database import db
 from app.dependencies import get_current_user
@@ -121,9 +123,10 @@ async def analyze_resume(
 
     except Exception as e:
         logger.error(f"Resume analysis failed: {e}")
-        raise HTTPException(
+        raise DebugHTTPException(
             status_code=500,
             detail="Failed to analyze resume. Please try again.",
+            error=e,
         )
 
 
@@ -172,9 +175,10 @@ async def generate_enhancements(
         )
     except Exception as e:
         logger.error(f"Failed to re-analyze resume: {e}")
-        raise HTTPException(
+        raise DebugHTTPException(
             status_code=500,
             detail="Failed to process enhancements. Please try again.",
+            error=e,
         )
 
     # Build question_id -> item_id mapping
@@ -339,9 +343,10 @@ async def apply_enhancements(
         )
     except Exception as e:
         logger.error(f"Failed to save enhancements to database: {e}")
-        raise HTTPException(
+        raise DebugHTTPException(
             status_code=500,
             detail="Failed to save enhancements. Please try again.",
+            error=e,
         )
 
     return {
@@ -487,9 +492,11 @@ async def regenerate_items(
         regenerated_items.append(result)
 
     if not regenerated_items:
-        raise HTTPException(
+        raise DebugHTTPException(
             status_code=500,
             detail="Failed to regenerate content. Please try again.",
+            error_type="RegenerateAllFailed",
+            error_detail=f"All {len(request.items)} item(s) failed to regenerate.",
         )
 
     return RegenerateResponse(regenerated_items=regenerated_items, errors=errors)
@@ -752,9 +759,10 @@ async def apply_regenerated_items(
         )
     except Exception as e:
         logger.error(f"Failed to save regenerated content to database: {e}")
-        raise HTTPException(
+        raise DebugHTTPException(
             status_code=500,
             detail="Failed to save changes. Please try again.",
+            error=e,
         )
 
     return {

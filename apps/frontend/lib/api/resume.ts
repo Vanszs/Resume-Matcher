@@ -146,7 +146,10 @@ export async function uploadJobDescriptions(
     job_descriptions: descriptions,
     resume_id: resumeId,
   });
-  if (!res.ok) throw new Error(`Upload failed with status ${res.status}`);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Upload failed with status ${res.status}: ${text}`);
+  }
   const data = await res.json();
   return data.job_id[0];
 }
@@ -188,7 +191,8 @@ export async function confirmImproveResume(
 export async function fetchResume(resumeId: string): Promise<ResumeResponse['data']> {
   const res = await apiFetch(`/resumes?resume_id=${encodeURIComponent(resumeId)}`);
   if (!res.ok) {
-    throw new Error(`Failed to load resume (status ${res.status}).`);
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to load resume (status ${res.status}): ${text}`);
   }
   const payload = (await res.json()) as ResumeResponse;
   // Support both raw_resume content (initial) and processed_resume (if available)
@@ -199,7 +203,8 @@ export async function fetchResume(resumeId: string): Promise<ResumeResponse['dat
 export async function fetchResumeList(includeMaster = false): Promise<ResumeListItem[]> {
   const res = await apiFetch(`/resumes/list?include_master=${includeMaster ? 'true' : 'false'}`);
   if (!res.ok) {
-    throw new Error(`Failed to load resumes list (status ${res.status}).`);
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to load resumes list (status ${res.status}): ${text}`);
   }
   const payload = (await res.json()) as { data: ResumeListItem[] };
   return payload.data;

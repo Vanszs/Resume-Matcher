@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, field_validator
 
 from app.dependencies import get_current_user
+from app.exceptions import DebugHTTPException
 from app.prisma_db import prisma
 
 logger = logging.getLogger(__name__)
@@ -72,7 +73,7 @@ async def get_llm_configs(user=Depends(get_current_user)) -> list[LLMConfigOut]:
         ]
     except Exception as e:
         logger.error("Failed to get LLM configs for user %s: %s", user.id, e)
-        raise HTTPException(status_code=500, detail="Failed to retrieve configurations.")
+        raise DebugHTTPException(status_code=500, detail="Failed to retrieve configurations.", error=e)
 
 
 @router.post("/llm-config", response_model=LLMConfigOut)
@@ -140,7 +141,7 @@ async def upsert_llm_config(request: LLMConfigInput, user=Depends(get_current_us
         raise
     except Exception as e:
         logger.error("Failed to upsert LLM config for user %s provider %s: %s", user.id, request.provider, e)
-        raise HTTPException(status_code=500, detail="Failed to save configuration.")
+        raise DebugHTTPException(status_code=500, detail="Failed to save configuration.", error=e)
 
 
 @router.put("/llm-config/{provider}/set-default")
@@ -175,7 +176,7 @@ async def set_default_provider(provider: str, user=Depends(get_current_user)) ->
         raise
     except Exception as e:
         logger.error("Failed to set default provider %s for user %s: %s", provider, user.id, e)
-        raise HTTPException(status_code=500, detail="Failed to update default provider.")
+        raise DebugHTTPException(status_code=500, detail="Failed to update default provider.", error=e)
 
 
 @router.delete("/llm-config/{provider}")

@@ -216,9 +216,13 @@ export default function TailorPage() {
       setPendingResult(result);
       setShowDiffModal(true);
     } catch (err) {
-      console.error(err);
+      // Log structured error context for debugging
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error('[tailor] runGenerate failed:', {
+        message: errorMessage,
+        raw: err,
+      });
       // Check for common error patterns
-      const errorMessage = err instanceof Error ? err.message : '';
       if (
         errorMessage.includes('ALL_ENTRIES_REMOVED')
       ) {
@@ -282,10 +286,11 @@ export default function TailorPage() {
       setShowDiffModal(false);
       setPendingResult(null);
     } catch (err) {
-      console.error(err);
-      const errorMessage = t('tailor.errors.failedToConfirm');
-      setError(errorMessage);
-      setDiffConfirmError(errorMessage);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error('[tailor] handleConfirmChanges failed:', { message: errorMessage, raw: err });
+      const msg = t('tailor.errors.failedToConfirm');
+      setError(msg);
+      setDiffConfirmError(msg);
     } finally {
       confirmInFlight.current = false;
       if (!navigationInProgress.current) {
@@ -326,10 +331,11 @@ export default function TailorPage() {
       await confirmAndNavigate(missingDiffResult);
       handleCloseMissingDiffDialog();
     } catch (err) {
-      console.error(err);
-      const errorMessage = t('tailor.errors.failedToConfirm');
-      setError(errorMessage);
-      setMissingDiffError(errorMessage);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error('[tailor] handleMissingDiffConfirm failed:', { message: errorMessage, raw: err });
+      const msg = t('tailor.errors.failedToConfirm');
+      setError(msg);
+      setMissingDiffError(msg);
     } finally {
       missingDiffConfirmInFlight.current = false;
       if (!navigationInProgress.current) {
@@ -382,7 +388,8 @@ export default function TailorPage() {
       setPendingResult(result);
       setShowDiffModal(true);
     } catch (err) {
-      console.error(err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error('[tailor] handleAllRemovedTryKeywords failed:', { message: errorMessage, raw: err });
       setError(t('tailor.errors.failedToPreview'));
     } finally {
       setIsLoading(false);

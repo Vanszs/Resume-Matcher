@@ -17,6 +17,7 @@ from fastapi.responses import Response, StreamingResponse
 
 from app.database import db
 from app.dependencies import get_current_user
+from app.exceptions import DebugHTTPException
 from app.pdf import render_resume_pdf, PDFRenderError
 from app.config import settings
 
@@ -196,7 +197,7 @@ def _raise_improve_error(
             detail="AI service is temporarily unavailable. Please try again.",
         )
 
-    raise HTTPException(status_code=500, detail=detail)
+    raise DebugHTTPException(status_code=500, detail=detail, error=error)
 
 
 def _get_original_resume_data(resume: dict[str, Any]) -> dict[str, Any] | None:

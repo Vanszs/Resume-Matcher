@@ -475,6 +475,16 @@ async def complete(
         if not content:
             raise ValueError("Empty response from LLM")
         return content
+    except (
+        litellm.exceptions.RateLimitError,
+        litellm.exceptions.AuthenticationError,
+        litellm.exceptions.ServiceUnavailableError,
+        litellm.exceptions.Timeout,
+        litellm.exceptions.BadRequestError,
+    ):
+        # Re-raise known LiteLLM exceptions so callers can detect their type.
+        # _raise_improve_error() handles each of these with a specific HTTP status.
+        raise
     except Exception as e:
         # Log the actual error server-side for debugging
         logging.error(f"LLM completion failed: {e}", extra={"model": model_name})

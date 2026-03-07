@@ -2,11 +2,13 @@
 
 import json
 import logging
+from typing import NoReturn
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, field_validator
 
 from app.dependencies import get_current_admin
+from app.exceptions import DebugHTTPException
 from app.prisma_db import prisma
 from app.services.auth import get_password_hash
 from app.config import load_config_file, save_config_file
@@ -14,6 +16,11 @@ from app.config import load_config_file, save_config_file
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/admin", tags=["Admin"], dependencies=[Depends(get_current_admin)])
+
+
+def _admin_exc(status_code: int, detail: str, exc: Exception) -> NoReturn:
+    """Raise a DebugHTTPException with extended error info for admin endpoints."""
+    raise DebugHTTPException(status_code=status_code, detail=detail, error=exc)
 
 
 # --- Schemas ---
@@ -133,7 +140,7 @@ async def create_user(request: CreateUserRequest, admin=Depends(get_current_admi
         raise
     except Exception as e:
         logger.error("Failed to create user %s: %s", request.email, e)
-        raise HTTPException(status_code=500, detail="Failed to create user. Please try again.")
+        _admin_exc(500, "Failed to create user. Please try again.", e)
 
 
 @router.get("/users", response_model=list[UserResponse])
@@ -155,7 +162,7 @@ async def list_users() -> list[UserResponse]:
         ]
     except Exception as e:
         logger.error("Failed to list users: %s", e)
-        raise HTTPException(status_code=500, detail="Failed to retrieve users.")
+        _admin_exc(500, "Failed to retrieve users.", e)
 
 
 @router.patch("/users/{user_id}/toggle-active")
@@ -182,7 +189,7 @@ async def toggle_user_active(user_id: str, admin=Depends(get_current_admin)) -> 
         raise
     except Exception as e:
         logger.error("Failed to toggle active for user %s: %s", user_id, e)
-        raise HTTPException(status_code=500, detail="Failed to update user status.")
+        _admin_exc(500, "Failed to update user status.", e)
 
 
 @router.delete("/users/{user_id}")
@@ -216,7 +223,7 @@ async def delete_user(user_id: str, admin=Depends(get_current_admin)) -> dict:
         raise
     except Exception as e:
         logger.error("Failed to delete user %s: %s", user_id, e)
-        raise HTTPException(status_code=500, detail="Failed to delete user.")
+        _admin_exc(500, "Failed to delete user.", e)
 
 
 class ResetPasswordRequest(BaseModel):
@@ -272,7 +279,7 @@ async def change_user_username(
         raise
     except Exception as e:
         logger.error("Failed to change username for user %s: %s", user_id, e)
-        raise HTTPException(status_code=500, detail="Failed to change username.")
+        _admin_exc(500, "Failed to change username.", e)
 
 
 @router.patch("/users/{user_id}/password")
@@ -296,7 +303,7 @@ async def reset_user_password(
         raise
     except Exception as e:
         logger.error("Failed to reset password for user %s: %s", user_id, e)
-        raise HTTPException(status_code=500, detail="Failed to reset password.")
+        _admin_exc(500, "Failed to reset password.", e)
 
 
 @router.patch("/users/{user_id}/role")
@@ -361,7 +368,7 @@ async def change_user_role(
         raise
     except Exception as e:
         logger.error("Failed to change role for user %s: %s", user_id, e)
-        raise HTTPException(status_code=500, detail="Failed to change user role.")
+        _admin_exc(500, "Failed to change user role.", e)
 
 
 # --- Role CRUD ---
@@ -385,7 +392,7 @@ async def create_role(request: CreateRoleRequest) -> RoleResponse:
         raise
     except Exception as e:
         logger.error("Failed to create role %s: %s", request.name, e)
-        raise HTTPException(status_code=500, detail="Failed to create role.")
+        _admin_exc(500, "Failed to create role.", e)
 
 
 @router.get("/roles", response_model=list[RoleResponse])
@@ -396,7 +403,7 @@ async def list_roles() -> list[RoleResponse]:
         return [RoleResponse(id=r.id, name=r.name, permissions=r.permissions) for r in roles]
     except Exception as e:
         logger.error("Failed to list roles: %s", e)
-        raise HTTPException(status_code=500, detail="Failed to retrieve roles.")
+        _admin_exc(500, "Failed to retrieve roles.", e)
 
 
 # --- App-level settings ---
@@ -511,7 +518,7 @@ async def get_user_detail(user_id: str, admin=Depends(get_current_admin)) -> Use
         raise
     except Exception as e:
         logger.error("Failed to get user detail for %s: %s", user_id, e)
-        raise HTTPException(status_code=500, detail="Failed to retrieve user details.")
+        _admin_exc(500, "Failed to retrieve user details.", e)
 
 
 @router.patch("/app-settings", response_model=AppSettingsResponse)

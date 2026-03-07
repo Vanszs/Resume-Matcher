@@ -12,6 +12,8 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+from app.exceptions import DebugHTTPException
+
 # Fix for Windows: Use ProactorEventLoop for subprocess support (Playwright)
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
@@ -113,6 +115,24 @@ app = FastAPI(
 # Attach rate limiter state and 429 handler
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+@app.exception_handler(DebugHTTPException)
+async def debug_exception_handler(request: Request, exc: DebugHTTPException) -> JSONResponse:
+    """Return extended error info in network response for debugging.
+
+    The 'detail' field stays a plain string so existing frontend code is
+    unaffected. debug fields (error_type, error_detail) are only visible
+    in the raw network response / browser DevTools.
+    """
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "detail": exc.detail,
+            "error_type": exc.error_type,
+            "error_detail": exc.error_detail,
+        },
+    )
 
 # CORS middleware - origins configurable via CORS_ORIGINS env var
 app.add_middleware(
