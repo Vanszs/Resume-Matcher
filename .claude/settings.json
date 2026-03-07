@@ -1,6 +1,20 @@
 {
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/vanszs/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
+      "Bash(rtk:*)",
       "Bash(docker-compose ps:*)",
       "Bash(docker-compose logs:*)",
       "Bash(grep:*)",
