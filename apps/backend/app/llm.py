@@ -153,38 +153,65 @@ def _join_text_parts(parts: list[str]) -> str | None:
     return joined or None
 
 
-def _extract_message_text(message: Any) -> str | None:
+def _extract_message_text(message: Any, model: str = "") -> str | None:
     """Extract plain text from a LiteLLM message object across providers.
-    
-    Handles reasoning models (e.g., DeepSeek-R1, GLM) that return content in
-    'reasoning_content' field instead of 'content'.
+
+    Fix 2: model-aware fallback — Harmony models (GPT-OSS) must NOT fall back
+    to reasoning_content because that channel contains CoT analysis text, not
+    the final answer.  For standard reasoning models (DeepSeek-R1, etc.) the
+    fallback is still valid and intentionally preserved.
+
+    Args:
+        message: LiteLLM message object or dict.
+        model: Full model name as used by LiteLLM (used for Harmony detection).
+
+    Returns:
+        Extracted text or None if no usable content is found.
     """
     content: Any = None
 
-    # Try regular content first
+    # 1. Try regular content first — works for all model types
     if hasattr(message, "content"):
         content = message.content
     elif isinstance(message, dict):
         content = message.get("content")
 
-    # If content is empty, check reasoning_content (for reasoning models)
+    # 2. Conditional fallback to reasoning_content when content is empty
     if not content:
+        if _is_harmony_model(model):
+            # Harmony models (GPT-OSS): reasoning_content = analysis channel CoT.
+            # Using it as the answer would cause reasoning-text leaks.
+            logging.warning(
+                "Harmony model returned empty content — reasoning_content ignored "
+                "to prevent CoT leak. Model: %s",
+                model,
+            )
+            return None
+
+        # Other reasoning models (DeepSeek-R1, GLM, etc.): reasoning_content may
+        # legitimately carry the final answer.
+        reasoning: Any = None
         if hasattr(message, "reasoning_content"):
-            content = message.reasoning_content
+            reasoning = message.reasoning_content
         elif isinstance(message, dict):
-            content = message.get("reasoning_content")
+            reasoning = message.get("reasoning_content")
+
+        if reasoning:
+            logging.info("Using reasoning_content fallback for model: %s", model)
+            content = reasoning
 
     return _join_text_parts(_extract_text_parts(content))
 
 
-def _extract_choice_text(choice: Any) -> str | None:
+def _extract_choice_text(choice: Any, model: str = "") -> str | None:
     """Extract plain text from a LiteLLM choice object.
 
-    Tries message.content first, then choice.text, then choice.delta. Handles both
-    object attributes and dict keys.
+    Fix 2: accepts model name so _extract_message_text can apply Harmony-aware
+    fallback logic.
 
     Args:
         choice: LiteLLM choice object or dict.
+        model: Full model name (passed through to _extract_message_text).
 
     Returns:
         Extracted text or None if no content is found.
@@ -195,7 +222,7 @@ def _extract_choice_text(choice: Any) -> str | None:
     elif isinstance(choice, dict):
         message = choice.get("message")
 
-    content = _extract_message_text(message)
+    content = _extract_message_text(message, model=model)
     if content:
         return content
 
@@ -323,16 +350,41 @@ def _supports_temperature(provider: str, model: str) -> bool:
     return True
 
 
-def _get_reasoning_effort(provider: str, model: str) -> str | None:
-    """Return a default reasoning_effort for models that require it.
+def _get_reasoning_effort(
+    provider: str,
+    model: str,
+    *,
+    override: str | None = None,
+) -> str | None:
+    """Return reasoning_effort value for the given model.
 
-    Some OpenAI gpt-5 models may return empty message.content unless a supported
-    `reasoning_effort` is explicitly set. This keeps downstream JSON parsing reliable.
+    Fix 3: supports per-call override and GPT-OSS default of 'low'.
+
+    Args:
+        provider: LLM provider name (unused — kept for API stability).
+        model: Full model name/identifier as used by LiteLLM.
+        override: Explicit effort level from the caller (takes priority).
+
+    Returns:
+        "low", "medium", "high", "minimal", or None if not applicable.
     """
+    # Explicit caller override takes priority over all defaults
+    if override:
+        return override
+
     _ = provider
     model_lower = model.lower()
+
+    # GPT-5: needs "minimal" to avoid returning empty content
     if "gpt-5" in model_lower:
         return "minimal"
+
+    # GPT-OSS (Harmony format): default to "low" to reduce CoT verbosity and
+    # reasoning_content leak.  Callers that need deeper reasoning can pass
+    # override="medium" or override="high".
+    if "gpt-oss" in model_lower:
+        return "low"
+
     return None
 
 
@@ -370,12 +422,12 @@ async def check_llm_health(
             "api_base": _normalize_api_base(config.provider, config.api_base),
             "timeout": LLM_TIMEOUT_HEALTH_CHECK,
         }
-        reasoning_effort = _get_reasoning_effort(config.provider, model_name)
+        reasoning_effort = _get_reasoning_effort(config.provider, model_name, override="low")
         if reasoning_effort:
             kwargs["reasoning_effort"] = reasoning_effort
 
         response = await litellm.acompletion(**kwargs)
-        content = _extract_choice_text(response.choices[0])
+        content = _extract_choice_text(response.choices[0], model=model_name)
         if not content:
             # LLM-003: Empty response should mark health check as unhealthy
             logging.warning(
@@ -441,8 +493,14 @@ async def complete(
     user_id: str | None = None,
     max_tokens: int = 4096,
     temperature: float = 0.7,
+    reasoning_effort: str | None = None,
 ) -> str:
-    """Make a completion request to the LLM."""
+    """Make a completion request to the LLM.
+
+    Fix 3: accepts reasoning_effort override so callers can tune CoT verbosity
+    per task (e.g., "low" for trivial title extraction).
+    Fix 5: logs a warning when a reasoning model returns reasoning-style prose.
+    """
     if config is None:
         config = get_llm_config(user_id)
 
@@ -465,15 +523,25 @@ async def complete(
         }
         if _supports_temperature(config.provider, model_name):
             kwargs["temperature"] = temperature
-        reasoning_effort = _get_reasoning_effort(config.provider, model_name)
-        if reasoning_effort:
-            kwargs["reasoning_effort"] = reasoning_effort
+        effort = _get_reasoning_effort(config.provider, model_name, override=reasoning_effort)
+        if effort:
+            kwargs["reasoning_effort"] = effort
 
         response = await litellm.acompletion(**kwargs)
 
-        content = _extract_choice_text(response.choices[0])
+        content = _extract_choice_text(response.choices[0], model=model_name)
         if not content:
             raise ValueError("Empty response from LLM")
+
+        # Fix 5: log a warning when reasoning model leaks CoT into plain-text output
+        if _is_reasoning_model(model_name) and _is_reasoning_response(content):
+            logging.warning(
+                "complete() received reasoning-style response from %s. "
+                "Content preview: %s",
+                model_name,
+                content[:200],
+            )
+
         return content
     except (
         litellm.exceptions.RateLimitError,
@@ -609,8 +677,44 @@ def _calculate_timeout(
     return int(base * token_factor * provider_factor)
 
 
+# --- Model classification helpers (Fix 1) ---
+
+# Known reasoning model name fragments (case-insensitive substring match)
+_REASONING_MODEL_PATTERNS: tuple[str, ...] = (
+    "gpt-oss",      # GPT-OSS-120B, GPT-OSS-20B (Harmony format)
+    "o1",           # OpenAI o1 family
+    "o3",           # OpenAI o3 family
+    "deepseek-r1",  # DeepSeek R1 (CoT in reasoning_content)
+    "gpt-5",        # GPT-5 family (needs reasoning_effort)
+)
+
+# Models that use Harmony multi-channel format specifically
+_HARMONY_MODEL_PATTERNS: tuple[str, ...] = (
+    "gpt-oss",
+)
+
+
+def _is_reasoning_model(model: str) -> bool:
+    """Return True if model is a known reasoning/CoT model."""
+    model_lower = model.lower()
+    return any(p in model_lower for p in _REASONING_MODEL_PATTERNS)
+
+
+def _is_harmony_model(model: str) -> bool:
+    """Return True if model uses Harmony multi-channel format (e.g. GPT-OSS).
+
+    In Harmony format, reasoning_content contains the *analysis channel* (CoT
+    thinking text), NOT the final answer.  We must NOT fall back to it.
+    """
+    model_lower = model.lower()
+    return any(p in model_lower for p in _HARMONY_MODEL_PATTERNS)
+
+
+# --- Reasoning-pattern detection (Fix 6 — expanded) ---
+
 # Patterns indicating a reasoning model is "thinking" instead of outputting JSON
 _REASONING_PATTERNS = (
+    # Original patterns
     "1.  **Analyze",
     "1. **Analyze",
     "**Analyze the Request",
@@ -620,16 +724,60 @@ _REASONING_PATTERNS = (
     "Let me parse",
     "Sure, here",
     "Certainly!",
+    # GPT-OSS-120B specific patterns
+    "We need to",
+    "I need to",
+    "I will ",
+    "I'll ",
+    "First,",
+    "First ",
+    "The description",
+    "The job description",
+    "Looking at",
+    "Analyzing ",
+    "Based on ",
+    "Let me extract",
+    "Let me identify",
+    "Let me read",
+    "To extract",
+    "To answer",
+    "Here's my",
+    "Here is my",
+    "Okay,",
+    "OK,",
+    "Alright,",
+    # Generic reasoning starters
+    "Step 1",
+    "**Step 1",
+    "So,",
+    "Now,",
+    "Think",
 )
 
 
 def _is_reasoning_response(content: str) -> bool:
-    """Detect if LLM response is reasoning/thinking text instead of JSON."""
+    """Detect if LLM response is reasoning/thinking text instead of JSON.
+
+    Fix 6: expanded checks — also catches mid-text reasoning and clear prose.
+    """
     stripped = content.strip()
-    return any(stripped.startswith(p) for p in _REASONING_PATTERNS) or (
-        not stripped.startswith(("{", "[", "```")) and "json" not in stripped[:50].lower()
-        and any(p in stripped[:300] for p in _REASONING_PATTERNS)
-    )
+
+    # Check 1: starts with a known reasoning pattern
+    if any(stripped.startswith(p) for p in _REASONING_PATTERNS):
+        return True
+
+    # Check 2: doesn't start with JSON/code-block but contains reasoning early on
+    if not stripped.startswith(("{", "[", "```")):
+        if "json" not in stripped[:50].lower():
+            if any(p in stripped[:300] for p in _REASONING_PATTERNS):
+                return True
+
+    # Check 3: clearly prose — multiple sentence terminators and no JSON structure
+    first_200 = stripped[:200]
+    if first_200.count(". ") >= 3 and "{" not in first_200:
+        return True
+
+    return False
 
 
 def _extract_json(content: str, _depth: int = 0) -> str:
@@ -719,10 +867,12 @@ async def complete_json(
     user_id: str | None = None,
     max_tokens: int = 15000,
     retries: int = 2,
+    reasoning_effort: str | None = None,
 ) -> dict[str, Any]:
     """Make a completion request expecting JSON response.
 
     Uses JSON mode when available, with retry logic for reliability.
+    Fix 3: accepts reasoning_effort override for per-call CoT control.
     """
     if config is None:
         config = get_llm_config(user_id)
@@ -758,16 +908,16 @@ async def complete_json(
             if _supports_temperature(config.provider, model_name):
                 # LLM-002: Increase temperature on retry for variation
                 kwargs["temperature"] = _get_retry_temperature(attempt)
-            reasoning_effort = _get_reasoning_effort(config.provider, model_name)
-            if reasoning_effort:
-                kwargs["reasoning_effort"] = reasoning_effort
+            effort = _get_reasoning_effort(config.provider, model_name, override=reasoning_effort)
+            if effort:
+                kwargs["reasoning_effort"] = effort
 
             # Add JSON mode if supported
             if use_json_mode:
                 kwargs["response_format"] = {"type": "json_object"}
 
             response = await litellm.acompletion(**kwargs)
-            content = _extract_choice_text(response.choices[0])
+            content = _extract_choice_text(response.choices[0], model=model_name)
 
             if not content:
                 raise ValueError("Empty response from LLM")
