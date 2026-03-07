@@ -589,7 +589,18 @@
       "failedToGenerate": "Gagal menghasilkan resume. Periksa pengaturan Anda dan coba lagi.",
       "failedToPreview": "Gagal mempratinjau resume. Periksa pengaturan Anda dan coba lagi.",
       "serviceUnavailable": "Model AI sedang mengalami permintaan tinggi. Silakan coba lagi nanti.",
+      "timeout": "Permintaan habis waktu — AI membutuhkan waktu terlalu lama untuk merespons. Silakan coba lagi.",
       "failedToConfirm": "Gagal mengonfirmasi resume. Silakan coba lagi."
+    },
+    "progress": {
+      "queued": "Mengantri\u2026",
+      "extractKeywords": "Menganalisis deskripsi pekerjaan\u2026",
+      "improveResume": "Menyesuaikan resume\u2026",
+      "refineResume": "Menyempurnakan dan memvalidasi\u2026",
+      "finalize": "Menyelesaikan\u2026",
+      "done": "Selesai",
+      "processing": "Memproses\u2026",
+      "cancel": "Batal"
     },
     "focusedWarning": "Kustomisasi terfokus akan menghapus pengalaman kerja dan proyek yang tidak relevan dengan deskripsi pekerjaan. Hanya entri yang cocok yang akan disimpan dan ditulis ulang.",
     "allRemovedDialog": {

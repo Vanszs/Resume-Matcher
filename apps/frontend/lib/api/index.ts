@@ -19,8 +19,6 @@ export {
 // Resume operations
 export {
   uploadJobDescriptions,
-  improveResume,
-  previewImproveResume,
   confirmImproveResume,
   fetchResume,
   fetchResumeList,

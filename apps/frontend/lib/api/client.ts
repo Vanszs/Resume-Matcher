@@ -49,13 +49,37 @@ function secureCookieFlag(): string {
 /**
  * Standard fetch wrapper with common error handling.
  * Automatically attaches JWT token and handles 401 redirects.
+ *
+ * Pass `requestTimeout` (ms) to override the default 95-second limit.
+ * This intentionally sits just under Cloudflare's 100-second gateway timeout
+ * so we can show a friendly message before the proxy returns a 524.
  */
-export async function apiFetch(endpoint: string, options?: RequestInit): Promise<Response> {
+export async function apiFetch(
+  endpoint: string,
+  options?: RequestInit & { requestTimeout?: number },
+): Promise<Response> {
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
-  const response = await fetch(url, {
-    ...options,
-    headers: buildHeaders(options?.headers),
-  });
+
+  const { requestTimeout, ...fetchOptions } = options ?? {};
+  const timeoutMs = requestTimeout ?? 95_000;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...fetchOptions,
+      headers: buildHeaders(fetchOptions?.headers),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error('Request timed out. The AI is taking too long — please try again.');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   // Auto-redirect to login on 401 (token expired or invalid)
   // But don't redirect if already on the login page (prevents loop)

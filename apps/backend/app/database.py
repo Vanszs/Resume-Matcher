@@ -47,6 +47,11 @@ class Database:
         """Improvement results table."""
         return self.db.table("improvements")
 
+    @property
+    def tailor_tasks(self) -> Table:
+        """Async tailor task tracking table."""
+        return self.db.table("tailor_tasks")
+
     def close(self) -> None:
         """Close database connection."""
         if self._db is not None:
@@ -437,12 +442,107 @@ class Database:
         self.jobs.remove(Job.user_id == user_id)
         self.improvements.remove(Improvement.user_id == user_id)
 
+    # ---------------------------------------------------------------------------
+    # Tailor task operations (async background tailoring)
+    # ---------------------------------------------------------------------------
+
+    def create_tailor_task(
+        self,
+        task_id: str,
+        user_id: str,
+        resume_id: str,
+        job_id: str,
+        prompt_id: str,
+    ) -> dict[str, Any]:
+        """Create a new tailor task record with status=pending."""
+        now = datetime.now(timezone.utc).isoformat()
+        doc: dict[str, Any] = {
+            "task_id": task_id,
+            "user_id": user_id,
+            "resume_id": resume_id,
+            "job_id": job_id,
+            "prompt_id": prompt_id,
+            "status": "pending",    # pending | processing | completed | failed
+            "stage": "queued",      # queued | extract_keywords | improve_resume | refine_resume | finalize | done
+            "progress": 0,          # 0-100
+            "result": None,
+            "error": None,
+            "error_type": None,
+            "created_at": now,
+            "updated_at": now,
+        }
+        self.tailor_tasks.insert(doc)
+        return doc
+
+    def get_tailor_task(self, task_id: str, user_id: str) -> dict[str, Any] | None:
+        """Fetch a tailor task by ID, scoped to user."""
+        Task = Query()
+        results = self.tailor_tasks.search(
+            (Task.task_id == task_id) & (Task.user_id == user_id)
+        )
+        return results[0] if results else None
+
+    def update_tailor_task(self, task_id: str, updates: dict[str, Any], user_id: str | None = None) -> None:
+        """Update fields on a tailor task record."""
+        updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+        Task = Query()
+        condition = Task.task_id == task_id
+        if user_id:
+            condition = condition & (Task.user_id == user_id)
+        self.tailor_tasks.update(updates, condition)
+
+    def cleanup_stale_tailor_tasks(self, max_age_minutes: int = 15) -> int:
+        """Mark in-flight tasks older than max_age_minutes as failed (crash recovery).
+
+        Returns the number of tasks updated.
+        """
+        from datetime import timedelta
+
+        cutoff = (
+            datetime.now(timezone.utc) - timedelta(minutes=max_age_minutes)
+        ).isoformat()
+        Task = Query()
+        stale = self.tailor_tasks.search(
+            Task.status.one_of(["pending", "processing"])
+            & (Task.created_at < cutoff)
+        )
+        for task in stale:
+            self.update_tailor_task(
+                task["task_id"],
+                {
+                    "status": "failed",
+                    "error": "Task expired — server may have restarted. Please try again.",
+                    "error_type": "timeout",
+                },
+            )
+        return len(stale)
+
+    def cleanup_old_tailor_tasks(self, max_age_hours: int = 24) -> int:
+        """Permanently delete completed/failed tasks older than max_age_hours.
+
+        Returns the number of tasks deleted.
+        """
+        from datetime import timedelta
+
+        cutoff = (
+            datetime.now(timezone.utc) - timedelta(hours=max_age_hours)
+        ).isoformat()
+        Task = Query()
+        old = self.tailor_tasks.search(
+            Task.status.one_of(["completed", "failed"])
+            & (Task.created_at < cutoff)
+        )
+        for task in old:
+            self.tailor_tasks.remove(Task.task_id == task["task_id"])
+        return len(old)
+
     def reset_database(self) -> None:
         """Reset the database by truncating all tables and clearing uploads."""
         # Truncate tables
         self.resumes.truncate()
         self.jobs.truncate()
         self.improvements.truncate()
+        self.tailor_tasks.truncate()
 
         # Clear uploads directory
         uploads_dir = settings.data_dir / "uploads"

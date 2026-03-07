@@ -589,7 +589,18 @@
       "failedToGenerate": "No se pudo generar el currículum. Revisa tu configuración e inténtalo de nuevo.",
       "failedToPreview": "No se pudo previsualizar el currículum. Revisa tu configuración e inténtalo de nuevo.",
       "serviceUnavailable": "El modelo de IA está experimentando alta demanda en este momento. Por favor, inténtalo de nuevo más tarde.",
+      "timeout": "La solicitud agotó el tiempo de espera: la IA tardó demasiado en responder. Por favor, inténtalo de nuevo.",
       "failedToConfirm": "No se pudo confirmar el currículum. Inténtalo de nuevo."
+    },
+    "progress": {
+      "queued": "En cola\u2026",
+      "extractKeywords": "Analizando la descripción del trabajo\u2026",
+      "improveResume": "Adaptando el currículum\u2026",
+      "refineResume": "Refinando y validando\u2026",
+      "finalize": "Finalizando\u2026",
+      "done": "Listo",
+      "processing": "Procesando\u2026",
+      "cancel": "Cancelar"
     },
     "focusedWarning": "La adaptación enfocada eliminará experiencias laborales y proyectos que no sean relevantes para la descripción del trabajo. Solo se conservarán y reescribirán las entradas que coincidan.",
     "allRemovedDialog": {

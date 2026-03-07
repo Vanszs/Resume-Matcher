@@ -589,7 +589,18 @@
       "failedToGenerate": "Falha ao gerar currículo. Verifique suas configurações e tente novamente.",
       "failedToPreview": "Falha ao pré-visualizar o currículo. Verifique suas configurações e tente novamente.",
       "serviceUnavailable": "O modelo de IA está com alta demanda no momento. Por favor, tente novamente mais tarde.",
+      "timeout": "A solicitação atingiu o tempo limite — a IA demorou muito para responder. Por favor, tente novamente.",
       "failedToConfirm": "Falha ao confirmar o currículo. Tente novamente."
+    },
+    "progress": {
+      "queued": "Na fila\u2026",
+      "extractKeywords": "Analisando a descri\u00e7\u00e3o da vaga\u2026",
+      "improveResume": "Personalizando o currículo\u2026",
+      "refineResume": "Refinando e validando\u2026",
+      "finalize": "Finalizando\u2026",
+      "done": "Concluído",
+      "processing": "Processando\u2026",
+      "cancel": "Cancelar"
     },
     "focusedWarning": "A adaptação focada removerá experiências de trabalho e projetos não relevantes para a descrição do cargo. Apenas as entradas correspondentes serão mantidas e reescritas.",
     "allRemovedDialog": {

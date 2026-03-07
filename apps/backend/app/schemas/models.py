@@ -793,6 +793,25 @@ class HealthResponse(BaseModel):
     llm: dict[str, Any]
 
 
+class TailorTaskStartResponse(BaseModel):
+    """Response when a tailor task is successfully queued."""
+
+    task_id: str
+    status: str = "pending"
+
+
+class TailorTaskStatusResponse(BaseModel):
+    """Polling response for an async tailor task."""
+
+    task_id: str
+    status: str          # pending | processing | completed | failed
+    stage: str           # queued | extract_keywords | improve_resume | refine_resume | finalize | done
+    progress: int        # 0-100
+    result: ImproveResumeData | None = None
+    error: str | None = None
+    error_type: str | None = None  # timeout | auth | rate_limit | service_unavailable | general
+
+
 class StatusResponse(BaseModel):
     """Application status response."""
 

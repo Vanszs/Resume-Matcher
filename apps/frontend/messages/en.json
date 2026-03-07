@@ -589,7 +589,18 @@
       "failedToGenerate": "Failed to generate resume. Please check your settings and try again.",
       "failedToPreview": "Failed to preview resume. Please check your settings and try again.",
       "serviceUnavailable": "The AI model is currently experiencing high demand. Please try again later.",
+      "timeout": "The request timed out — the AI took too long to respond. Please try again.",
       "failedToConfirm": "Failed to confirm resume. Please try again."
+    },
+    "progress": {
+      "queued": "Queued\u2026",
+      "extractKeywords": "Analyzing job description\u2026",
+      "improveResume": "Tailoring resume\u2026",
+      "refineResume": "Refining and validating\u2026",
+      "finalize": "Finalizing\u2026",
+      "done": "Done",
+      "processing": "Processing\u2026",
+      "cancel": "Cancel"
     },
     "focusedWarning": "Focused tailoring will remove work experiences and projects that are not relevant to the job description. Only matching entries will be kept and rewritten.",
     "allRemovedDialog": {

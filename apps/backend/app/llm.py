@@ -662,8 +662,8 @@ def _calculate_timeout(
 
     base = base_timeouts.get(operation, LLM_TIMEOUT_COMPLETION)
 
-    # Scale by token count (relative to 4096 baseline)
-    token_factor = max(1.0, max_tokens / 4096)
+    # Scale by token count (relative to 4096 baseline); cap at 2× to prevent runaway timeouts.
+    token_factor = min(2.0, max(1.0, max_tokens / 4096))
 
     # Provider-specific latency adjustments
     provider_factors = {
@@ -674,7 +674,8 @@ def _calculate_timeout(
     }
     provider_factor = provider_factors.get(provider, 1.0)
 
-    return int(base * token_factor * provider_factor)
+    # Hard cap at 90 s so we always return before Cloudflare's 100 s gateway timeout.
+    return min(int(base * token_factor * provider_factor), 90)
 
 
 # --- Model classification helpers (Fix 1) ---
@@ -974,6 +975,17 @@ async def complete_json(
         except Exception as e:
             last_error = e
             logging.warning(f"LLM call failed (attempt {attempt + 1}): {e}")
+            # Never retry: authentication failures, timeouts (already over budget),
+            # or rate-limit errors (no built-in delay means immediate retry is pointless).
+            if isinstance(
+                e,
+                (
+                    litellm.exceptions.AuthenticationError,
+                    litellm.exceptions.Timeout,
+                    litellm.exceptions.RateLimitError,
+                ),
+            ):
+                raise
             if attempt < retries:
                 continue
             raise

@@ -5,6 +5,7 @@ import copy
 import hashlib
 import json
 import logging
+import time
 import unicodedata
 from collections.abc import AsyncGenerator, Awaitable
 from pathlib import Path
@@ -39,6 +40,8 @@ from app.schemas import (
     ResumeSummary,
     ResumeUploadResponse,
     RawResume,
+    TailorTaskStartResponse,
+    TailorTaskStatusResponse,
     UpdateCoverLetterRequest,
     UpdateOutreachMessageRequest,
     UpdateTitleRequest,
@@ -49,6 +52,7 @@ from app.services.parser import parse_document, parse_resume_to_json
 from app.services.improver import (
     extract_job_keywords,
     generate_improvements,
+    hash_job_content,
     improve_resume,
 )
 from app.services.refiner import refine_resume, calculate_keyword_match
@@ -91,10 +95,6 @@ def _get_default_prompt_id() -> str:
     option_ids = {option["id"] for option in IMPROVE_PROMPT_OPTIONS}
     prompt_id = config.get("default_prompt_id", DEFAULT_IMPROVE_PROMPT_ID)
     return prompt_id if prompt_id in option_ids else DEFAULT_IMPROVE_PROMPT_ID
-
-
-def _hash_job_content(content: str) -> str:
-    return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
 def _normalize_payload(value: Any) -> Any:
@@ -750,60 +750,93 @@ async def list_resumes(
     return ResumeListResponse(request_id=str(uuid4()), data=summaries)
 
 
-@router.post("/improve/preview", response_model=ImproveResumeResponse)
-async def improve_resume_preview_endpoint(
-    request: ImproveResumeRequest,
-    user=Depends(get_current_user),
-) -> ImproveResumeResponse:
-    """Preview a tailored resume without persisting it.
+# ---------------------------------------------------------------------------
+# Async tailor helpers (Phase 2 — background-task architecture)
+# ---------------------------------------------------------------------------
 
-    The response includes resume_preview data but leaves resume_id null.
+def _classify_error(error: Exception) -> tuple[str, str]:
+    """Map an exception to (error_type, user-facing message).
+
+    Returns a tuple so background tasks can persist error info without raising.
     """
-    resume = _get_generation_source_resume(request.resume_id, user.id)
-
-    job = db.get_job(request.job_id, user_id=user.id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job description not found")
-
-    language = _get_content_language()
-    prompt_id = request.prompt_id or _get_default_prompt_id()
-
-    stage = "load_job_keywords"
-    detail = "Failed to preview resume. Please try again."
     try:
+        if isinstance(error, litellm.exceptions.AuthenticationError):
+            return ("auth", "AI API authentication failed. Please check your API key in Settings.")
+        if isinstance(error, litellm.exceptions.RateLimitError):
+            return ("rate_limit", "AI API rate limit reached. Please wait a moment and try again.")
+        if isinstance(error, (litellm.exceptions.ServiceUnavailableError, litellm.exceptions.Timeout)):
+            return ("timeout", "AI service is temporarily unavailable or timed out. Please try again.")
+        if isinstance(error, litellm.exceptions.BadRequestError):
+            return ("general", "Invalid request to AI provider. Please check your model configuration in Settings.")
+    except Exception:
+        pass  # litellm.exceptions not available — fall through to string check
+
+    if isinstance(error, HTTPException):
+        status = error.status_code
+        if status == 422 and "ALL_ENTRIES_REMOVED" in str(error.detail):
+            return ("general", str(error.detail))
+        if status == 401:
+            return ("auth", str(error.detail))
+        if status == 429:
+            return ("rate_limit", str(error.detail))
+        if status == 503:
+            return ("timeout", str(error.detail))
+        return ("general", str(error.detail))
+
+    msg_lower = str(error).lower()
+    if "rate limit" in msg_lower or "429" in str(error):
+        return ("rate_limit", "AI API rate limit reached. Please wait a moment and try again.")
+    if "auth" in msg_lower or "api key" in msg_lower or "401" in str(error) or "unauthorized" in msg_lower:
+        return ("auth", "AI API authentication failed. Please check your API key in Settings.")
+    if "timeout" in msg_lower or "timed out" in msg_lower or "503" in str(error):
+        return ("timeout", "AI service is temporarily unavailable or timed out. Please try again.")
+
+    return ("general", "Failed to preview resume. Please try again.")
+
+
+async def _run_tailor_task(
+    task_id: str,
+    resume: dict[str, Any],
+    job: dict[str, Any],
+    job_id: str,
+    language: str,
+    prompt_id: str,
+    user_id: str,
+) -> None:
+    """Background worker that runs the full tailor pipeline and persists results."""
+    start_time = time.monotonic()
+
+    def elapsed() -> float:
+        return time.monotonic() - start_time
+
+    try:
+        db.update_tailor_task(task_id, {"status": "processing", "stage": "extract_keywords", "progress": 10}, user_id=user_id)
+
         job_keywords = job.get("job_keywords")
         job_keywords_hash = job.get("job_keywords_hash")
-        content_hash = _hash_job_content(job["content"])
+        content_hash = hash_job_content(job["content"])
         if not job_keywords or job_keywords_hash != content_hash:
-            stage = "extract_job_keywords"
-            job_keywords = await extract_job_keywords(job["content"], user_id=user.id)
-            stage = "persist_job_keywords"
-            # Cache extracted keywords with a content hash for basic invalidation.
+            job_keywords = await extract_job_keywords(job["content"], user_id=user_id)
             try:
                 updated_job = db.update_job(
-                    request.job_id,
+                    job_id,
                     {"job_keywords": job_keywords, "job_keywords_hash": content_hash},
-                    user_id=user.id,
+                    user_id=user_id,
                 )
                 if not updated_job:
-                    logger.warning(
-                        "Failed to persist job keywords for job %s.",
-                        request.job_id,
-                    )
+                    logger.warning("Failed to persist job keywords for job %s.", job_id)
             except Exception as e:
-                logger.warning(
-                    "Failed to persist job keywords for job %s: %s",
-                    request.job_id,
-                    e,
-                )
-        stage = "improve_resume"
+                logger.warning("Failed to persist job keywords for job %s: %s", job_id, e)
+
+        db.update_tailor_task(task_id, {"stage": "improve_resume", "progress": 30}, user_id=user_id)
+
         improved_data, removed_entries = await improve_resume(
             original_resume=resume["content"],
             job_description=job["content"],
             job_keywords=job_keywords,
             language=language,
             prompt_id=prompt_id,
-            user_id=user.id,
+            user_id=user_id,
         )
 
         # Focused mode: guard against all entries removed
@@ -811,86 +844,97 @@ async def improve_resume_preview_endpoint(
             has_work = bool(improved_data.get("workExperience"))
             has_projects = bool(improved_data.get("personalProjects"))
             if not has_work and not has_projects:
-                raise HTTPException(
-                    status_code=422,
-                    detail=(
-                        "ALL_ENTRIES_REMOVED: The AI determined that none of your work "
-                        "experiences or projects are relevant to this job description."
-                    ),
+                error_msg = (
+                    "ALL_ENTRIES_REMOVED: The AI determined that none of your work "
+                    "experiences or projects are relevant to this job description."
                 )
+                db.update_tailor_task(task_id, {
+                    "status": "failed",
+                    "error": error_msg,
+                    "error_type": "general",
+                    "stage": "done",
+                    "progress": 100,
+                }, user_id=user_id)
+                return
 
-            # Restore education if the LLM incorrectly removed entries from it
+            # Restore education if the LLM incorrectly removed entries
             original_data_for_edu = _get_original_resume_data(resume)
             if original_data_for_edu:
                 orig_edu = original_data_for_edu.get("education", [])
                 if orig_edu and len(improved_data.get("education", [])) < len(orig_edu):
-                    logger.warning(
-                        "Focused mode removed education entries; restoring originals"
-                    )
+                    logger.warning("Focused mode removed education entries; restoring originals")
                     improved_data = dict(improved_data)
                     improved_data["education"] = copy.deepcopy(orig_edu)
 
-        # Collect warnings throughout the process
         response_warnings: list[str] = []
-
         improved_data, preserve_warnings = _preserve_personal_info(
             _get_original_resume_data(resume),
             improved_data,
         )
         response_warnings.extend(preserve_warnings)
 
-        # Multi-pass refinement: keyword injection, AI phrase removal, alignment validation
-        stage = "refine_resume"
+        db.update_tailor_task(task_id, {"stage": "refine_resume", "progress": 60}, user_id=user_id)
+
+        # Time-budget guard: skip refinement if we are already over 120 s
         refinement_stats: RefinementStats | None = None
         refinement_attempted = False
         refinement_successful = False
-        try:
-            # Use the explicit selected source resume for alignment validation.
-            master_data = _get_original_resume_data(resume)
-            if master_data:
-                initial_match = calculate_keyword_match(improved_data, job_keywords)
-                refinement_attempted = True
-                refinement_result = await refine_resume(
-                    initial_tailored=improved_data,
-                    master_resume=master_data,
-                    job_description=job["content"],
-                    job_keywords=job_keywords,
-                    config=RefinementConfig(),
-                    user_id=user.id,
-                )
-                improved_data = refinement_result.refined_data
-                refinement_stats = RefinementStats(
-                    passes_completed=refinement_result.passes_completed,
-                    keywords_injected=(
-                        len(refinement_result.keyword_analysis.injectable_keywords)
-                        if refinement_result.keyword_analysis
-                        else 0
-                    ),
-                    ai_phrases_removed=refinement_result.ai_phrases_removed,
-                    alignment_violations_fixed=(
-                        len(
-                            [
-                                v
-                                for v in refinement_result.alignment_report.violations
-                                if v.severity == "critical"
-                            ]
-                        )
-                        if refinement_result.alignment_report
-                        else 0
-                    ),
-                    initial_match_percentage=initial_match,
-                    final_match_percentage=refinement_result.final_match_percentage,
-                )
-                refinement_successful = True
-                logger.info(
-                    "Refinement completed: %d passes, %d AI phrases removed",
-                    refinement_result.passes_completed,
-                    len(refinement_result.ai_phrases_removed),
-                )
-        except Exception as e:
-            logger.warning("Refinement failed, using unrefined result: %s", e)
-            if refinement_attempted:
-                response_warnings.append(f"Refinement failed: {str(e)}")
+        if elapsed() < 120:
+            try:
+                master_data = _get_original_resume_data(resume)
+                if master_data:
+                    initial_match = calculate_keyword_match(improved_data, job_keywords)
+                    refinement_attempted = True
+                    refinement_result = await refine_resume(
+                        initial_tailored=improved_data,
+                        master_resume=master_data,
+                        job_description=job["content"],
+                        job_keywords=job_keywords,
+                        config=RefinementConfig(),
+                        user_id=user_id,
+                    )
+                    improved_data = refinement_result.refined_data
+                    refinement_stats = RefinementStats(
+                        passes_completed=refinement_result.passes_completed,
+                        keywords_injected=(
+                            len(refinement_result.keyword_analysis.injectable_keywords)
+                            if refinement_result.keyword_analysis
+                            else 0
+                        ),
+                        ai_phrases_removed=refinement_result.ai_phrases_removed,
+                        alignment_violations_fixed=(
+                            len(
+                                [
+                                    v
+                                    for v in refinement_result.alignment_report.violations
+                                    if v.severity == "critical"
+                                ]
+                            )
+                            if refinement_result.alignment_report
+                            else 0
+                        ),
+                        initial_match_percentage=initial_match,
+                        final_match_percentage=refinement_result.final_match_percentage,
+                    )
+                    refinement_successful = True
+                    logger.info(
+                        "Refinement completed: %d passes, %d AI phrases removed",
+                        refinement_result.passes_completed,
+                        len(refinement_result.ai_phrases_removed),
+                    )
+            except Exception as e:
+                logger.warning("Refinement failed, using unrefined result: %s", e)
+                if refinement_attempted:
+                    response_warnings.append(f"Refinement failed: {str(e)}")
+        else:
+            logger.warning(
+                "Skipping refinement for task %s — elapsed %.1fs exceeds 120s budget",
+                task_id,
+                elapsed(),
+            )
+            response_warnings.append("Refinement skipped due to time constraints.")
+
+        db.update_tailor_task(task_id, {"stage": "finalize", "progress": 85}, user_id=user_id)
 
         improved_text = json.dumps(improved_data, indent=2)
         preview_hash = _hash_improved_data(improved_data)
@@ -898,26 +942,21 @@ async def improve_resume_preview_endpoint(
         if not isinstance(preview_hashes, dict):
             preview_hashes = {}
         preview_hashes[prompt_id] = preview_hash
-        # NOTE: preview_hashes updates are last-write-wins; concurrent previews can race.
         try:
             updated_job = db.update_job(
-                request.job_id,
+                job_id,
                 {
                     "preview_hash": preview_hash,
                     "preview_prompt_id": prompt_id,
                     "preview_hashes": preview_hashes,
                 },
-                user_id=user.id,
+                user_id=user_id,
             )
             if not updated_job:
-                logger.warning(
-                    "Failed to persist preview hash for job %s.", request.job_id
-                )
+                logger.warning("Failed to persist preview hash for job %s.", job_id)
         except Exception as e:
-            logger.warning(
-                "Failed to persist preview hash for job %s: %s", request.job_id, e
-            )
-        stage = "calculate_diff"
+            logger.warning("Failed to persist preview hash for job %s: %s", job_id, e)
+
         diff_summary, detailed_changes, diff_error = _calculate_diff_from_resume(
             resume,
             improved_data,
@@ -925,10 +964,9 @@ async def improve_resume_preview_endpoint(
         )
         if diff_error:
             response_warnings.append(f"Could not calculate changes: {diff_error}")
-        stage = "generate_improvements"
+
         improvements = generate_improvements(job_keywords)
 
-        # Convert removed_entries dicts to RemovedEntry schema objects
         removed_entry_objects = [
             RemovedEntry(
                 type=e.get("type", "workExperience"),  # type: ignore[arg-type]
@@ -939,35 +977,118 @@ async def improve_resume_preview_endpoint(
         ]
 
         request_id = str(uuid4())
-        return ImproveResumeResponse(
+        result_data = ImproveResumeData(
             request_id=request_id,
-            data=ImproveResumeData(
-                request_id=request_id,
-                resume_id=None,
-                job_id=request.job_id,
-                resume_preview=ResumeData.model_validate(improved_data),
-                improvements=[
-                    {
-                        "suggestion": imp["suggestion"],
-                        "lineNumber": imp.get("lineNumber"),
-                    }
-                    for imp in improvements
-                ],
-                markdownOriginal=resume["content"],
-                markdownImproved=improved_text,
-                cover_letter=None,
-                outreach_message=None,
-                diff_summary=diff_summary,
-                detailed_changes=detailed_changes,
-                removed_entries=removed_entry_objects,
-                refinement_stats=refinement_stats,
-                warnings=response_warnings,
-                refinement_attempted=refinement_attempted,
-                refinement_successful=refinement_successful,
-            ),
+            resume_id=None,
+            job_id=job_id,
+            resume_preview=ResumeData.model_validate(improved_data),
+            improvements=[
+                {
+                    "suggestion": imp["suggestion"],
+                    "lineNumber": imp.get("lineNumber"),
+                }
+                for imp in improvements
+            ],
+            markdownOriginal=resume["content"],
+            markdownImproved=improved_text,
+            cover_letter=None,
+            outreach_message=None,
+            diff_summary=diff_summary,
+            detailed_changes=detailed_changes,
+            removed_entries=removed_entry_objects,
+            refinement_stats=refinement_stats,
+            warnings=response_warnings,
+            refinement_attempted=refinement_attempted,
+            refinement_successful=refinement_successful,
         )
+
+        db.update_tailor_task(task_id, {
+            "status": "completed",
+            "stage": "done",
+            "progress": 100,
+            "result": result_data.model_dump(mode="json"),
+        }, user_id=user_id)
+
     except Exception as e:
-        _raise_improve_error("preview", stage, e, detail)
+        error_type, error_msg = _classify_error(e)
+        logger.error("Tailor task %s failed: %s", task_id, e)
+        db.update_tailor_task(task_id, {
+            "status": "failed",
+            "stage": "done",
+            "progress": 100,
+            "error": error_msg,
+            "error_type": error_type,
+        }, user_id=user_id)
+
+
+@router.post("/improve/preview", response_model=TailorTaskStartResponse)
+async def improve_resume_preview_endpoint(
+    request: ImproveResumeRequest,
+    background_tasks: BackgroundTasks,
+    user=Depends(get_current_user),
+) -> TailorTaskStartResponse:
+    """Queue a resume tailoring task and return immediately with a task_id.
+
+    Poll GET /improve/status/{task_id} to track progress and retrieve results.
+    """
+    resume = _get_generation_source_resume(request.resume_id, user.id)
+
+    job = db.get_job(request.job_id, user_id=user.id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job description not found")
+
+    language = _get_content_language()
+    prompt_id = request.prompt_id or _get_default_prompt_id()
+
+    task_id = str(uuid4())
+    db.create_tailor_task(
+        task_id=task_id,
+        user_id=user.id,
+        resume_id=request.resume_id,
+        job_id=request.job_id,
+        prompt_id=prompt_id,
+    )
+
+    background_tasks.add_task(
+        _run_tailor_task,
+        task_id=task_id,
+        resume=resume,
+        job=job,
+        job_id=request.job_id,
+        language=language,
+        prompt_id=prompt_id,
+        user_id=user.id,
+    )
+
+    return TailorTaskStartResponse(task_id=task_id)
+
+
+@router.get("/improve/status/{task_id}", response_model=TailorTaskStatusResponse)
+async def get_tailor_task_status(
+    task_id: str,
+    user=Depends(get_current_user),
+) -> TailorTaskStatusResponse:
+    """Poll the status of an async tailor task."""
+    task = db.get_tailor_task(task_id, user_id=user.id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    result_data: ImproveResumeData | None = None
+    if task["status"] == "completed" and task.get("result"):
+        try:
+            result_data = ImproveResumeData.model_validate(task["result"])
+        except Exception as e:
+            logger.error("Failed to deserialize task result for %s: %s", task_id, e)
+
+    return TailorTaskStatusResponse(
+        task_id=task_id,
+        status=task["status"],
+        stage=task["stage"],
+        progress=task["progress"],
+        result=result_data,
+        error=task.get("error"),
+        error_type=task.get("error_type"),
+    )
 
 
 @router.post("/improve/confirm", response_model=ImproveResumeResponse)

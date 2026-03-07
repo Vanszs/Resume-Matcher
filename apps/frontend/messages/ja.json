@@ -589,7 +589,18 @@
       "failedToGenerate": "履歴書の生成に失敗しました。設定を確認して再試行してください。",
       "failedToPreview": "履歴書のプレビューに失敗しました。設定を確認して再試行してください。",
       "serviceUnavailable": "AIモデルは現在高負荷状態です。しばらくしてからもう一度お試しください。",
+      "timeout": "リクエストがタイムアウトしました。AIの応答に時間がかかりすぎています。もう一度お試しください。",
       "failedToConfirm": "履歴書の確定に失敗しました。もう一度お試しください。"
+    },
+    "progress": {
+      "queued": "キュー中\u2026",
+      "extractKeywords": "求人内容を分析中\u2026",
+      "improveResume": "履歴書をカスタマイズ中\u2026",
+      "refineResume": "精査と検証中\u2026",
+      "finalize": "仕上げ中\u2026",
+      "done": "完了",
+      "processing": "処理中\u2026",
+      "cancel": "キャンセル"
     },
     "focusedWarning": "集中カスタマイズでは、求人内容に関連しない職歴とプロジェクトが削除されます。関連するエントリのみ保持・書き直されます。",
     "allRemovedDialog": {

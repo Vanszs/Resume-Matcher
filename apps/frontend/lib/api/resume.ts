@@ -125,8 +125,10 @@ async function postImprove(
 
   const text = await response.text();
   if (!response.ok) {
-    console.error('Improve failed response body:', text);
-    throw new Error(`Improve failed with status ${response.status}: ${text}`);
+    // Truncate to avoid dumping multi-KB Cloudflare HTML error pages into logs/UI
+    const truncated = text.length > 500 ? text.slice(0, 500) + '…' : text;
+    console.error('Improve failed response body:', truncated);
+    throw new Error(`Improve failed with status ${response.status}: ${truncated}`);
   }
 
   try {
@@ -154,37 +156,75 @@ export async function uploadJobDescriptions(
   return data.job_id[0];
 }
 
-/** Improves the resume and returns the full preview object */
-export async function improveResume(
-  resumeId: string,
-  jobId: string,
-  promptId?: string
-): Promise<ImprovedResult> {
-  return postImprove('/resumes/improve', {
-    resume_id: resumeId,
-    job_id: jobId,
-    prompt_id: promptId ?? null,
-  });
-}
-
-/** Previews the resume improvement without saving */
-export async function previewImproveResume(
-  resumeId: string,
-  jobId: string,
-  promptId?: string
-): Promise<ImprovedResult> {
-  return postImprove('/resumes/improve/preview', {
-    resume_id: resumeId,
-    job_id: jobId,
-    prompt_id: promptId ?? null,
-  });
-}
-
 /** Confirms and saves a tailored resume */
 export async function confirmImproveResume(
   payload: ImproveResumeConfirmRequest
 ): Promise<ImprovedResult> {
   return postImprove('/resumes/improve/confirm', payload as unknown as Record<string, unknown>);
+}
+
+// ---------------------------------------------------------------------------
+// Async tailor task API (Phase 2/3 — background task polling)
+// ---------------------------------------------------------------------------
+
+export type TailorTaskStatus =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed';
+
+export type TailorTaskStage =
+  | 'queued'
+  | 'extract_keywords'
+  | 'improve_resume'
+  | 'refine_resume'
+  | 'finalize'
+  | 'done';
+
+export interface TailorTaskStatusResponse {
+  task_id: string;
+  status: TailorTaskStatus;
+  stage: TailorTaskStage;
+  progress: number;
+  result?: ImprovedResult['data'] | null;
+  error?: string | null;
+  error_type?: 'timeout' | 'auth' | 'rate_limit' | 'service_unavailable' | 'general' | null;
+}
+
+/**
+ * Start an async tailor task and return the task_id immediately.
+ * The server runs extract_keywords → improve_resume → refine in the background.
+ */
+export async function startTailorTask(
+  resumeId: string,
+  jobId: string,
+  promptId?: string
+): Promise<string> {
+  const res = await apiPost('/resumes/improve/preview', {
+    resume_id: resumeId,
+    job_id: jobId,
+    prompt_id: promptId ?? null,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    const truncated = text.length > 500 ? text.slice(0, 500) + '…' : text;
+    throw new Error(`Failed to start tailor task (status ${res.status}): ${truncated}`);
+  }
+  const data = await res.json() as { task_id: string };
+  return data.task_id;
+}
+
+/**
+ * Poll the status of an async tailor task.
+ * Returns the full task state including result when completed.
+ */
+export async function getTailorTaskStatus(taskId: string): Promise<TailorTaskStatusResponse> {
+  const res = await apiFetch(`/resumes/improve/status/${encodeURIComponent(taskId)}`);
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to get task status (status ${res.status}): ${text}`);
+  }
+  return res.json() as Promise<TailorTaskStatusResponse>;
 }
 
 /** Fetches a raw resume record for previewing the original upload */

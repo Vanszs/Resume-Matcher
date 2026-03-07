@@ -10,9 +10,10 @@ import type { ImprovedResult } from '@/components/common/resume_previewer_contex
 import type { ResumeData } from '@/components/dashboard/resume-component';
 import {
   uploadJobDescriptions,
-  previewImproveResume,
   confirmImproveResume,
   fetchResumeList,
+  startTailorTask,
+  getTailorTaskStatus,
   type ResumeListItem,
 } from '@/lib/api/resume';
 import { fetchPromptConfig, type PromptOption } from '@/lib/api/config';
@@ -23,6 +24,47 @@ import { useNavigating } from '@/hooks/use-navigating';
 import { useTranslations } from '@/lib/i18n';
 import { DiffPreviewModal } from '@/components/tailor/diff-preview-modal';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { TailorProgress } from '@/components/tailor/tailor-progress';
+
+// ---------------------------------------------------------------------------
+// Shared polling utility — used by both runGenerate and handleAllRemovedTryKeywords
+// ---------------------------------------------------------------------------
+const MAX_TAILOR_POLLS = 90; // 90 × 2 s = 3 min hard timeout
+
+async function pollTailorTask(
+  taskId: string,
+  abortRef: React.MutableRefObject<boolean>,
+  onProgress: (progress: number, stage: string) => void,
+): Promise<ImprovedResult> {
+  let polls = 0;
+  while (true) {
+    if (abortRef.current) throw new DOMException('Aborted', 'AbortError');
+
+    if (++polls > MAX_TAILOR_POLLS) {
+      throw Object.assign(
+        new Error('Task is taking too long. Please try again.'),
+        { errorType: 'timeout' },
+      );
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    if (abortRef.current) throw new DOMException('Aborted', 'AbortError');
+
+    const status = await getTailorTaskStatus(taskId);
+    if (abortRef.current) throw new DOMException('Aborted', 'AbortError');
+
+    onProgress(status.progress, status.stage);
+
+    if (status.status === 'completed' && status.result) {
+      return { data: status.result as ImprovedResult['data'] };
+    }
+    if (status.status === 'failed') {
+      const msg = status.error ?? 'Failed to preview resume. Please try again.';
+      throw Object.assign(new Error(msg), { errorType: status.error_type });
+    }
+    // status === 'pending' | 'processing' — keep polling
+  }
+}
 
 export default function TailorPage() {
   const { t } = useTranslations();
@@ -38,7 +80,12 @@ export default function TailorPage() {
   const missingDiffConfirmInFlight = useRef(false);
   const confirmInFlight = useRef(false);
   const navigationInProgress = useRef(false);
+  const abortRef = useRef(false);
   const { isNavigating, navigateBack } = useNavigating();
+
+  // Polling progress state
+  const [tailorProgress, setTailorProgress] = useState(0);
+  const [tailorStage, setTailorStage] = useState<string>('queued');
 
   // Diff preview modal state
   const [showDiffModal, setShowDiffModal] = useState(false);
@@ -189,68 +236,104 @@ export default function TailorPage() {
     return null;
   };
 
+  // Classify a caught error and set the appropriate i18n error message in state.
+  const handleTailorError = (err: unknown, context: string) => {
+    if (abortRef.current) return;
+    const rawMessage = err instanceof Error ? err.message : String(err);
+    const errorMessage = rawMessage.length > 500 ? rawMessage.slice(0, 500) + '…' : rawMessage;
+    const errorType = (err as Record<string, unknown>).errorType as string | undefined;
+    console.error(`[tailor] ${context} failed:`, { message: errorMessage, raw: err });
+
+    if (errorMessage.includes('ALL_ENTRIES_REMOVED')) {
+      setShowAllRemovedDialog(true);
+      return;
+    }
+    if (
+      errorType === 'timeout' ||
+      errorMessage.toLowerCase().includes('timed out') ||
+      errorMessage.toLowerCase().includes('request timed out') ||
+      errorMessage.includes('524') ||
+      errorMessage.includes('504') ||
+      errorMessage.toLowerCase().includes('aborterror')
+    ) {
+      setError(t('tailor.errors.timeout'));
+    } else if (
+      errorType === 'auth' ||
+      errorMessage.toLowerCase().includes('api key') ||
+      errorMessage.toLowerCase().includes('unauthorized') ||
+      errorMessage.toLowerCase().includes('authentication') ||
+      errorMessage.includes('401')
+    ) {
+      setError(t('tailor.errors.apiKeyError'));
+    } else if (
+      errorType === 'rate_limit' ||
+      errorMessage.toLowerCase().includes('rate limit') ||
+      errorMessage.includes('429')
+    ) {
+      setError(t('tailor.errors.rateLimit'));
+    } else if (
+      errorMessage.includes('503') ||
+      errorMessage.toLowerCase().includes('service unavailable') ||
+      errorMessage.toLowerCase().includes('temporarily unavailable')
+    ) {
+      setError(t('tailor.errors.serviceUnavailable'));
+    } else {
+      setError(t('tailor.errors.failedToPreview'));
+    }
+  };
+
+  // Shared: handle a completed poll result — check diff and open appropriate modal.
+  const handlePollResult = (result: ImprovedResult) => {
+    if (!result?.data?.diff_summary || !result?.data?.detailed_changes) {
+      console.warn('Diff data missing for tailor preview; requesting user confirmation.');
+      setDiffConfirmError(null);
+      setPendingResult(null);
+      setShowDiffModal(false);
+      setMissingDiffError(null);
+      setMissingDiffResult(result);
+      setShowMissingDiffDialog(true);
+      return;
+    }
+    setDiffConfirmError(null);
+    setMissingDiffError(null);
+    setPendingResult(result);
+    setShowDiffModal(true);
+  };
+
   const runGenerate = async (resumeId: string, description: string) => {
+    abortRef.current = false;
+    setTailorProgress(0);
+    setTailorStage('queued');
+
     try {
       // 1. Upload Job Description
-      // The API expects an array of strings
       const jobId = await uploadJobDescriptions([description], resumeId);
-      incrementJobs(); // Update cached counter
+      if (abortRef.current) return;
+      incrementJobs();
 
-      // 2. Preview Resume
-      const result = await previewImproveResume(resumeId, jobId, selectedPromptId);
+      // 2. Start async tailor task — returns immediately with task_id
+      const taskId = await startTailorTask(resumeId, jobId, selectedPromptId);
+      if (abortRef.current) return;
 
-      if (!result?.data?.diff_summary || !result?.data?.detailed_changes) {
-        console.warn('Diff data missing for tailor preview; requesting user confirmation.');
-        setDiffConfirmError(null);
-        setPendingResult(null);
-        setShowDiffModal(false);
-        setMissingDiffError(null);
-        setMissingDiffResult(result);
-        setShowMissingDiffDialog(true);
-        return;
-      }
-
-      // 3. Show diff preview modal
-      setDiffConfirmError(null);
-      setMissingDiffError(null);
-      setPendingResult(result);
-      setShowDiffModal(true);
-    } catch (err) {
-      // Log structured error context for debugging
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error('[tailor] runGenerate failed:', {
-        message: errorMessage,
-        raw: err,
+      // 3. Poll until the task completes or fails (max 3 min)
+      const result = await pollTailorTask(taskId, abortRef, (progress, stage) => {
+        setTailorProgress(progress);
+        setTailorStage(stage);
       });
-      // Check for common error patterns
-      if (
-        errorMessage.includes('ALL_ENTRIES_REMOVED')
-      ) {
-        setShowAllRemovedDialog(true);
-        return;
-      }
-      if (
-        errorMessage.toLowerCase().includes('api key') ||
-        errorMessage.toLowerCase().includes('unauthorized') ||
-        errorMessage.toLowerCase().includes('authentication') ||
-        errorMessage.includes('401')
-      ) {
-        setError(t('tailor.errors.apiKeyError'));
-      } else if (
-        errorMessage.toLowerCase().includes('rate limit') ||
-        errorMessage.includes('429')
-      ) {
-        setError(t('tailor.errors.rateLimit'));
-      } else if (
-        errorMessage.includes('503') ||
-        errorMessage.toLowerCase().includes('service unavailable') ||
-        errorMessage.toLowerCase().includes('temporarily unavailable')
-      ) {
-        setError(t('tailor.errors.serviceUnavailable'));
-      } else {
-        setError(t('tailor.errors.failedToPreview'));
-      }
+      if (abortRef.current) return;
+      handlePollResult(result);
+    } catch (err) {
+      if (abortRef.current) return;
+      handleTailorError(err, 'runGenerate');
     }
+  };
+
+  const handleCancel = () => {
+    abortRef.current = true;
+    setIsLoading(false);
+    setTailorProgress(0);
+    setTailorStage('queued');
+    setError(null);
   };
 
   const handleGenerate = async () => {
@@ -370,27 +453,29 @@ export default function TailorPage() {
     const trimmedDescription = jobDescription.trim();
     if (!trimmedDescription || !masterResumeId) return;
     const resumeId = masterResumeId;
+    abortRef.current = false;
+    setTailorProgress(0);
+    setTailorStage('queued');
     setIsLoading(true);
     setError(null);
     try {
       // Use 'keywords' explicitly — React state update for selectedPromptId
       // may not have propagated yet at this point in the async flow.
       const jobId = await uploadJobDescriptions([trimmedDescription], resumeId);
+      if (abortRef.current) return;
       incrementJobs();
-      const result = await previewImproveResume(resumeId, jobId, 'keywords');
-      if (!result?.data?.diff_summary || !result?.data?.detailed_changes) {
-        setMissingDiffResult(result);
-        setShowMissingDiffDialog(true);
-        return;
-      }
-      setDiffConfirmError(null);
-      setMissingDiffError(null);
-      setPendingResult(result);
-      setShowDiffModal(true);
+      const taskId = await startTailorTask(resumeId, jobId, 'keywords');
+      if (abortRef.current) return;
+
+      const result = await pollTailorTask(taskId, abortRef, (progress, stage) => {
+        setTailorProgress(progress);
+        setTailorStage(stage);
+      });
+      if (abortRef.current) return;
+      handlePollResult(result);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error('[tailor] handleAllRemovedTryKeywords failed:', { message: errorMessage, raw: err });
-      setError(t('tailor.errors.failedToPreview'));
+      if (abortRef.current) return;
+      handleTailorError(err, 'handleAllRemovedTryKeywords');
     } finally {
       setIsLoading(false);
     }
@@ -538,6 +623,15 @@ export default function TailorPage() {
             </div>
           )}
 
+          {/* Progress bar shown while polling is active */}
+          {isLoading && (
+            <TailorProgress
+              progress={tailorProgress}
+              stage={tailorStage}
+              onCancel={handleCancel}
+            />
+          )}
+
           <Button
             size="lg"
             onClick={handleGenerate}
@@ -550,18 +644,15 @@ export default function TailorPage() {
             }
             className="w-full"
           >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                {t('common.processing')}
-              </>
-            ) : statusLoading ? (
+            {statusLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
                 {t('common.checking')}
               </>
             ) : !isLlmConfigured ? (
               t('tailor.configureApiKeyFirst')
+            ) : isLoading ? (
+              t('tailor.generateTailored')
             ) : (
               t('tailor.generateTailored')
             )}

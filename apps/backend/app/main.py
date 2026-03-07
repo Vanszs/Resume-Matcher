@@ -87,6 +87,19 @@ async def lifespan(app: FastAPI):
             )
     except Exception as e:
         logger.error("Startup sweep failed: %s", e)
+
+    # Startup sweep: mark stale tailor tasks (pending/processing older than 15 min) as failed
+    try:
+        cleaned = db.cleanup_stale_tailor_tasks(max_age_minutes=15)
+        if cleaned:
+            logger.warning("Startup sweep: reset %d stale tailor task(s) to 'failed'", cleaned)
+        # Also purge completed/failed tasks older than 24 h to keep DB lean
+        purged = db.cleanup_old_tailor_tasks(max_age_hours=24)
+        if purged:
+            logger.info("Startup sweep: purged %d expired tailor task(s)", purged)
+    except Exception as e:
+        logger.error("Tailor task startup sweep failed: %s", e)
+
     yield
     # Shutdown - wrap each cleanup in try-except to ensure all resources are released
     try:

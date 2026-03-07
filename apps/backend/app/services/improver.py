@@ -1,5 +1,6 @@
 """Resume improvement service using LLM."""
 
+import hashlib
 import json
 import logging
 import re
@@ -21,6 +22,11 @@ from app.prompts.templates import RESUME_SCHEMA
 from app.schemas import ResumeData, ResumeFieldDiff, ResumeDiffSummary
 
 logger = logging.getLogger(__name__)
+
+
+def hash_job_content(content: str) -> str:
+    """Return a SHA-256 hex digest of the job content string."""
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 # Fields the LLM must not return as null (LLM sometimes does for missing dates etc.)
 _SANITIZE_STRING_FIELDS = frozenset({
@@ -131,6 +137,7 @@ async def extract_job_keywords(
         prompt=prompt,
         system_prompt="You are an expert job description analyzer.",
         user_id=user_id,
+        max_tokens=4096,  # JD keyword extraction never needs the full 15k default
     )
 
 
