@@ -619,7 +619,7 @@ def _appears_truncated(data: dict) -> bool:
     if not isinstance(data, dict):
         return False
 
-    # Skip non-resume responses (keyword extractions, health checks, etc.)
+    # Only check resume-shaped responses (must have at least one resume key)
     _RESUME_KEYS = {"personalInfo", "workExperience", "summary", "sectionMeta"}
     if not _RESUME_KEYS.intersection(data.keys()):
         return False
@@ -629,28 +629,6 @@ def _appears_truncated(data: dict) -> bool:
         logging.warning(
             "Possible truncation detected: missing required section 'personalInfo'",
         )
-    "health_check": LLM_TIMEOUT_HEALTH_CHECK,
-        "completion": LLM_TIMEOUT_COMPLETION,
-        "json": LLM_TIMEOUT_JSON,
-    }
-
-    base = base_timeouts.get(operation, LLM_TIMEOUT_COMPLETION)
-
-    # Scale by token count (relative to 4096 baseline); cap at 2× to prevent runaway timeouts.
-    token_factor = min(2.0, max(1.0, max_tokens / 4096))
-
-    # Provider-specific latency adjustments
-    provider_factors = {
-        "openai": 1.0,
-        "anthropic": 1.2,
-        "openrouter": 1.5,  # More variable latency
-        "ollama": 2.0,  # Local models can be slower
-    }
-    provider_factor = provider_factors.get(provider, 1.0)
-
-    # Hard cap at 90 s so we always return before Cloudflare's 100 s gateway timeout.
-    return min(int(base * token_factor * provider_factor), 90)
-
 
 # --- Model classification helpers (Fix 1) ---
 
