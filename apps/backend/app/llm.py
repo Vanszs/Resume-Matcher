@@ -611,55 +611,25 @@ def _unwrap_json_envelope(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def _appears_truncated(data: dict) -> bool:
-    """LLM-001: Check if JSON data appears to be truncated.
+    """LLM-001: Heuristic check for truncated JSON responses.
 
-    Detects suspicious patterns indicating incomplete responses.
+    Only applies to resume-shaped dicts. The authoritative truncation check
+    lives in improver._check_for_truncation() which raises on missing sections.
     """
     if not isinstance(data, dict):
         return False
 
-    # Check for empty arrays that should typically have content
-    suspicious_empty_arrays = ["workExperience", "education", "skills"]
-    for key in suspicious_empty_arrays:
-        if key in data and data[key] == []:
-            # Log warning - these are rarely empty in real resumes
-            logging.warning(
-                "Possible truncation detected: '%s' is empty",
-                key,
-            )
-            return True
+    # Skip non-resume responses (keyword extractions, health checks, etc.)
+    _RESUME_KEYS = {"personalInfo", "workExperience", "summary", "sectionMeta"}
+    if not _RESUME_KEYS.intersection(data.keys()):
+        return False
 
-    # Check for missing critical sections
-    required_top_level = ["personalInfo"]
-    for key in required_top_level:
-        if key not in data:
-            logging.warning(
-                "Possible truncation detected: missing required section '%s'",
-                key,
-            )
-            return True
-
-    return False
-
-
-def _get_retry_temperature(attempt: int, base_temp: float = 0.1) -> float:
-    """LLM-002: Get temperature for retry attempt - increases with each retry.
-
-    Higher temperature on retries gives the model more variation to produce
-    different (hopefully valid) output.
-    """
-    temperatures = [base_temp, 0.3, 0.5, 0.7]
-    return temperatures[min(attempt, len(temperatures) - 1)]
-
-
-def _calculate_timeout(
-    operation: str,
-    max_tokens: int = 4096,
-    provider: str = "openai",
-) -> int:
-    """LLM-005: Calculate adaptive timeout based on operation and parameters."""
-    base_timeouts = {
-        "health_check": LLM_TIMEOUT_HEALTH_CHECK,
+    # Missing personalInfo is the strongest truncation signal
+    if "personalInfo" not in data:
+        logging.warning(
+            "Possible truncation detected: missing required section 'personalInfo'",
+        )
+    "health_check": LLM_TIMEOUT_HEALTH_CHECK,
         "completion": LLM_TIMEOUT_COMPLETION,
         "json": LLM_TIMEOUT_JSON,
     }
