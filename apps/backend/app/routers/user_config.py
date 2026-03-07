@@ -222,7 +222,7 @@ async def delete_llm_config(provider: str, user=Depends(get_current_user)) -> di
         raise
     except Exception as e:
         logger.error("Failed to delete LLM config %s for user %s: %s", provider, user.id, e)
-        raise HTTPException(status_code=500, detail="Failed to delete configuration.")
+        raise DebugHTTPException(status_code=500, detail="Failed to delete configuration.", error=e)
 
 
 # --- Self-service account changes ---
@@ -276,7 +276,7 @@ async def change_my_password(
         raise
     except Exception as e:
         logger.error("Failed to change password for user %s: %s", user.id, e)
-        raise HTTPException(status_code=500, detail="Failed to change password.")
+        raise DebugHTTPException(status_code=500, detail="Failed to change password.", error=e)
 
 
 @router.patch("/me/username")
@@ -300,5 +300,5 @@ async def change_my_username(
         raise
     except Exception as e:
         logger.error("Failed to change username for user %s: %s", user.id, e)
-        raise HTTPException(status_code=500, detail="Failed to change username.")
+        raise DebugHTTPException(status_code=500, detail="Failed to change username.", error=e)
 

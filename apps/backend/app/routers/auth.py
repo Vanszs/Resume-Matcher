@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+
+from app.exceptions import DebugHTTPException
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -125,9 +127,10 @@ async def register(request: Request, body: LoginRequest) -> RegisterResponse:
         raise
     except Exception as e:
         logger.error("Registration failed for %s: %s", body.email, e)
-        raise HTTPException(
+        raise DebugHTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Registration failed. Please try again.",
+            error=e,
         )
 
 
@@ -214,9 +217,10 @@ async def login(request: Request, body: LoginRequest) -> TokenResponse:
         raise
     except Exception as e:
         logger.error("Unexpected error during login for %s: %s", body.email, e)
-        raise HTTPException(
+        raise DebugHTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Login failed. Please try again.",
+            error=e,
         )
 
 
@@ -289,7 +293,7 @@ async def resend_verification(request: Request, body: ResendVerifyRequest) -> di
 
     if not success:
         logger.error("Resend verification failed for %s", user.email)
-        raise HTTPException(
+        raise DebugHTTPException(
             status_code=500,
             detail="Failed to send verification email. Please try again later.",
         )

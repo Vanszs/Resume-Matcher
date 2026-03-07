@@ -1359,7 +1359,7 @@ async def update_resume_endpoint(
     )
 
     if not updated:
-        raise HTTPException(status_code=500, detail="Failed to update resume")
+        raise DebugHTTPException(status_code=500, detail="Failed to update resume")
 
     raw_resume = RawResume(
         id=None,
