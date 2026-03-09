@@ -55,6 +55,30 @@ OPENROUTER_JSON_CAPABLE_MODELS = {
 MAX_JSON_EXTRACTION_RECURSION = 10
 MAX_JSON_CONTENT_SIZE = 1024 * 1024  # 1MB
 
+# Extra seconds added to the base timeout per 1000 tokens requested
+_TIMEOUT_SECONDS_PER_1K_TOKENS = 10
+
+
+def _calculate_timeout(call_type: str, max_tokens: int, provider: str) -> int:
+    """Calculate an appropriate timeout (seconds) for an LLM call.
+
+    Scales the base timeout up for large max_tokens requests so that high-output
+    calls (e.g., 8192 tokens) don't get killed prematurely.
+
+    Args:
+        call_type: "json", "completion", or "health".
+        max_tokens: The max_tokens value passed to the LLM.
+        provider: The LLM provider name (unused currently, reserved for future tuning).
+
+    Returns:
+        Timeout in seconds.
+    """
+    if call_type == "health":
+        return LLM_TIMEOUT_HEALTH_CHECK
+    base = LLM_TIMEOUT_JSON if call_type == "json" else LLM_TIMEOUT_COMPLETION
+    extra = int((max_tokens / 1000) * _TIMEOUT_SECONDS_PER_1K_TOKENS)
+    return base + extra
+
 
 class LLMConfig(BaseModel):
     """LLM configuration model."""
