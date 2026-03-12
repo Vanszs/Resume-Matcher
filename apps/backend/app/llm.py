@@ -385,6 +385,16 @@ def _supports_temperature(provider: str, model: str) -> bool:
     return True
 
 
+def _get_retry_temperature(attempt: int, base_temp: float = 0.1) -> float:
+    """LLM-002: Get temperature for retry attempt - increases with each retry.
+
+    Higher temperature on retries gives the model more variation to produce
+    different (hopefully valid) output.
+    """
+    temperatures = [base_temp, 0.3, 0.5, 0.7]
+    return temperatures[min(attempt, len(temperatures) - 1)]
+
+
 def _get_reasoning_effort(
     provider: str,
     model: str,
