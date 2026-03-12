@@ -1022,10 +1022,75 @@ const ResumeBuilderContent = () => {
   );
 };
 
+const BuilderSkeleton = () => (
+  <div
+    className="h-screen w-full bg-[#F0F0E8] flex justify-center items-center p-4 md:p-8"
+    style={{
+      backgroundImage:
+        'linear-gradient(rgba(29, 78, 216, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(29, 78, 216, 0.1) 1px, transparent 1px)',
+      backgroundSize: '40px 40px',
+    }}
+  >
+    <div className="w-full h-full max-w-[90%] md:max-w-[95%] xl:max-w-[1800px] border border-black bg-[#F0F0E8] shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)] flex flex-col">
+      {/* Header skeleton */}
+      <div className="border-b border-black p-6 md:p-8 bg-[#F0F0E8]">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <div>
+            <div className="h-4 w-32 bg-gray-300 rounded-none mb-4 animate-pulse" />
+            <div className="h-10 w-48 bg-gray-300 rounded-none animate-pulse" />
+            <div className="mt-3 h-4 w-40 bg-blue-100 rounded-none animate-pulse" />
+          </div>
+          <div className="flex gap-3 mt-4 md:mt-0">
+            <div className="h-9 w-24 bg-gray-200 border border-gray-300 rounded-none animate-pulse" />
+            <div className="h-9 w-20 bg-gray-200 border border-gray-300 rounded-none animate-pulse" />
+            <div className="h-9 w-20 bg-gray-200 border border-gray-300 rounded-none animate-pulse" />
+          </div>
+        </div>
+        {/* Tabs skeleton */}
+        <div className="flex gap-0 border-b border-black">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-10 w-28 bg-gray-200 border border-gray-300 rounded-none animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Content grid skeleton */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 bg-black gap-[1px] flex-1 min-h-0">
+        {/* Left panel */}
+        <div className="bg-[#F0F0E8] p-6 md:p-8 overflow-hidden">
+          <div className="max-w-3xl mx-auto space-y-6">
+            <div className="flex items-center gap-2 border-b-2 border-black pb-2">
+              <div className="w-3 h-3 bg-blue-700" />
+              <div className="h-5 w-32 bg-gray-300 rounded-none animate-pulse" />
+            </div>
+            {/* Section skeletons */}
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="border border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] p-4 space-y-3"
+              >
+                <div className="h-5 w-40 bg-gray-300 rounded-none animate-pulse" />
+                <div className="h-4 w-full bg-gray-200 rounded-none animate-pulse" />
+                <div className="h-4 w-3/4 bg-gray-200 rounded-none animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Right panel */}
+        <div className="bg-[#F0F0E8] p-6 md:p-8 flex flex-col items-center">
+          <div className="w-full max-w-[612px] aspect-[8.5/11] bg-white border border-gray-300 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] animate-pulse" />
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 export const ResumeBuilder = () => {
-  const { t } = useTranslations();
   return (
-    <Suspense fallback={<div>{t('common.loading')}</div>}>
+    <Suspense fallback={<BuilderSkeleton />}>
       <ResumeBuilderContent />
     </Suspense>
   );
