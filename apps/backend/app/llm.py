@@ -673,11 +673,22 @@ def _appears_truncated(data: dict) -> bool:
     if not _RESUME_KEYS.intersection(data.keys()):
         return False
 
-    # Missing personalInfo is the strongest truncation signal
-    if "personalInfo" not in data:
-        logging.warning(
-            "Possible truncation detected: missing required section 'personalInfo'",
-        )
+    # Check for empty arrays that should typically have content
+    suspicious_empty_arrays = ["workExperience", "education", "skills"]
+    for key in suspicious_empty_arrays:
+        if key in data and data[key] == []:
+            logging.warning(
+                "Possible truncation detected: '%s' is empty",
+                key,
+            )
+            return True
+
+    # personalInfo is intentionally excluded: the improve prompts tell the LLM
+    # to skip it, and _preserve_personal_info() restores it from the original.
+    # Checking for it here caused 3 wasteful retry attempts on every request.
+
+    return False
+
 
 # --- Model classification helpers (Fix 1) ---
 
