@@ -188,5 +188,16 @@ class Settings(BaseSettings):
             return self.llm_api_key
         return _get_llm_api_key_with_fallback()
 
+    def __repr__(self) -> str:
+        """Override repr to prevent secrets from appearing in logs/tracebacks."""
+        return (
+            f"Settings(llm_provider={self.llm_provider!r}, "
+            f"llm_model={self.llm_model!r}, "
+            f"host={self.host!r}, port={self.port})"
+        )
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
 
 settings = Settings()
