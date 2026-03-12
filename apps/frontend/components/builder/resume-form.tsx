@@ -382,21 +382,22 @@ export const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, onUpdate }) 
         strategy={verticalListSortingStrategy}
       >
         <div className="space-y-6 pb-20">
-          {sortedAllSections.map((section, index) => {
-            const isFirst = index === 0 || section.id === 'personalInfo';
-            const isLast = index === sortedAllSections.length - 1;
-            const isPersonalInfo = section.id === 'personalInfo';
+          {sortedAllSections
+            .filter((section) => section.id !== 'personalInfo')
+            .map((section, index, filtered) => {
+              const isFirst = index === 0;
+              const isLast = index === filtered.length - 1;
 
-            const sectionContent = section.isDefault
-              ? renderDefaultSection(section, isFirst, isLast)
-              : renderCustomSection(section, isFirst, isLast);
+              const sectionContent = section.isDefault
+                ? renderDefaultSection(section, isFirst, isLast)
+                : renderCustomSection(section, isFirst, isLast);
 
-            return (
-              <DraggableSectionWrapper key={section.id} id={section.id} disabled={isPersonalInfo}>
-                {sectionContent}
-              </DraggableSectionWrapper>
-            );
-          })}
+              return (
+                <DraggableSectionWrapper key={section.id} id={section.id} disabled={false}>
+                  {sectionContent}
+                </DraggableSectionWrapper>
+              );
+            })}
 
           {/* Add Section Button */}
           <AddSectionButton onAdd={handleAddSection} />

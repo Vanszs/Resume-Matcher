@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { type ResumeData } from '@/components/dashboard/resume-component';
 import { ResumeForm } from './resume-form';
 import { FormattingControls } from './formatting-controls';
+import { PersonalInfoPanel } from './personal-info-panel';
 import { CoverLetterEditor } from './cover-letter-editor';
 import { OutreachEditor } from './outreach-editor';
 import { CoverLetterPreview } from './cover-letter-preview';
@@ -755,6 +756,10 @@ const ResumeBuilderContent = () => {
               {activeTab === 'resume' && (
                 <>
                   <FormattingControls settings={templateSettings} onChange={handleSettingsChange} />
+                  <PersonalInfoPanel
+                    data={resumeData.personalInfo || {}}
+                    onChange={(data) => handleUpdate({ ...resumeData, personalInfo: data })}
+                  />
                   <ResumeForm resumeData={resumeData} onUpdate={handleUpdate} />
                 </>
               )}
