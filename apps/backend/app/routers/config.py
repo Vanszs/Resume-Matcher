@@ -90,9 +90,11 @@ async def _log_llm_health_check(config: LLMConfig) -> None:
                 "LLM config saved but health check failed",
                 extra={"provider": config.provider, "model": config.model},
             )
-    except Exception:
-        logging.exception(
-            "LLM config saved but health check raised exception",
+    except Exception as e:
+        logging.error(
+            "LLM config saved but health check raised exception: %s: %s",
+            type(e).__name__,
+            str(e)[:200],
             extra={"provider": config.provider, "model": config.model},
         )
 
@@ -393,8 +395,8 @@ def _clear_api_keys_for_all_users() -> None:
             stored["api_keys"] = {}
             stored["api_key"] = ""
             config_file.write_text(json.dumps(stored, indent=2))
-        except Exception:
-            logging.exception("Failed to clear API keys in %s", config_file)
+        except Exception as e:
+            logging.error("Failed to clear API keys in %s: %s", config_file.name, type(e).__name__)
 
 
 @router.get("/api-keys", response_model=ApiKeyStatusResponse, dependencies=[Depends(get_current_user)])

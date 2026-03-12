@@ -88,6 +88,13 @@ class LLMConfig(BaseModel):
     api_key: str
     api_base: str | None = None
 
+    def __repr__(self) -> str:
+        masked = self.api_key[:4] + "****" if len(self.api_key) > 4 else "****"
+        return f"LLMConfig(provider={self.provider!r}, model={self.model!r}, api_key={masked!r}, api_base={self.api_base!r})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
 
 def _normalize_api_base(provider: str, api_base: str | None) -> str | None:
     """Normalize api_base for LiteLLM provider-specific expectations.
@@ -486,9 +493,12 @@ async def check_llm_health(
             result["model_output"] = _to_code_block(content)
         return result
     except Exception as e:
-        # Log full exception details server-side, but do not expose them to clients
-        logging.exception(
-            "LLM health check failed",
+        # Log error type only — avoid logging.exception() which prints full
+        # stack traces that may contain LLMConfig objects with plaintext api_key.
+        logging.error(
+            "LLM health check failed: %s: %s",
+            type(e).__name__,
+            str(e)[:200],
             extra={"provider": config.provider, "model": config.model},
         )
 
@@ -583,7 +593,12 @@ async def complete(
         raise
     except Exception as e:
         # Log the actual error server-side for debugging
-        logging.error(f"LLM completion failed: {e}", extra={"model": model_name})
+        logging.error(
+            "LLM completion failed: %s: %s",
+            type(e).__name__,
+            str(e)[:200],
+            extra={"model": model_name},
+        )
         raise ValueError(
             "LLM completion failed. Please check your API configuration and try again."
         ) from e
@@ -950,7 +965,7 @@ async def complete_json(
 
         except Exception as e:
             last_error = e
-            logging.warning(f"LLM call failed (attempt {attempt + 1}): {e}")
+            logging.warning("LLM call failed (attempt %d): %s: %s", attempt + 1, type(e).__name__, str(e)[:200])
             # Never retry: authentication failures, timeouts (already over budget),
             # or rate-limit errors (no built-in delay means immediate retry is pointless).
             if isinstance(
