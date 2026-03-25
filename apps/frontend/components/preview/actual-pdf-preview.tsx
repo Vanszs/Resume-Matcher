@@ -3,6 +3,7 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, FileWarning, FileText } from 'lucide-react';
 import type { ResumeData } from '@/components/dashboard/resume-component';
+import { PaginatedPreview } from '@/components/preview/paginated-preview';
 import type { TemplateSettings } from '@/lib/types/template-settings';
 import type { Locale } from '@/i18n/config';
 import { renderDraftResumePdf } from '@/lib/api/resume';
@@ -14,7 +15,7 @@ interface ActualPdfPreviewProps {
   locale: Locale;
 }
 
-const RENDER_DEBOUNCE_MS = 700;
+const RENDER_DEBOUNCE_MS = 1500;
 
 export function ActualPdfPreview({ resumeData, settings, locale }: ActualPdfPreviewProps) {
   const { t } = useTranslations();
@@ -31,22 +32,47 @@ export function ActualPdfPreview({ resumeData, settings, locale }: ActualPdfPrev
   );
 
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [status, setStatus] = useState<'syncing' | 'ready' | 'error'>('syncing');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const requestIdRef = useRef(0);
   const objectUrlRef = useRef<string | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+  const inFlightRef = useRef(false);
+  const queuedRenderRef = useRef(false);
+  const latestPayloadRef = useRef({
+    resumeData: deferredResumeData,
+    settings: deferredSettings,
+    locale,
+    signature: payloadSignature,
+  });
+
+  latestPayloadRef.current = {
+    resumeData: deferredResumeData,
+    settings: deferredSettings,
+    locale,
+    signature: payloadSignature,
+  };
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(async () => {
-      const requestId = requestIdRef.current + 1;
-      requestIdRef.current = requestId;
-      setStatus('loading');
-      setErrorMessage(null);
+    const renderLatestPreview = async () => {
+      if (inFlightRef.current || !queuedRenderRef.current) {
+        return;
+      }
+
+      queuedRenderRef.current = false;
+      inFlightRef.current = true;
+      const snapshot = latestPayloadRef.current;
 
       try {
-        const blob = await renderDraftResumePdf(deferredResumeData, deferredSettings, locale);
+        const blob = await renderDraftResumePdf(
+          snapshot.resumeData,
+          snapshot.settings,
+          snapshot.locale
+        );
         const nextUrl = URL.createObjectURL(blob);
-        if (requestId !== requestIdRef.current) {
+        const isLatestSnapshot =
+          snapshot.signature === latestPayloadRef.current.signature && !queuedRenderRef.current;
+
+        if (!isLatestSnapshot) {
           URL.revokeObjectURL(nextUrl);
           return;
         }
@@ -54,36 +80,64 @@ export function ActualPdfPreview({ resumeData, settings, locale }: ActualPdfPrev
         if (objectUrlRef.current) {
           URL.revokeObjectURL(objectUrlRef.current);
         }
+
         objectUrlRef.current = nextUrl;
         setPdfUrl(nextUrl);
+        setErrorMessage(null);
         setStatus('ready');
       } catch (error) {
-        if (requestId !== requestIdRef.current) {
-          return;
+        const isLatestSnapshot =
+          snapshot.signature === latestPayloadRef.current.signature && !queuedRenderRef.current;
+        if (isLatestSnapshot) {
+          setStatus('error');
+          setErrorMessage(error instanceof Error ? error.message : t('common.unknown'));
         }
-        setStatus('error');
-        setErrorMessage(error instanceof Error ? error.message : t('common.unknown'));
+      } finally {
+        inFlightRef.current = false;
+        if (queuedRenderRef.current) {
+          timeoutRef.current = window.setTimeout(() => {
+            void renderLatestPreview();
+          }, RENDER_DEBOUNCE_MS);
+        }
       }
+    };
+
+    queuedRenderRef.current = true;
+    setStatus('syncing');
+
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = window.setTimeout(() => {
+      void renderLatestPreview();
     }, RENDER_DEBOUNCE_MS);
 
     return () => {
-      window.clearTimeout(timeoutId);
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+      }
     };
   }, [deferredResumeData, deferredSettings, locale, payloadSignature, t]);
 
   useEffect(() => {
     return () => {
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+      }
       if (objectUrlRef.current) {
         URL.revokeObjectURL(objectUrlRef.current);
       }
     };
   }, []);
 
+  const showExactPreview = status === 'ready' && pdfUrl !== null;
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex items-center justify-between border-b border-gray-300 bg-[#E5E5E0] px-4 py-2 shrink-0">
         <div className="flex items-center gap-2 text-gray-700">
-          {status === 'loading' ? (
+          {status === 'syncing' ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : status === 'error' ? (
             <FileWarning className="w-4 h-4 text-red-600" />
@@ -91,14 +145,12 @@ export function ActualPdfPreview({ resumeData, settings, locale }: ActualPdfPrev
             <FileText className="w-4 h-4" />
           )}
           <span className="font-mono text-xs uppercase tracking-wider">
-            {status === 'loading'
-              ? t('preview.calculating')
-              : status === 'error'
-                ? t('common.error')
-                : 'Actual Print Preview'}
+            {showExactPreview ? 'Actual Print Preview' : 'Live Preview'}
           </span>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-wider text-gray-500">PDF</span>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-gray-500">
+          {showExactPreview ? 'PDF Synced' : 'PDF Sync Pending'}
+        </span>
       </div>
 
       <div
@@ -109,7 +161,7 @@ export function ActualPdfPreview({ resumeData, settings, locale }: ActualPdfPrev
           backgroundSize: '20px 20px',
         }}
       >
-        {pdfUrl ? (
+        {showExactPreview ? (
           <div className="mx-auto h-full max-w-[980px] border-2 border-black bg-white shadow-[6px_6px_0px_0px_#000000]">
             <iframe
               key={pdfUrl}
@@ -119,27 +171,22 @@ export function ActualPdfPreview({ resumeData, settings, locale }: ActualPdfPrev
             />
           </div>
         ) : (
-          <div className="flex h-full items-center justify-center border-2 border-dashed border-gray-400 bg-white/60">
-            <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-gray-600">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Rendering PDF Preview</span>
-            </div>
-          </div>
+          <PaginatedPreview resumeData={resumeData} settings={settings} />
         )}
 
-        {status === 'loading' && pdfUrl && (
+        {status === 'syncing' && (
           <div className="pointer-events-none absolute inset-4 flex items-start justify-end">
             <div className="border border-black bg-[#F0F0E8] px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-blue-700 shadow-[3px_3px_0px_0px_#000000]">
-              Rendering latest draft...
+              Syncing download layout...
             </div>
           </div>
         )}
 
         {status === 'error' && (
-          <div className="absolute inset-4 flex items-center justify-center">
-            <div className="max-w-md border-2 border-black bg-white p-4 shadow-[6px_6px_0px_0px_#000000]">
+          <div className="pointer-events-none absolute inset-x-4 bottom-4 flex justify-center">
+            <div className="max-w-2xl border-2 border-black bg-white px-4 py-3 shadow-[6px_6px_0px_0px_#000000]">
               <p className="font-mono text-xs uppercase tracking-wider text-red-600">
-                Actual print preview failed
+                Exact PDF preview unavailable. Showing live preview.
               </p>
               <p className="mt-2 text-sm text-gray-700">{errorMessage}</p>
             </div>

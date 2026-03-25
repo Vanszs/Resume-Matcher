@@ -1685,7 +1685,7 @@ async def render_resume_pdf_from_draft(
         )
         raise HTTPException(
             status_code=503,
-            detail="Failed to render resume preview. Please try again.",
+            detail=str(error),
         )
     finally:
         await delete_resume_preview(preview_id)
