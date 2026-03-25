@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { type PageSize, type MarginSettings } from '@/lib/types/template-settings';
-import { getContentAreaPx } from '@/lib/constants/page-dimensions';
+import { getContentAreaPx, mmToPx } from '@/lib/constants/page-dimensions';
 
 export interface PageBreak {
   pageNumber: number;
@@ -22,6 +22,8 @@ interface UsePaginationResult {
   totalContentHeight: number;
   isCalculating: boolean;
 }
+
+const PRINT_LAYOUT_SAFETY_BUFFER_MM = 2;
 
 /**
  * Custom hook for calculating page breaks based on content height.
@@ -52,7 +54,9 @@ export function usePagination({
     // Wait for fonts to load before measuring
     document.fonts.ready.then(() => {
       const contentArea = getContentAreaPx(pageSize, margins);
-      const pageHeight = contentArea.height;
+      // Leave a small buffer so preview pagination stays slightly conservative
+      // versus Chromium's PDF print layout and does not overfill the page.
+      const pageHeight = Math.max(contentArea.height - mmToPx(PRINT_LAYOUT_SAFETY_BUFFER_MM), 100);
       const contentHeight = container.scrollHeight;
 
       setTotalContentHeight(contentHeight);
