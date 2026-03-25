@@ -1656,6 +1656,7 @@ async def download_resume_pdf(
 @router.post("/render-pdf")
 async def render_resume_pdf_from_draft(
     payload: ResumeRenderPdfRequest,
+    request: Request,
     user=Depends(get_current_user),
 ) -> Response:
     """Render the current builder draft using the exact PDF pipeline."""
@@ -1669,6 +1670,9 @@ async def render_resume_pdf_from_draft(
 
     margins = settings_payload["margins"]
     params = urlencode({"accessKey": access_key})
+    raw_token = request.headers.get("authorization", "").removeprefix("Bearer ").strip()
+    if raw_token:
+        params = f"{params}&token={raw_token}"
     url = f"{settings.frontend_base_url}/print/resumes/preview/{preview_id}?{params}"
 
     try:

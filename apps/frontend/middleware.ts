@@ -56,10 +56,14 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Allow print pages when a short-lived token is present (used by the PDF renderer)
+    // Allow print pages when a short-lived token is present (used by the PDF renderer).
+    // Draft print previews use an ephemeral accessKey instead of a user session cookie.
     if (pathname.startsWith('/print')) {
         const tokenParam = request.nextUrl.searchParams.get('token');
-        if (tokenParam) {
+        const accessKeyParam = request.nextUrl.searchParams.get('accessKey');
+        const isDraftPreviewPath = pathname.startsWith('/print/resumes/preview/');
+
+        if (tokenParam || (isDraftPreviewPath && accessKeyParam)) {
             return NextResponse.next();
         }
     }

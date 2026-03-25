@@ -13,6 +13,7 @@ from playwright.async_api import (
     Error as PlaywrightError,
     Page,
     Playwright,
+    TimeoutError as PlaywrightTimeoutError,
     async_playwright,
 )
 
@@ -140,8 +141,61 @@ async def _render_page_to_pdf(
     pdf_format: str,
     pdf_margins: dict,
 ) -> bytes:
-    await page.goto(url, wait_until="networkidle")
-    await page.wait_for_selector(selector)
+    response = await page.goto(url, wait_until="networkidle")
+    if "/login" in page.url:
+        raise PDFRenderError(
+            "PDF renderer was redirected to the login page before the print document "
+            f"loaded. Attempted URL: {url}. Final URL: {page.url}."
+        )
+    if response is not None and response.status >= 400:
+        title = ""
+        body_excerpt = ""
+        try:
+            title = await page.title()
+        except PlaywrightError:
+            title = ""
+        try:
+            body_text = await page.locator("body").inner_text(timeout=1000)
+            body_excerpt = " ".join(body_text.split())[:280]
+        except PlaywrightError:
+            body_excerpt = ""
+
+        detail_parts = [
+            f"Print page returned HTTP {response.status} before '{selector}' appeared.",
+            f"Attempted URL: {url}.",
+            f"Final URL: {page.url}.",
+        ]
+        if title:
+            detail_parts.append(f"Page title: {title}.")
+        if body_excerpt:
+            detail_parts.append(f"Body excerpt: {body_excerpt}")
+        raise PDFRenderError(" ".join(detail_parts))
+    try:
+        await page.wait_for_selector(selector)
+    except PlaywrightTimeoutError as error:
+        title = ""
+        body_excerpt = ""
+        final_url = page.url
+        try:
+            title = await page.title()
+        except PlaywrightError:
+            title = ""
+        try:
+            body_text = await page.locator("body").inner_text(timeout=1000)
+            body_excerpt = " ".join(body_text.split())[:280]
+        except PlaywrightError:
+            body_excerpt = ""
+
+        detail_parts = [
+            f"Timed out waiting for '{selector}' after loading {url}.",
+            f"Final URL: {final_url}.",
+        ]
+        if title:
+            detail_parts.append(f"Page title: {title}.")
+        if body_excerpt:
+            detail_parts.append(f"Body excerpt: {body_excerpt}")
+
+        raise PDFRenderError(" ".join(detail_parts)) from error
     await page.evaluate("document.fonts.ready")
     return await page.pdf(
         format=pdf_format,
