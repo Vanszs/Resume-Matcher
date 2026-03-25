@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { type PageSize, type MarginSettings } from '@/lib/types/template-settings';
 import { getContentAreaPx, mmToPx } from '@/lib/constants/page-dimensions';
+import baseStyles from '@/components/resume/styles/_base.module.css';
 
 export interface PageBreak {
   pageNumber: number;
@@ -24,6 +25,10 @@ interface UsePaginationResult {
 }
 
 const PRINT_LAYOUT_SAFETY_BUFFER_MM = 2;
+const ITEM_SELECTOR = `.${baseStyles['resume-item']}, [data-no-break]`;
+const SECTION_TITLE_SELECTOR = `.${baseStyles['resume-section-title']}, .${baseStyles['resume-section-title-sm']}`;
+const SECTION_SELECTOR = `.${baseStyles['resume-section']}`;
+const SECTION_ITEMS_SELECTOR = `.${baseStyles['resume-items']} > *:first-child`;
 
 /**
  * Custom hook for calculating page breaks based on content height.
@@ -72,7 +77,7 @@ export function usePagination({
       // - .resume-item: Individual job entries, project entries, education entries
       // - [data-no-break]: Explicitly marked elements
       // NOTE: We do NOT include .resume-section because sections SHOULD span pages
-      const items = container.querySelectorAll('.resume-item, [data-no-break]');
+      const items = container.querySelectorAll(ITEM_SELECTOR);
       const itemBounds: { top: number; bottom: number; element: Element }[] = [];
       const containerRect = container.getBoundingClientRect();
 
@@ -85,20 +90,33 @@ export function usePagination({
         });
       });
 
+      // If an entire section can fit on a single page, keep it together.
+      // This is especially important for small sections like publications.
+      const sections = container.querySelectorAll(SECTION_SELECTOR);
+      sections.forEach((section) => {
+        const rect = section.getBoundingClientRect();
+        const sectionHeight = rect.height;
+        if (sectionHeight <= pageHeight) {
+          itemBounds.push({
+            top: rect.top - containerRect.top,
+            bottom: rect.bottom - containerRect.top,
+            element: section,
+          });
+        }
+      });
+
       // CRITICAL: Prevent section headers from being orphaned at page bottom
       // A section header should stay with at least its first content element
-      const sectionTitles = container.querySelectorAll(
-        '.resume-section-title, .resume-section-title-sm'
-      );
+      const sectionTitles = container.querySelectorAll(SECTION_TITLE_SELECTOR);
       sectionTitles.forEach((title) => {
         const titleRect = title.getBoundingClientRect();
-        const section = title.closest('.resume-section');
+        const section = title.closest(SECTION_SELECTOR);
         if (section) {
           // Find the first content element after the title
           // Could be: .resume-item, .resume-items > first-child, p, ul, etc.
           const firstContent =
-            section.querySelector('.resume-item') ||
-            section.querySelector('.resume-items > *:first-child') ||
+            section.querySelector(`.${baseStyles['resume-item']}`) ||
+            section.querySelector(SECTION_ITEMS_SELECTOR) ||
             title.nextElementSibling; // Fallback to immediate sibling (p, ul, etc.)
 
           if (firstContent && firstContent !== title) {
