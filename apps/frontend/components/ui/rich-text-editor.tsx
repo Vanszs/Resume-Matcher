@@ -54,6 +54,9 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         codeBlock: false,
         horizontalRule: false,
         hardBreak: false,
+        // Provide explicitly-configured extensions below to avoid duplicate names.
+        link: false,
+        underline: false,
       }),
       Underline,
       Link.configure({
