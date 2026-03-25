@@ -1,82 +1,18 @@
-import Resume, { ResumeData } from '@/components/dashboard/resume-component';
-import {
-  type TemplateType,
-  type PageSize,
-  type TemplateSettings,
-  type SpacingLevel,
-  type HeaderFontFamily,
-  type BodyFontFamily,
-  type AccentColor,
-  DEFAULT_TEMPLATE_SETTINGS,
-} from '@/lib/types/template-settings';
-import { PAGE_DIMENSIONS } from '@/lib/constants/page-dimensions';
 import { API_BASE } from '@/lib/api/client';
 import { translate } from '@/lib/i18n/server';
 import { resolveLocale } from '@/lib/i18n/locale';
 import { withLocalizedDefaultSections } from '@/lib/utils/section-helpers';
+import {
+  type ResumePrintSearchParams,
+  ResumePrintDocument,
+  buildResumePrintSettings,
+} from '@/lib/print/resume-print';
+import type { ResumeData } from '@/components/dashboard/resume-component';
 
 type PageProps = {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{
-    template?: string;
-    pageSize?: string;
-    marginTop?: string;
-    marginBottom?: string;
-    marginLeft?: string;
-    marginRight?: string;
-    sectionSpacing?: string;
-    itemSpacing?: string;
-    lineHeight?: string;
-    fontSize?: string;
-    headerScale?: string;
-    headerFont?: string;
-    bodyFont?: string;
-    compactMode?: string;
-    showContactIcons?: string;
-    accentColor?: string;
-    lang?: string;
-    token?: string;
-  }>;
+  searchParams?: Promise<ResumePrintSearchParams>;
 };
-
-/**
- * Parse header font family
- */
-function parseHeaderFont(value: string | undefined): HeaderFontFamily {
-  if (value === 'serif' || value === 'sans-serif' || value === 'mono') {
-    return value;
-  }
-  return DEFAULT_TEMPLATE_SETTINGS.fontSize.headerFont;
-}
-
-/**
- * Parse body font family
- */
-function parseBodyFont(value: string | undefined): BodyFontFamily {
-  if (value === 'serif' || value === 'sans-serif' || value === 'mono') {
-    return value;
-  }
-  return DEFAULT_TEMPLATE_SETTINGS.fontSize.bodyFont;
-}
-
-/**
- * Parse accent color
- */
-function parseAccentColor(value: string | undefined): AccentColor {
-  if (value === 'blue' || value === 'green' || value === 'orange' || value === 'red') {
-    return value;
-  }
-  return DEFAULT_TEMPLATE_SETTINGS.accentColor;
-}
-
-/**
- * Parse boolean from string
- */
-function parseBoolean(value: string | undefined, defaultValue: boolean): boolean {
-  if (value === 'true') return true;
-  if (value === 'false') return false;
-  return defaultValue;
-}
 
 async function fetchResumeData(id: string, token?: string): Promise<ResumeData> {
   const headers: Record<string, string> = {};
@@ -98,8 +34,6 @@ async function fetchResumeData(id: string, token?: string): Promise<ResumeData> 
     try {
       return JSON.parse(payload.data.raw_resume.content) as ResumeData;
     } catch (error) {
-      // Log error for debugging instead of silently failing
-      // Note: Avoid logging content preview to prevent PII exposure
       console.error('Failed to parse resume JSON:', {
         resumeId: id,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -111,164 +45,40 @@ async function fetchResumeData(id: string, token?: string): Promise<ResumeData> 
   return {} as ResumeData;
 }
 
-/**
- * Parse spacing level from string, clamped to valid range 1-5
- */
-function parseSpacingLevel(value: string | undefined, defaultValue: SpacingLevel): SpacingLevel {
-  if (!value) return defaultValue;
-  const num = parseInt(value, 10);
-  if (isNaN(num) || num < 1 || num > 5) return defaultValue;
-  return num as SpacingLevel;
-}
-
-/**
- * Parse margin value from string, clamped to valid range 5-25
- */
-function parseMargin(value: string | undefined, defaultValue: number): number {
-  if (!value) return defaultValue;
-  const num = parseInt(value, 10);
-  if (isNaN(num)) return defaultValue;
-  return Math.max(5, Math.min(25, num));
-}
-
-/**
- * Validate template type
- */
-function parseTemplate(value: string | undefined): TemplateType {
-  if (
-    value === 'swiss-single' ||
-    value === 'swiss-two-column' ||
-    value === 'modern' ||
-    value === 'modern-two-column'
-  ) {
-    return value;
-  }
-  return 'swiss-single';
-}
-
-/**
- * Validate page size
- */
-function parsePageSize(value: string | undefined): PageSize {
-  if (value === 'A4' || value === 'LETTER') {
-    return value;
-  }
-  return 'A4';
-}
-
 export default async function PrintResumePage({ params, searchParams }: PageProps) {
   const resolvedParams = await params;
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const resumeData = await fetchResumeData(resolvedParams.id, resolvedSearchParams?.token);
   const locale = resolveLocale(resolvedSearchParams?.lang);
-  const t = (key: string, params?: Record<string, string | number>) =>
-    translate(locale, key, params);
+  const t = (key: string, values?: Record<string, string | number>) =>
+    translate(locale, key, values);
   const localizedResumeData = withLocalizedDefaultSections(resumeData, t);
-  const additionalSectionLabels = {
-    technicalSkills: t('resume.additionalLabels.technicalSkills'),
-    languages: t('resume.additionalLabels.languages'),
-    certifications: t('resume.additionalLabels.certifications'),
-    awards: t('resume.additionalLabels.awards'),
-  };
-  const sectionHeadings = {
-    summary: t('resume.sections.summary'),
-    experience: t('resume.sections.experience'),
-    education: t('resume.sections.education'),
-    projects: t('resume.sections.projects'),
-    certifications: t('resume.sections.certifications'),
-    skills: t('resume.sections.skillsOnly'),
-    languages: t('resume.sections.languages'),
-    awards: t('resume.sections.awards'),
-    links: t('resume.sections.links'),
-  };
-  const fallbackLabels = {
-    name: t('resume.defaults.name'),
-  };
-
-  // Parse template settings from query params
-  const settings: TemplateSettings = {
-    template: parseTemplate(resolvedSearchParams?.template),
-    pageSize: parsePageSize(resolvedSearchParams?.pageSize),
-    margins: {
-      top: parseMargin(resolvedSearchParams?.marginTop, DEFAULT_TEMPLATE_SETTINGS.margins.top),
-      bottom: parseMargin(
-        resolvedSearchParams?.marginBottom,
-        DEFAULT_TEMPLATE_SETTINGS.margins.bottom
-      ),
-      left: parseMargin(resolvedSearchParams?.marginLeft, DEFAULT_TEMPLATE_SETTINGS.margins.left),
-      right: parseMargin(
-        resolvedSearchParams?.marginRight,
-        DEFAULT_TEMPLATE_SETTINGS.margins.right
-      ),
-    },
-    spacing: {
-      section: parseSpacingLevel(
-        resolvedSearchParams?.sectionSpacing,
-        DEFAULT_TEMPLATE_SETTINGS.spacing.section
-      ),
-      item: parseSpacingLevel(
-        resolvedSearchParams?.itemSpacing,
-        DEFAULT_TEMPLATE_SETTINGS.spacing.item
-      ),
-      lineHeight: parseSpacingLevel(
-        resolvedSearchParams?.lineHeight,
-        DEFAULT_TEMPLATE_SETTINGS.spacing.lineHeight
-      ),
-    },
-    fontSize: {
-      base: parseSpacingLevel(
-        resolvedSearchParams?.fontSize,
-        DEFAULT_TEMPLATE_SETTINGS.fontSize.base
-      ),
-      headerScale: parseSpacingLevel(
-        resolvedSearchParams?.headerScale,
-        DEFAULT_TEMPLATE_SETTINGS.fontSize.headerScale
-      ),
-      headerFont: parseHeaderFont(resolvedSearchParams?.headerFont),
-      bodyFont: parseBodyFont(resolvedSearchParams?.bodyFont),
-    },
-    compactMode: parseBoolean(
-      resolvedSearchParams?.compactMode,
-      DEFAULT_TEMPLATE_SETTINGS.compactMode
-    ),
-    showContactIcons: parseBoolean(
-      resolvedSearchParams?.showContactIcons,
-      DEFAULT_TEMPLATE_SETTINGS.showContactIcons
-    ),
-    accentColor: parseAccentColor(resolvedSearchParams?.accentColor),
-  };
-
-  // Note: Margins are applied by Playwright's PDF renderer (not here)
-  // This ensures margins appear on EVERY page, not just the first
-  // The settings are passed to override CSS variables for spacing/fonts only
-  const printSettings: TemplateSettings = {
-    ...settings,
-    // Zero out margins in CSS since Playwright handles them
-    margins: { top: 0, bottom: 0, left: 0, right: 0 },
-  };
-
-  // Constrain print page width to match the preview measurement container width.
-  // Without this the resume renders at full page width (~793px for A4) in the
-  // PDF, while the preview measures at content-area width (~718px). The layout
-  // difference causes slight height discrepancies that make a 1-page preview
-  // produce a 2-page PDF.
-  const pageDims = PAGE_DIMENSIONS[settings.pageSize];
-  const contentWidthMm =
-    pageDims.width - settings.margins.left - settings.margins.right;
+  const settings = buildResumePrintSettings(resolvedSearchParams);
 
   return (
-    <div
-      className="resume-print bg-white mx-auto"
-      style={{ width: `${contentWidthMm}mm` }}
-    >
-      <Resume
-        resumeData={localizedResumeData}
-        template={settings.template}
-        settings={printSettings}
-        additionalSectionLabels={additionalSectionLabels}
-        sectionHeadings={sectionHeadings}
-        fallbackLabels={fallbackLabels}
-      />
-    </div>
+    <ResumePrintDocument
+      resumeData={localizedResumeData}
+      settings={settings}
+      additionalSectionLabels={{
+        technicalSkills: t('resume.additionalLabels.technicalSkills'),
+        languages: t('resume.additionalLabels.languages'),
+        certifications: t('resume.additionalLabels.certifications'),
+        awards: t('resume.additionalLabels.awards'),
+      }}
+      sectionHeadings={{
+        summary: t('resume.sections.summary'),
+        experience: t('resume.sections.experience'),
+        education: t('resume.sections.education'),
+        projects: t('resume.sections.projects'),
+        certifications: t('resume.sections.certifications'),
+        skills: t('resume.sections.skillsOnly'),
+        languages: t('resume.sections.languages'),
+        awards: t('resume.sections.awards'),
+        links: t('resume.sections.links'),
+      }}
+      fallbackLabels={{
+        name: t('resume.defaults.name'),
+      }}
+    />
   );
 }

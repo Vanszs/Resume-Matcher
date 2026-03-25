@@ -167,11 +167,7 @@ export async function confirmImproveResume(
 // Async tailor task API (Phase 2/3 — background task polling)
 // ---------------------------------------------------------------------------
 
-export type TailorTaskStatus =
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'failed';
+export type TailorTaskStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
 export type TailorTaskStage =
   | 'queued'
@@ -210,7 +206,7 @@ export async function startTailorTask(
     const truncated = text.length > 500 ? text.slice(0, 500) + '…' : text;
     throw new Error(`Failed to start tailor task (status ${res.status}): ${truncated}`);
   }
-  const data = await res.json() as { task_id: string };
+  const data = (await res.json()) as { task_id: string };
   return data.task_id;
 }
 
@@ -261,6 +257,27 @@ export async function updateResume(
   }
   const payload = (await res.json()) as ResumeResponse;
   return payload.data;
+}
+
+export async function renderDraftResumePdf(
+  resumeData: ResumeData,
+  settings: TemplateSettings,
+  locale?: Locale
+): Promise<Blob> {
+  const res = await apiFetch('/resumes/render-pdf', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      resumeData,
+      settings,
+      lang: locale,
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Failed to render resume preview (status ${res.status}): ${text}`);
+  }
+  return await res.blob();
 }
 
 export function getResumePdfUrl(

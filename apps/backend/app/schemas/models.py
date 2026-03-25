@@ -506,6 +506,73 @@ class ResumeListResponse(BaseModel):
     data: list[ResumeSummary]
 
 
+class ResumeMarginSettings(BaseModel):
+    """PDF margin settings in millimeters."""
+
+    top: int = Field(default=10, ge=5, le=25)
+    bottom: int = Field(default=10, ge=5, le=25)
+    left: int = Field(default=10, ge=5, le=25)
+    right: int = Field(default=10, ge=5, le=25)
+
+
+class ResumeSpacingSettings(BaseModel):
+    """Spacing controls matching frontend template settings."""
+
+    section: int = Field(default=3, ge=1, le=5)
+    item: int = Field(default=2, ge=1, le=5)
+    lineHeight: int = Field(default=3, ge=1, le=5)
+
+
+class ResumeFontSizeSettings(BaseModel):
+    """Font settings matching frontend template settings."""
+
+    base: int = Field(default=3, ge=1, le=5)
+    headerScale: int = Field(default=3, ge=1, le=5)
+    headerFont: Literal["serif", "sans-serif", "mono"] = "serif"
+    bodyFont: Literal["serif", "sans-serif", "mono"] = "sans-serif"
+
+
+class ResumeTemplateSettings(BaseModel):
+    """Template settings shared by builder preview and PDF export."""
+
+    template: Literal[
+        "swiss-single",
+        "swiss-two-column",
+        "modern",
+        "modern-two-column",
+    ] = "swiss-single"
+    pageSize: Literal["A4", "LETTER"] = "A4"
+    margins: ResumeMarginSettings = Field(default_factory=ResumeMarginSettings)
+    spacing: ResumeSpacingSettings = Field(default_factory=ResumeSpacingSettings)
+    fontSize: ResumeFontSizeSettings = Field(default_factory=ResumeFontSizeSettings)
+    compactMode: bool = False
+    showContactIcons: bool = False
+    accentColor: Literal["blue", "green", "orange", "red"] = "blue"
+
+
+class ResumeRenderPdfRequest(BaseModel):
+    """Request to render a draft resume as PDF using print pipeline."""
+
+    resumeData: ResumeData
+    settings: ResumeTemplateSettings = Field(default_factory=ResumeTemplateSettings)
+    lang: str | None = Field(default=None, pattern=r"^[a-z]{2}(-[A-Z]{2})?$")
+
+
+class ResumePreviewDocument(BaseModel):
+    """Ephemeral draft document consumed by the print preview route."""
+
+    resumeData: ResumeData
+    settings: ResumeTemplateSettings
+    lang: str | None = None
+
+
+class ResumePreviewDocumentResponse(BaseModel):
+    """Response for draft preview data lookup."""
+
+    request_id: str
+    data: ResumePreviewDocument
+
+
 # Job Description Models
 class JobUploadRequest(BaseModel):
     """Request to upload job descriptions."""

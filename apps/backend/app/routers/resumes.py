@@ -10,6 +10,7 @@ import unicodedata
 from collections.abc import AsyncGenerator, Awaitable
 from pathlib import Path
 from typing import Any, NoReturn
+from urllib.parse import urlencode
 from uuid import uuid4
 
 import jwt as pyjwt
@@ -37,7 +38,11 @@ from app.schemas import (
     ResumeFetchData,
     ResumeFetchResponse,
     ResumeListResponse,
+    ResumePreviewDocument,
+    ResumePreviewDocumentResponse,
+    ResumeRenderPdfRequest,
     ResumeSummary,
+    ResumeTemplateSettings,
     ResumeUploadResponse,
     RawResume,
     TailorTaskStartResponse,
@@ -61,6 +66,11 @@ from app.services.cover_letter import (
     generate_cover_letter,
     generate_outreach_message,
     generate_resume_title,
+)
+from app.services.resume_preview_store import (
+    create_resume_preview,
+    delete_resume_preview,
+    get_resume_preview,
 )
 from app.prompts import DEFAULT_IMPROVE_PROMPT_ID, IMPROVE_PROMPT_OPTIONS
 
@@ -381,6 +391,51 @@ async def _generate_auxiliary_messages(
 
 
 router = APIRouter(prefix="/resumes", tags=["Resumes"], dependencies=[Depends(get_current_user)])
+preview_router = APIRouter(prefix="/resume-preview", tags=["Resume Preview"])
+
+
+def _build_resume_print_params(
+    *,
+    template: str,
+    page_size: str,
+    margins: dict[str, int],
+    spacing: dict[str, int],
+    font_size: dict[str, Any],
+    compact_mode: bool,
+    show_contact_icons: bool,
+    accent_color: str,
+    lang: str | None,
+) -> str:
+    params: dict[str, str] = {
+        "template": template,
+        "pageSize": page_size,
+        "marginTop": str(margins["top"]),
+        "marginBottom": str(margins["bottom"]),
+        "marginLeft": str(margins["left"]),
+        "marginRight": str(margins["right"]),
+        "sectionSpacing": str(spacing["section"]),
+        "itemSpacing": str(spacing["item"]),
+        "lineHeight": str(spacing["lineHeight"]),
+        "fontSize": str(font_size["base"]),
+        "headerScale": str(font_size["headerScale"]),
+        "headerFont": str(font_size["headerFont"]),
+        "bodyFont": str(font_size["bodyFont"]),
+        "compactMode": str(compact_mode).lower(),
+        "showContactIcons": str(show_contact_icons).lower(),
+        "accentColor": accent_color,
+    }
+    if lang:
+        params["lang"] = lang
+    return urlencode(params)
+
+
+def _build_pdf_margin_dict(margins: dict[str, int]) -> dict[str, int]:
+    return {
+        "top": margins["top"],
+        "right": margins["right"],
+        "bottom": margins["bottom"],
+        "left": margins["left"],
+    }
 
 
 async def _process_resume_background(resume_id: str, markdown_content: str, user_id: str) -> None:
@@ -1550,27 +1605,34 @@ async def download_resume_pdf(
     if not resume:
         raise HTTPException(status_code=404, detail="Resume not found")
 
-    # Build print URL with all settings
-    params = (
-        f"template={template}"
-        f"&pageSize={pageSize}"
-        f"&marginTop={marginTop}"
-        f"&marginBottom={marginBottom}"
-        f"&marginLeft={marginLeft}"
-        f"&marginRight={marginRight}"
-        f"&sectionSpacing={sectionSpacing}"
-        f"&itemSpacing={itemSpacing}"
-        f"&lineHeight={lineHeight}"
-        f"&fontSize={fontSize}"
-        f"&headerScale={headerScale}"
-        f"&headerFont={headerFont}"
-        f"&bodyFont={bodyFont}"
-        f"&compactMode={str(compactMode).lower()}"
-        f"&showContactIcons={str(showContactIcons).lower()}"
-        f"&accentColor={accentColor}"
+    margins = {
+        "top": marginTop,
+        "bottom": marginBottom,
+        "left": marginLeft,
+        "right": marginRight,
+    }
+    spacing = {
+        "section": sectionSpacing,
+        "item": itemSpacing,
+        "lineHeight": lineHeight,
+    }
+    font_settings = {
+        "base": fontSize,
+        "headerScale": headerScale,
+        "headerFont": headerFont,
+        "bodyFont": bodyFont,
+    }
+    params = _build_resume_print_params(
+        template=template,
+        page_size=pageSize,
+        margins=margins,
+        spacing=spacing,
+        font_size=font_settings,
+        compact_mode=compactMode,
+        show_contact_icons=showContactIcons,
+        accent_color=accentColor,
+        lang=lang,
     )
-    if lang:
-        params = f"{params}&lang={lang}"
     # Pass the user's JWT so the print page can authenticate its backend fetch
     if request:
         raw_token = request.headers.get("authorization", "").removeprefix("Bearer ").strip()
@@ -1579,12 +1641,7 @@ async def download_resume_pdf(
     url = f"{settings.frontend_base_url}/print/resumes/{resume_id}?{params}"
 
     # Use the exact margins provided; compact mode only affects spacing.
-    pdf_margins = {
-        "top": marginTop,
-        "right": marginRight,
-        "bottom": marginBottom,
-        "left": marginLeft,
-    }
+    pdf_margins = _build_pdf_margin_dict(margins)
 
     # Render PDF with margins applied to every page
     try:
@@ -1594,6 +1651,67 @@ async def download_resume_pdf(
 
     headers = {"Content-Disposition": f'attachment; filename="resume_{resume_id}.pdf"'}
     return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
+
+
+@router.post("/render-pdf")
+async def render_resume_pdf_from_draft(
+    payload: ResumeRenderPdfRequest,
+    user=Depends(get_current_user),
+) -> Response:
+    """Render the current builder draft using the exact PDF pipeline."""
+
+    settings_payload = payload.settings.model_dump(mode="json")
+    preview_id, access_key = await create_resume_preview(
+        resume_data=payload.resumeData.model_dump(mode="json"),
+        settings=settings_payload,
+        lang=payload.lang,
+    )
+
+    margins = settings_payload["margins"]
+    params = urlencode({"accessKey": access_key})
+    url = f"{settings.frontend_base_url}/print/resumes/preview/{preview_id}?{params}"
+
+    try:
+        pdf_bytes = await render_resume_pdf(
+            url,
+            payload.settings.pageSize,
+            margins=_build_pdf_margin_dict(margins),
+        )
+    except PDFRenderError as error:
+        logger.error(
+            "Draft PDF render failed for user %s: %s",
+            user.id,
+            error,
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Failed to render resume preview. Please try again.",
+        )
+    finally:
+        await delete_resume_preview(preview_id)
+
+    return Response(content=pdf_bytes, media_type="application/pdf")
+
+
+@preview_router.get("/{preview_id}", response_model=ResumePreviewDocumentResponse)
+async def get_resume_preview_document(
+    preview_id: str,
+    accessKey: str = Query(..., min_length=8),
+) -> ResumePreviewDocumentResponse:
+    """Return draft preview data for the temporary print route."""
+
+    preview = await get_resume_preview(preview_id, accessKey)
+    if preview is None:
+        raise HTTPException(status_code=404, detail="Resume preview not found or expired.")
+
+    return ResumePreviewDocumentResponse(
+        request_id=str(uuid4()),
+        data=ResumePreviewDocument(
+            resumeData=ResumeData.model_validate(preview.resume_data),
+            settings=ResumeTemplateSettings.model_validate(preview.settings),
+            lang=preview.lang,
+        ),
+    )
 
 
 @router.delete("/{resume_id}")

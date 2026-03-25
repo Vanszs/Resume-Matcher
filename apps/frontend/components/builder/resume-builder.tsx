@@ -28,13 +28,12 @@ import {
 } from 'lucide-react';
 import { useNavigating } from '@/hooks/use-navigating';
 import { useResumePreview } from '@/components/common/resume_previewer_context';
-import { PaginatedPreview } from '@/components/preview';
+import { ActualPdfPreview } from '@/components/preview';
 import {
-  downloadResumePdf,
   downloadCoverLetterPdf,
-  getResumePdfUrl,
   getCoverLetterPdfUrl,
   fetchResume,
+  renderDraftResumePdf,
   updateResume,
   updateCoverLetter,
   updateOutreachMessage,
@@ -47,7 +46,6 @@ import { RegenerateWizard } from './regenerate-wizard';
 import { useRegenerateWizard } from '@/hooks/use-regenerate-wizard';
 import { useTranslations } from '@/lib/i18n';
 import { type TemplateSettings, DEFAULT_TEMPLATE_SETTINGS } from '@/lib/types/template-settings';
-import { withLocalizedDefaultSections } from '@/lib/utils/section-helpers';
 import { useLanguage } from '@/lib/context/language-context';
 import { downloadBlobAsFile, openUrlInNewTab, sanitizeFilename } from '@/lib/utils/download';
 import type { RegenerateItemInput } from '@/lib/api/enrichment';
@@ -238,11 +236,6 @@ const ResumeBuilderContent = () => {
     }
     return null;
   }, [resumeData.additional?.technicalSkills, t]);
-
-  const localizedResumeDataForPreview = useMemo(
-    () => withLocalizedDefaultSections(resumeData, t),
-    [resumeData, t]
-  );
 
   // Load template settings from localStorage on mount
   useEffect(() => {
@@ -437,20 +430,12 @@ const ResumeBuilderContent = () => {
     }
     try {
       setIsDownloading(true);
-      const blob = await downloadResumePdf(resumeId, templateSettings, uiLanguage);
+      const blob = await renderDraftResumePdf(resumeData, templateSettings, uiLanguage);
       const filename = sanitizeFilename(resumeTitle, resumeId, 'resume');
       downloadBlobAsFile(blob, filename);
       showNotification(t('builder.alerts.downloadSuccess'), 'success');
     } catch (error) {
       console.error('Failed to download resume:', error);
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        const fallbackUrl = getResumePdfUrl(resumeId, templateSettings, uiLanguage);
-        const didOpen = openUrlInNewTab(fallbackUrl);
-        if (!didOpen) {
-          showNotification(t('common.popupBlocked', { url: fallbackUrl }), 'warning');
-        }
-        return;
-      }
       let errorMessage = t('builder.alerts.downloadFailed');
       if (error instanceof Error && error.message) {
         errorMessage = `${t('builder.alerts.downloadFailed')}: ${error.message}`;
@@ -616,7 +601,11 @@ const ResumeBuilderContent = () => {
                 disabled={isNavigating}
                 className="mb-2 -ml-1"
               >
-                {isNavigating ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowLeft className="w-4 h-4" />}
+                {isNavigating ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <ArrowLeft className="w-4 h-4" />
+                )}
                 {t('nav.backToDashboard')}
               </Button>
               <h1 className="font-serif text-3xl md:text-5xl text-black tracking-tight leading-[0.95] uppercase">
@@ -883,9 +872,10 @@ const ResumeBuilderContent = () => {
             <div className="flex-1 overflow-y-auto">
               {/* Resume Preview */}
               {activeTab === 'resume' && (
-                <PaginatedPreview
-                  resumeData={localizedResumeDataForPreview}
+                <ActualPdfPreview
+                  resumeData={resumeData}
                   settings={templateSettings}
+                  locale={uiLanguage}
                 />
               )}
 
